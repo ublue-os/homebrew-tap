@@ -5,7 +5,7 @@
 class Fleek < Formula
   desc "Own your $HOME"
   homepage "https://getfleek.dev"
-  version "0.9.3"
+  version "0.9.6"
   license "Apache-2.0"
 
   depends_on "go" => :optional
@@ -13,54 +13,38 @@ class Fleek < Formula
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/ublue-os/fleek/releases/download/v0.9.3/fleek_Darwin_arm64.tar.gz"
-      sha256 "a247256d382be48f83b7463c03757945db298770a191a9977cfdfbe20df8557a"
+      url "https://github.com/ublue-os/fleek/releases/download/v0.9.6/fleek_Darwin_arm64.tar.gz"
+      sha256 "7c6a952d393247bb84c7b4a27b0f65790a56f6cd000f3848fd13f7b355ca6263"
 
       def install
         bin.install "fleek"
-        bash_completion.install "completions/fleek.bash" => "fleek"
-        zsh_completion.install "completions/fleek.zsh" => "_fleek"
-        fish_completion.install "completions/fleek.fish"
-        man1.install "man/en/man1/fleek.1.gz"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/v0.9.3/fleek_Darwin_x86_64.tar.gz"
-      sha256 "f15583998538ffa6860b6a37a19b601c6914ed3a39ee6c11cbf103783ea7ab66"
+      url "https://github.com/ublue-os/fleek/releases/download/v0.9.6/fleek_Darwin_x86_64.tar.gz"
+      sha256 "3a17afecf12814e91abb6e9ae4df060c997549dbf0728790c0d294ddb6d1f3ea"
 
       def install
         bin.install "fleek"
-        bash_completion.install "completions/fleek.bash" => "fleek"
-        zsh_completion.install "completions/fleek.zsh" => "_fleek"
-        fish_completion.install "completions/fleek.fish"
-        man1.install "man/en/man1/fleek.1.gz"
       end
     end
   end
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ublue-os/fleek/releases/download/v0.9.3/fleek_Linux_arm64.tar.gz"
-      sha256 "18d8951281f9c96e181c67cc70eb2cb694f946970dfbc53783c0fbde79f35d0d"
+      url "https://github.com/ublue-os/fleek/releases/download/v0.9.6/fleek_Linux_arm64.tar.gz"
+      sha256 "97dd6d74de3e51d1990c8bb6e15b6b5bb389d5835d37f057daeb46d9b82755ae"
 
       def install
         bin.install "fleek"
-        bash_completion.install "completions/fleek.bash" => "fleek"
-        zsh_completion.install "completions/fleek.zsh" => "_fleek"
-        fish_completion.install "completions/fleek.fish"
-        man1.install "man/en/man1/fleek.1.gz"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/v0.9.3/fleek_Linux_x86_64.tar.gz"
-      sha256 "ed98a07c806ff8267b8bd1ef4f154a55a038b63ddb05ba0bfe623462f862d6c4"
+      url "https://github.com/ublue-os/fleek/releases/download/v0.9.6/fleek_Linux_x86_64.tar.gz"
+      sha256 "60f8801ff1cc1ea4130a6e1089043f524be7dafe985e5ad42fc7a1b40fe52862"
 
       def install
         bin.install "fleek"
-        bash_completion.install "completions/fleek.bash" => "fleek"
-        zsh_completion.install "completions/fleek.zsh" => "_fleek"
-        fish_completion.install "completions/fleek.fish"
-        man1.install "man/en/man1/fleek.1.gz"
       end
     end
   end
