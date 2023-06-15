@@ -5,24 +5,24 @@
 class Fleek < Formula
   desc "Own your $HOME"
   homepage "https://getfleek.dev"
-  version "0.9.11"
+  version "0.9.12"
   license "Apache-2.0"
 
   depends_on "go" => :optional
   depends_on "git"
 
   on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.11/fleek_0.9.11_darwin_amd64.tar.gz"
-      sha256 "d9a89d79af0a7fb941bd940805aec1029c7eea02c636b86d985309791911f051"
+    if Hardware::CPU.arm?
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.12/fleek_0.9.12_darwin_arm64.tar.gz"
+      sha256 "e63d3943cfebbec1e2e99e0f8101accaad55f6515ab1570c26fd3c4c76faa526"
 
       def install
         bin.install "fleek"
       end
     end
-    if Hardware::CPU.arm?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.11/fleek_0.9.11_darwin_arm64.tar.gz"
-      sha256 "f45a3d332a1f1c18147a52828a078ac6b0494e8292f49ff5e2923e2d0270fef5"
+    if Hardware::CPU.intel?
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.12/fleek_0.9.12_darwin_amd64.tar.gz"
+      sha256 "62be0b4897d947e0f9216c84d03a999e03e7f5fa635890be4d6a77a49d44224a"
 
       def install
         bin.install "fleek"
@@ -31,17 +31,17 @@ class Fleek < Formula
   end
 
   on_linux do
-    if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.11/fleek_0.9.11_linux_amd64.tar.gz"
-      sha256 "b8f81d45bf48810e4d3176c885dc6b0576ac845ac6084a2ca1de7818096d1668"
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.12/fleek_0.9.12_linux_arm64.tar.gz"
+      sha256 "fa8cbe97f3a8f082cfc41d1313872173552c78d1019165573f486ebd8eb235ab"
 
       def install
         bin.install "fleek"
       end
     end
-    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.11/fleek_0.9.11_linux_arm64.tar.gz"
-      sha256 "6ae2fc3b36f641729db1269fc2f837a54133a52584c5458bc8d5107ff73c8d17"
+    if Hardware::CPU.intel?
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.12/fleek_0.9.12_linux_amd64.tar.gz"
+      sha256 "8c6f3d9ee51638c48d3261e333d571712eeef5b12fa3c00a8b5ec58cff3b6d8a"
 
       def install
         bin.install "fleek"
