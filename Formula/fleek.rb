@@ -5,7 +5,7 @@
 class Fleek < Formula
   desc "Own your $HOME"
   homepage "https://getfleek.dev"
-  version "0.9.9"
+  version "0.9.10"
   license "Apache-2.0"
 
   depends_on "go" => :optional
@@ -13,16 +13,16 @@ class Fleek < Formula
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.9/fleek_0.9.9_darwin_arm64.tar.gz"
-      sha256 "7cee673ba7039b3bab7591b2adbad2c0b17ec5ec96eed09b5e9d84953dd3dec1"
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.10/fleek_0.9.10_darwin_arm64.tar.gz"
+      sha256 "d1f5d47d035e203812aca03b3486ee192c4a814972e2e7e5370f91f85f9ce1fa"
 
       def install
         bin.install "fleek"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.9/fleek_0.9.9_darwin_amd64.tar.gz"
-      sha256 "02758fbf21bb4360928e2f4363b0579c748d2fd9425a1e4deecf34d9b8ccca84"
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.10/fleek_0.9.10_darwin_amd64.tar.gz"
+      sha256 "c344be83943419d4dcd94d995248c122f91350ea99a27cff07acb2c4c7141d74"
 
       def install
         bin.install "fleek"
@@ -32,16 +32,16 @@ class Fleek < Formula
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.9/fleek_0.9.9_linux_arm64.tar.gz"
-      sha256 "b3f7c733aeaea1b315a5d3f85488efa73c8a8fed67aa2b55e65ee9a727148a4e"
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.10/fleek_0.9.10_linux_arm64.tar.gz"
+      sha256 "ceb34c9bc465869ed4d8248b26eea97b0902b99fcf5709e05fe51b5d78e14401"
 
       def install
         bin.install "fleek"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.9/fleek_0.9.9_linux_amd64.tar.gz"
-      sha256 "d40d636601e201176e25dfe9d8cc9cfec586abb8362355e51ebd6b5086b4671a"
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.10/fleek_0.9.10_linux_amd64.tar.gz"
+      sha256 "72cf3c299450be09dd10583bbde9d46823bf9c09ae306c981abb980363965dc4"
 
       def install
         bin.install "fleek"
