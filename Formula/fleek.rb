@@ -14,7 +14,7 @@ class Fleek < Formula
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/ublue-os/fleek/releases/download/0.9.18/fleek_0.9.18_darwin_arm64.tar.gz"
-      sha256 "1be5544216ff5993d23001cb61b993d8e9164319c089cad539ea3613c1c3251b"
+      sha256 "040bf10504665c9469ae807e30c4e4d699b0f48cdfe1f560487da28ebdb6c3d8"
 
       def install
         bin.install "fleek"
@@ -22,7 +22,7 @@ class Fleek < Formula
     end
     if Hardware::CPU.intel?
       url "https://github.com/ublue-os/fleek/releases/download/0.9.18/fleek_0.9.18_darwin_amd64.tar.gz"
-      sha256 "0ee1979ce923aa6374f93cc712486b4c1d8b49700295e7efb7d332d0f2ffe38d"
+      sha256 "7ecf2b3e281e120b2a04ccd261874c42cc281ed990dbe234af352511203502a4"
 
       def install
         bin.install "fleek"
@@ -33,7 +33,7 @@ class Fleek < Formula
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
       url "https://github.com/ublue-os/fleek/releases/download/0.9.18/fleek_0.9.18_linux_arm64.tar.gz"
-      sha256 "496f06cfb2b1bf402c7c004112e1c1693fe00f0629317b11b8b1f0d8d971a426"
+      sha256 "df6b38e2c0fa8192ba300878bcb35ef6218c642de5ec014cbb1df614512a00c0"
 
       def install
         bin.install "fleek"
@@ -41,7 +41,7 @@ class Fleek < Formula
     end
     if Hardware::CPU.intel?
       url "https://github.com/ublue-os/fleek/releases/download/0.9.18/fleek_0.9.18_linux_amd64.tar.gz"
-      sha256 "7bd87789a2c83168f41fde34cb97a70f3e8b40d0cfa40e89c61c32cba0384605"
+      sha256 "e77c0563a9090c7ebf657a64b2b6704b2b32fe1a08cd576a149fcb7d8dac5f67"
 
       def install
         bin.install "fleek"
