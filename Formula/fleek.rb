@@ -5,24 +5,24 @@
 class Fleek < Formula
   desc "Own your $HOME"
   homepage "https://getfleek.dev"
-  version "0.9.20"
+  version "0.9.21"
   license "Apache-2.0"
 
   depends_on "git"
   depends_on "go" => :optional
 
   on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.20/fleek_0.9.20_darwin_amd64.tar.gz"
-      sha256 "f0176dfa783117adbe31b51ba15ca81bebfc73a90434d86c08ca369b4d9e734c"
+    if Hardware::CPU.arm?
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.21/fleek_0.9.21_darwin_arm64.tar.gz"
+      sha256 "946fb428c62801a1f97ad8e4a9e799cb9ebf0498a3cfb91cbde5845a3c5d67ae"
 
       def install
         bin.install "fleek"
       end
     end
-    if Hardware::CPU.arm?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.20/fleek_0.9.20_darwin_arm64.tar.gz"
-      sha256 "fe91411eca6cb81ce5c0f0f9abfaa237d849673779a17c3c63d74125648e4747"
+    if Hardware::CPU.intel?
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.21/fleek_0.9.21_darwin_amd64.tar.gz"
+      sha256 "d61f207710d850f56b98f980e16dc25cbfdd0deddc17b4f391195d76299a7c47"
 
       def install
         bin.install "fleek"
@@ -32,16 +32,16 @@ class Fleek < Formula
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.20/fleek_0.9.20_linux_arm64.tar.gz"
-      sha256 "76e2a94eaa907a19f69dd008ca3656f8b200d18a615a6526bc8090b3c755b021"
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.21/fleek_0.9.21_linux_arm64.tar.gz"
+      sha256 "56e14b062dde9683b12135044e6d018260153f186ac7448245a9c863ad4717ff"
 
       def install
         bin.install "fleek"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ublue-os/fleek/releases/download/0.9.20/fleek_0.9.20_linux_amd64.tar.gz"
-      sha256 "ec3f69ad2cb14b355f055263e4ae802939e8471213b9e2a0c24d2e7cb346f6c0"
+      url "https://github.com/ublue-os/fleek/releases/download/0.9.21/fleek_0.9.21_linux_amd64.tar.gz"
+      sha256 "73666a5d4603c9538454496513b4540bea9e72ba4725050310ed9fb5139d1153"
 
       def install
         bin.install "fleek"
