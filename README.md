@@ -20,4 +20,6 @@ brew install --cask lm-studio-linux
 
 ## Out of Scope
 
-Browsers, etc. This is mostly for IDEs and things that help us remove the need for -dx images.
+Browsers, etc. This is mostly for IDEs and things that help us remove the need for -dx images. This is not intended to be a repository of apps
+
+- GUI apps should be flatpak first and we should exhaust all efforts with flatpak before considering this
