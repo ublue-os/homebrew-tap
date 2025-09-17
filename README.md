@@ -12,11 +12,13 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 brew tap ublue-os/tap
 brew install --cask jetbrains-toolbox-linux
 brew install --cask lm-studio-linux
+brew install --cask visual-studio-code-linux
 ```
 ## Includes
 
 - Jetbrains Toolbox
 - LM Studio
+- Visual Studio Code
 
 ## Out of Scope
 
