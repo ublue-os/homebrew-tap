@@ -25,6 +25,13 @@ cask "lm-studio-linux" do
   postflight do
     # Set up desktop integration
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
+    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons"
+
+    # Copy icon to user icon directory
+    icon_source = "#{staged_path}/squashfs-root/usr/share/icons/hicolor/0x0/apps/lm-studio.png"
+    icon_target = "#{Dir.home}/.local/share/icons/lm-studio.png"
+
+    FileUtils.cp icon_source, icon_target if File.exist?(icon_source)
 
     source_desktop = "#{staged_path}/squashfs-root/lm-studio.desktop"
     target_desktop = "#{Dir.home}/.local/share/applications/lm-studio.desktop"
@@ -55,5 +62,6 @@ cask "lm-studio-linux" do
   zap trash: [
     "~/.config/LMStudio",
     "~/.local/share/applications/lm-studio.desktop",
+    "~/.local/share/icons/lm-studio.png",
   ]
 end
