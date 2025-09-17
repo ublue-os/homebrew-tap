@@ -16,7 +16,7 @@ class Fleek < Formula
       url "https://github.com/ublue-os/fleek/releases/download/0.10.5/fleek_0.10.5_darwin_amd64.tar.gz"
       sha256 "7ec7953bf8471e773013e56679de0d0bc0f5de71326456d933a5c4379f8ffddc"
 
-      def install
+      define_method(:install) do
         bin.install "fleek"
       end
     end
@@ -24,7 +24,7 @@ class Fleek < Formula
       url "https://github.com/ublue-os/fleek/releases/download/0.10.5/fleek_0.10.5_darwin_arm64.tar.gz"
       sha256 "9331c3cb5baec610802e9088d89bb9bbe3620c427ea269861a3cded1de67eefd"
 
-      def install
+      define_method(:install) do
         bin.install "fleek"
       end
     end
@@ -35,7 +35,7 @@ class Fleek < Formula
       url "https://github.com/ublue-os/fleek/releases/download/0.10.5/fleek_0.10.5_linux_arm64.tar.gz"
       sha256 "8c1fe7552244cb7e33740e0cf9e744798a2ad99ffca741e5fbba05a0d9822ce0"
 
-      def install
+      define_method(:install) do
         bin.install "fleek"
       end
     end
@@ -43,13 +43,13 @@ class Fleek < Formula
       url "https://github.com/ublue-os/fleek/releases/download/0.10.5/fleek_0.10.5_linux_amd64.tar.gz"
       sha256 "f7f77beb757bd2a31b93b409a5d8bc2d175a1061f98af5ea93413d57c8ce031a"
 
-      def install
+      define_method(:install) do
         bin.install "fleek"
       end
     end
   end
 
   test do
-    system "#{bin}/fleek -v"
+    system "#{bin}/fleek", "-v"
   end
 end
