@@ -10,38 +10,33 @@ cask "lm-studio-linux" do
   auto_updates true
   depends_on formula: "squashfs"
 
-  binary "#{staged_path}/lm-studio-#{version.tr(",", "-")}/contents/AppRun", target: "lm-studio"
+  binary "squashfs-root/AppRun", target: "lm-studio"
 
   preflight do
-    # Extract AppImage contents - change to staged_path first so squashfs-root is created there
+    # Extract AppImage contents
     appimage_path = "#{staged_path}/LM-Studio-#{version.tr(",", "-")}-x64.AppImage"
     system "chmod", "+x", appimage_path
-
-    system "cd '#{staged_path}' && '#{appimage_path}' --appimage-extract"
-
-    # Create versioned directory structure
-    target_dir = "#{staged_path}/lm-studio-#{version.tr(",", "-")}"
-    FileUtils.mkdir_p target_dir
-    FileUtils.mv "#{staged_path}/squashfs-root", "#{target_dir}/contents"
+    system appimage_path, "--appimage-extract", chdir: staged_path
 
     # Remove the original AppImage to save space
     FileUtils.rm appimage_path
+  end
 
-    # Clean up any stray squashfs-root directories
-    ["squashfs-root", "#{Dir.pwd}/squashfs-root"].each do |stray_path|
-      FileUtils.rm_r(stray_path) if File.exist?(stray_path)
-    end
-
+  postflight do
     # Set up desktop integration
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    if File.exist?("#{target_dir}/contents/lm-studio.desktop")
+
+    source_desktop = "#{staged_path}/squashfs-root/lm-studio.desktop"
+    target_desktop = "#{Dir.home}/.local/share/applications/lm-studio.desktop"
+
+    if File.exist?(source_desktop)
       # Use bundled desktop file if available
-      desktop_content = File.read("#{target_dir}/contents/lm-studio.desktop")
+      desktop_content = File.read(source_desktop)
       desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/lm-studio")
-      File.write("#{Dir.home}/.local/share/applications/lm-studio.desktop", desktop_content)
+      File.write(target_desktop, desktop_content)
     else
       # Fallback to custom desktop file
-      File.write("#{Dir.home}/.local/share/applications/lm-studio.desktop", <<~EOS)
+      File.write(target_desktop, <<~EOS)
         [Desktop Entry]
         Name=LM Studio
         Comment=Discover, download, and run local LLMs
