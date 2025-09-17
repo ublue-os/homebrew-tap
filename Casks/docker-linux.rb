@@ -20,11 +20,12 @@ cask "docker-linux-notworking" do
   end
 
   auto_updates true
-  #conflicts_with "docker"
 
-  #binary "docker/containerd"
-  #binary "docker/containerd-shim-runc-v2"
-  #binary "docker/ctr"
+  # conflicts_with "docker"
+
+  # binary "docker/containerd"
+  # binary "docker/containerd-shim-runc-v2"
+  # binary "docker/ctr"
   binary "docker/dockerd"
   binary "docker/docker"
   binary "docker/docker-init"
@@ -32,7 +33,8 @@ cask "docker-linux-notworking" do
   binary "docker/runc"
   artifact "docker.service", target: "#{Dir.home}/.config/systemd/user/docker.service"
   artifact "docker.socket", target: "#{Dir.home}/.config/systemd/user/docker.socket"
-  #artifact "containerd.service", target: "#{Dir.home}/.config/systemd/user/containerd.service"
+
+  # artifact "containerd.service", target: "#{Dir.home}/.config/systemd/user/containerd.service"
 
   preflight do
     File.write("#{staged_path}/docker.service", <<~EOS)
@@ -50,7 +52,7 @@ cask "docker-linux-notworking" do
       # the default is not to use systemd for cgroups because the delegate issues still
       # exists and systemd currently does not support the cgroup feature set required
       # for containers run by docker
-      ExecStart=#{HOMEBREW_PREFIX}/bin/dockerd -H fd:// --containerd=#{ENV["XDG_RUNTIME_DIR"]}/containerd.sock
+      ExecStart=#{HOMEBREW_PREFIX}/bin/dockerd -H fd:// --containerd=#{ENV.fetch("XDG_RUNTIME_DIR", nil)}/containerd.sock
       ExecReload=/bin/kill -s HUP $MAINPID
       TimeoutStartSec=0
       RestartSec=2
@@ -83,9 +85,9 @@ cask "docker-linux-notworking" do
       [Socket]
       # If /var/run is not implemented as a symlink to /run, you may need to
       # specify ListenStream=/var/run/docker.sock instead.
-      ListenStream=#{ENV["XDG_RUNTIME_DIR"]}/docker.sock
+      ListenStream=#{ENV.fetch("XDG_RUNTIME_DIR", nil)}/docker.sock
       SocketMode=0660
-      SocketUser=#{ENV["USER"]}
+      SocketUser=#{ENV.fetch("USER", nil)}
       SocketGroup=docker
 
       [Install]
