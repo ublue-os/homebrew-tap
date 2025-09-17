@@ -16,6 +16,9 @@ cask "jetbrains-toolbox-linux" do
 
   auto_updates true
 
+  # Correct binary path inside the tarball
+  binary "#{staged_path}/jetbrains-toolbox-#{version}/bin/jetbrains-toolbox"
+
   preflight do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
     File.write("#{staged_path}/jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop", <<~EOS)
@@ -33,10 +36,5 @@ cask "jetbrains-toolbox-linux" do
     EOS
   end
 
-  # Correct binary path inside the tarball
-  binary "#{staged_path}/jetbrains-toolbox-#{version}/bin/jetbrains-toolbox"
-
-  zap trash: [
-    "~/.config/JetBrains/ToolboxApp",
-  ]
+  zap trash: "~/.config/JetBrains/ToolboxApp"
 end
