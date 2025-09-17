@@ -8,7 +8,7 @@ cask "containerd-not-working" do
 
   url "https://github.com/containerd/containerd/releases/download/v#{version}/containerd-#{version}-#{os}-#{arch}.tar.gz"
   name "containerd"
-  desc "An open and reliable container runtime"
+  desc "Open and reliable container runtime"
   homepage "https://containerd.io/"
 
   livecheck do
@@ -27,7 +27,8 @@ cask "containerd-not-working" do
   end
 
   auto_updates true
-  #conflicts_with "docker"
+
+  # conflicts_with "docker"
 
   binary "bin/containerd"
   binary "bin/containerd-shim-runc-v2"
