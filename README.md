@@ -10,7 +10,7 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 
 ```shell
 brew tap ublue-os/tap
-brew install jetbrains-toolbox
+brew install jetbrains-toolbox-linux
 ```
 ## Includes
 
