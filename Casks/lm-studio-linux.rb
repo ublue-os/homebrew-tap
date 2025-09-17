@@ -8,6 +8,7 @@ cask "lm-studio-linux" do
   homepage "https://lmstudio.ai/"
 
   auto_updates true
+  depends_on formula: "squashfs"
 
   binary "#{staged_path}/lm-studio-#{version.tr(",", "-")}/contents/AppRun", target: "lm-studio"
 
@@ -28,7 +29,7 @@ cask "lm-studio-linux" do
 
     # Clean up any stray squashfs-root directories
     ["squashfs-root", "#{Dir.pwd}/squashfs-root"].each do |stray_path|
-      FileUtils.rm_r(stray_path)
+      FileUtils.rm_r(stray_path) if File.exist?(stray_path)
     end
 
     # Set up desktop integration
