@@ -17,3 +17,7 @@ brew install --cask lm-studio-linux
 
 - Jetbrains Toolbox
 - LM Studio
+
+## Out of Scope
+
+Browsers, etc. This is mostly for IDEs and things that help us remove the need for -dx images.
