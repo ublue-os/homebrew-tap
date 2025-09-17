@@ -1,4 +1,4 @@
-# UniversaL Blue Homebrew Tap
+# Universal Blue Homebrew Tap
 
 This is a _staging area_ to test Linux casks builds of things we want. It is intended to show that homebrew casks on linux work great. This repository's metric of success is when it is deleted.
 
