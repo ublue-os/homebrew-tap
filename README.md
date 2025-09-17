@@ -10,8 +10,8 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 
 ```shell
 brew tap ublue-os/tap
-brew install jetbrains-toolbox-linux
-brew install lm-studio-linux
+brew install --cask jetbrains-toolbox-linux
+brew install --cask lm-studio-linux
 ```
 ## Includes
 
