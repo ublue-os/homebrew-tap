@@ -12,10 +12,8 @@ cask "vscodium-linux" do
   homepage "https://vscodium.com/"
 
   livecheck do
-    url "https://raw.githubusercontent.com/VSCodium/versions/refs/heads/master/stable/linux/#{arch}/latest.json"
-    strategy :json do |json|
-      json["name"]
-    end
+    url :url
+    strategy :github_latest
   end
 
   auto_updates true
