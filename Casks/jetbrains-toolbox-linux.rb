@@ -1,6 +1,6 @@
 cask "jetbrains-toolbox-linux" do
-  version "2.8.1.52155"
-  sha256 "23fc2af0aed0d59a894399e651eec942c7711f89f5d3b6d548ef6ba3358f01e5"
+  version "2.9.0.56191"
+  sha256 "927ccdbe1791d36311250a76721bd05849f996f52068f9eb3c7436f0018ab6c0"
 
   url "https://download.jetbrains.com/toolbox/jetbrains-toolbox-#{version}.tar.gz"
   name "JetBrains Toolbox"
@@ -17,22 +17,31 @@ cask "jetbrains-toolbox-linux" do
   auto_updates true
 
   # Correct binary path inside the tarball
-  binary "#{staged_path}/jetbrains-toolbox-#{version}/bin/jetbrains-toolbox"
+  binary "jetbrains-toolbox-#{version}/bin/jetbrains-toolbox"
+  artifact "jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop",
+           target: "#{Dir.home}/.local/share/applications/jetbrains-toolbox.desktop"
 
   preflight do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
+    # We need this file to start, but Jetbrains Toolbox will overwrite it on its first run with a proper one
+    # It will also extract the icon from somewhere, but it doesn't exist until first run, so we just point to where it
+    # should be, and it will get fixed on first run
     File.write("#{staged_path}/jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop", <<~EOS)
       [Desktop Entry]
-      Name=JetBrains Toolbox
-      Comment=JetBrains tools manager
-      GenericName=Development Tools Manager
-      Exec=#{HOMEBREW_PREFIX}/bin/jetbrains-toolbox
-      Icon=jetbrains-toolbox
+      Icon=#{staged_path}/jetbrains-toolbox-#{version}/bin/toolbox.svg
+      Exec=#{HOMEBREW_PREFIX}/bin/jetbrains-toolbox %u
+      Version=1.0
       Type=Application
+      Categories=Development
+      Name=JetBrains Toolbox
+      StartupWMClass=jetbrains-toolbox
+      Terminal=false
+      MimeType=x-scheme-handler/jetbrains;
+      X-GNOME-Autostart-enabled=true
       StartupNotify=false
-      StartupWMClass=JetBrains Toolbox
-      Categories=Development;IDE;
-      Keywords=jetbrains;toolbox;ide;
+      X-GNOME-Autostart-Delay=10
+      X-MATE-Autostart-Delay=10
+      X-KDE-autostart-after=panel
     EOS
   end
 
