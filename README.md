@@ -11,14 +11,22 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 ```shell
 brew tap ublue-os/tap
 brew install --cask visual-studio-code-linux
+brew install --cask vscodium-linux
 brew install --cask jetbrains-toolbox-linux
 brew install --cask lm-studio-linux
 brew install --cask 1password-gui-linux
+brew install --cask framework-system
+brew install --cask bluefin-wallpapers
 ```
 ## Includes
 
-- Jetbrains Toolbox
-- LM Studio
+- 1Password - Password manager
+- Bluefin Wallpapers - Additional wallpapers for Bluefin
+- Framework System Tool - Hardware management for Framework laptops
+- JetBrains Toolbox - JetBrains tools manager
+- LM Studio - Local LLM discovery, download, and runtime
+- Visual Studio Code - Microsoft's code editor
+- VSCodium - Open-source build of VS Code
 
 ## Out of Scope
 
