@@ -21,7 +21,7 @@ brew install --cask bluefin-wallpapers
 ## Includes
 
 - 1Password - Password manager
-- Bluefin Wallpapers - Wallpapers for Bluefin OS
+- Bluefin Wallpapers - Additional wallpapers for Bluefin
 - Framework System Tool - Hardware management for Framework laptops
 - JetBrains Toolbox - JetBrains tools manager
 - LM Studio - Local LLM discovery, download, and runtime
