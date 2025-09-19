@@ -28,8 +28,16 @@ brew install --cask bluefin-wallpapers
 - Visual Studio Code - Microsoft's code editor
 - VSCodium - Open-source build of VS Code
 
+## Scope
+
+- IDEs and other apps that aren't flatpak friendly
+- Crucial apps for Aurora, Bazzite, and Bluefin that are appimages that need to be converted
+- Command line tools for OEMs, framework, etc. so that we don't need to bake them into images
+- Anything that helps us delete code in justfiles and other scripts
+
 ## Out of Scope
 
-Browsers, etc. This is mostly for IDEs and things that help us remove the need for -dx images. This is not intended to be a repository of apps
+- Browsers
+- GUI apps, every effort to use flatpak should be exhausted, or are out of our control (eg. vscode)
+- General requests for common apps. We don't expect users to use this repo directly, the packages are there for us to automate in the background, ideall they never know this tap exists.
 
-- GUI apps should be flatpak first and we should exhaust all efforts with flatpak before considering this
