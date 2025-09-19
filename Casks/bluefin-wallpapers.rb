@@ -15,4 +15,8 @@ cask "bluefin-wallpapers" do
   Dir.glob("#{staged_path}/packages-main/packages/bluefin/wallpapers/images/*").each do |file|
     artifact file, target: "#{Dir.home}/.local/share/backgrounds/#{File.basename(file)}"
   end
+
+  Dir.glob("#{staged_path}/packages-main/packages/bluefin/wallpapers/gnome-background-properties/*").each do |file|
+    artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+  end
 end
