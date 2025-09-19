@@ -13,10 +13,24 @@ cask "bluefin-wallpapers" do
   end
 
   Dir.glob("#{staged_path}/packages-main/packages/bluefin/wallpapers/images/*").each do |file|
-    artifact file, target: "#{Dir.home}/.local/share/backgrounds/#{File.basename(file)}"
+    artifact file, target: "#{Dir.home}/.local/share/backgrounds/bluefin/#{File.basename(file)}"
   end
 
   Dir.glob("#{staged_path}/packages-main/packages/bluefin/wallpapers/gnome-background-properties/*").each do |file|
     artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+  end
+
+  preflight do
+    Dir.glob("#{staged_path}/packages-main/packages/bluefin/wallpapers/images/*.xml").each do |file|
+      # Use Ruby standard library for in-place editing
+      content = File.read(file)
+      content.gsub!("/usr/share/backgrounds/", "#{Dir.home}/.local/share/backgrounds/")
+      File.write(file, content)
+    end
+    Dir.glob("#{staged_path}/packages-main/packages/bluefin/wallpapers/gnome-background-properties/*.xml").each do |file|
+      content = File.read(file)
+      content.gsub!("/usr/share/backgrounds/", "#{Dir.home}/.local/share/backgrounds/")
+      File.write(file, content)
+    end
   end
 end
