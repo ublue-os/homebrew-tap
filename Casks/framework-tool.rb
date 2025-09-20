@@ -1,4 +1,4 @@
-cask "framework-system" do
+cask "framework-tool" do
   version "0.4.5"
   sha256 "e94af70b2a287577c3d7e26e92e1a3910bd27b725543ac5763b7cd348d8fb57d"
 
@@ -12,5 +12,5 @@ cask "framework-system" do
     strategy :github_latest
   end
 
-  binary "framework_tool", target: "framework-system"
+  binary "framework_tool", target: "framework_tool"
 end
