@@ -23,6 +23,7 @@ brew install --cask aurora-wallpapers
 
 - 1Password - Password manager
 - Bluefin Wallpapers - Additional wallpapers for Bluefin
+- Aurora Wallpapers - Commissioned art for Aurora
 - Framework System Tool - Hardware management for Framework laptops
 - JetBrains Toolbox - JetBrains tools manager
 - LM Studio - Local LLM discovery, download, and runtime
