@@ -15,7 +15,7 @@ brew install --cask vscodium-linux
 brew install --cask jetbrains-toolbox-linux
 brew install --cask lm-studio-linux
 brew install --cask 1password-gui-linux
-brew install --cask framework-system
+brew install --cask framework-tool
 brew install --cask bluefin-wallpapers
 ```
 ## Includes
