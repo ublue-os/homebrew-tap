@@ -4,7 +4,7 @@ cask "bluefin-wallpapers-plasma-dynamic" do
 
   url "https://github.com/renner0e/bluefin-wallpapers-plasma/releases/latest/download/wallpapers.tar.gz"
   name "bluefin-wallpapers-plasma-dynamic"
-  desc "Dynamic Bluefin Wallpapers for KDE Plasma. Use with this: https://github.com/zzag/plasma5-wallpapers-dynamic"
+  desc "Bluefin Wallpapers for KDE"
   homepage "https://github.com/renner0e/bluefin-wallpapers-plasma"
 
   livecheck do
@@ -14,4 +14,3 @@ cask "bluefin-wallpapers-plasma-dynamic" do
 
   artifact staged_path, target: "#{Dir.home}/.local/share/wallpapers/bluefin-plasma-dynamic"
 end
-
