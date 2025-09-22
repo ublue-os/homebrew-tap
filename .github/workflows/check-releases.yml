@@ -1,0 +1,33 @@
+name: Check Upstream Releases
+on:
+  workflow_dispatch:
+
+jobs:
+  check-asusctl:
+    runs-on: ubuntu-24.04
+    outputs:
+      new_version: ${{ steps.check.outputs.asusctl_latest }}
+      needs_update: ${{ steps.check.outputs.asusctl_needs_update }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests
+      
+      - name: Check GitLab releases
+        id: check
+        run: |
+          python3 .github/scripts/check_gitlab_release.py
+      
+      - name: Trigger bottle build if new
+        if: steps.check.outputs.asusctl_needs_update == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: build-asusctl-bottle
+          client-payload: '{"version": "${{ steps.check.outputs.asusctl_latest }}"}'
