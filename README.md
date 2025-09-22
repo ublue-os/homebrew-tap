@@ -19,10 +19,12 @@ brew install --cask framework-tool
 brew install --cask bluefin-wallpapers
 brew install --cask aurora-wallpapers
 brew install --cask bluefin-wallpapers-plasma-dynamic
+brew install asusctl
 ```
 ## Includes
 
 - 1Password - Password manager
+- ASUSCTL - Control daemon and CLI tools for ASUS ROG laptops
 - Bluefin Wallpapers - Additional wallpapers for Bluefin
 - [Bluefin Wallpapers Plasma Dynamic](https://github.com/renner0e/bluefin-wallpapers-plasma) - utilizes [this KDE Plasma Plugin](https://github.com/zzag/plasma5-wallpapers-dynamic)
 - Aurora Wallpapers - Commissioned art for Aurora
