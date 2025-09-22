@@ -57,13 +57,13 @@ class Asusctl < Formula
   end
 
   service do
-    name macos: nil, linux: "asusd-user"
+    name linux: "asusd-user"
   end
 
   def caveats
     <<~EOS
       To install the user service:
-        cp #{share}/systemd/user/asusd-user.service ~/.config/systemd/user/
+        ln -sf #{share}/systemd/user/asusd-user.service ~/.config/systemd/user/
         systemctl --user daemon-reload
         systemctl --user enable asusd-user.service
         systemctl --user start asusd-user.service
