@@ -1,6 +1,6 @@
 # Universal Blue Homebrew Tap
 
-This is a _staging area_ to test Linux casks builds of things we want. It is intended to show that homebrew casks on linux work great. This repository's metric of success is when the applications in here are deleted. This also ships artwork and OEM tools that are better managed in userspace than on an image. 
+This is a _staging area_ to test Linux casks builds of things we want. It is intended to show that homebrew casks on linux work great. This repository's metric of success is when the applications in here are deleted. This also ships artwork and OEM tools that are better managed in userspace than on an image.
 
 Homebrew has asked us to run this as a tap as opposed to PRing these into individual projects, and that will take some work so in the meantime we can test.
 
@@ -18,11 +18,13 @@ brew install --cask 1password-gui-linux
 brew install --cask framework-tool
 brew install --cask bluefin-wallpapers
 brew install --cask aurora-wallpapers
+brew install --cask bluefin-wallpapers-plasma-dynamic
 ```
 ## Includes
 
 - 1Password - Password manager
 - Bluefin Wallpapers - Additional wallpapers for Bluefin
+- [Bluefin Wallpapers Plasma Dynamic](https://github.com/renner0e/bluefin-wallpapers-plasma) - utilizes [this KDE Plasma Plugin](https://github.com/zzag/plasma5-wallpapers-dynamic)
 - Aurora Wallpapers - Commissioned art for Aurora
 - Framework System Tool - Hardware management for Framework laptops
 - JetBrains Toolbox - JetBrains tools manager
