@@ -52,9 +52,9 @@ class GitLabReleaseChecker:
         content = path.read_text(encoding="utf-8")
 
         patterns = [
+            r'tag:\s+"v?([^"]+)"',
             r"url.*\/archive\/v?([^\/]+)\/asusctl-",
             r'version\s+"([^"]+)"',
-            r'tag:\s+"v?([^"]+)"',
         ]
 
         for pattern in patterns:

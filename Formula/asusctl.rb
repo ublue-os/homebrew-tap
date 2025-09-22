@@ -1,8 +1,7 @@
 class Asusctl < Formula
   desc "Control daemon, CLI tools for interacting with ASUS ROG laptops"
   homepage "https://gitlab.com/asus-linux/asusctl"
-  url "https://gitlab.com/asus-linux/asusctl/-/archive/6.1.12/asusctl-6.1.12.tar.gz"
-  sha256 "8b0f2851a48c64aa827dc4a771326f89478f443ef23e6208429d77b5871d04bf"
+  url "https://gitlab.com/asus-linux/asusctl.git", tag: "6.1.12"
   license "MPL-2.0"
 
   bottle do
@@ -16,6 +15,11 @@ class Asusctl < Formula
   depends_on "libgudev"
   depends_on :linux
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   def install
     ENV.prepend_path "PKG_CONFIG_PATH", Formula["libgudev"].opt_lib/"pkgconfig"
     ENV.prepend_path "PKG_CONFIG_PATH", Formula["systemd"].opt_lib/"pkgconfig"
@@ -27,18 +31,42 @@ class Asusctl < Formula
     system "cargo", "install", "--path", "asusctl", "--root", prefix, "--locked"
     system "cargo", "install", "--path", "asusd", "--root", prefix, "--locked"
     system "cargo", "install", "--path", "asusd-user", "--root", prefix, "--locked"
+
+    # Install data files
+    (share/"asusd").install "rog-aura/data/aura_support.ron"
+
+    # Install icons
+    Dir["data/icons/*.png"].each do |icon|
+      (share/"icons"/"hicolor"/"512x512"/"apps").install icon
+    end
+
+    Dir["data/icons/scalable/*.svg"].each do |icon|
+      (share/"icons"/"hicolor"/"scalable"/"status").install icon
+    end
+
+    # Install upstream systemd service file with corrected path
+    (share/"systemd"/"user").mkpath
+
+    # Copy and modify the upstream service file if it exists
+    if File.exist?("data/asusd-user.service")
+      service_content = File.read("data/asusd-user.service")
+      # Replace the path with Homebrew's path
+      service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
+      (share/"systemd"/"user"/"asusd-user.service").write(service_content)
+    end
+  end
+
+  service do
+    name macos: nil, linux: "asusd-user"
   end
 
   def caveats
     <<~EOS
-      asusctl requires Linux kernel modules (asus-wmi, asus-armoury). If you see a feature is missing you
-      either need a patched kernel or latest release.
-
-      To enable the user service:
+      To install the user service:
+        cp #{share}/systemd/user/asusd-user.service ~/.config/systemd/user/
+        systemctl --user daemon-reload
         systemctl --user enable asusd-user.service
         systemctl --user start asusd-user.service
-
-      The service will automatically start on login after enabling.
     EOS
   end
 
