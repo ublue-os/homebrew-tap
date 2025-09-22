@@ -4,6 +4,11 @@ class Asusctl < Formula
   url "https://gitlab.com/asus-linux/asusctl.git", tag: "6.1.12"
   license "MPL-2.0"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
     root_url "https://github.com/ublue-os/homebrew-tap/releases/download/asusctl-6.1.12"
     sha256 cellar: :any_skip_relocation, x86_64_linux: "a3ed5168d651169836b286334951b48eb3335cf972caa7be27df63090794ef54"
@@ -14,11 +19,6 @@ class Asusctl < Formula
   depends_on "rust" => :build
   depends_on "libgudev"
   depends_on :linux
-
-  livecheck do
-    url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
-  end
 
   def install
     ENV.prepend_path "PKG_CONFIG_PATH", Formula["libgudev"].opt_lib/"pkgconfig"
