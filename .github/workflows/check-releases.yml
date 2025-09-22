@@ -9,7 +9,7 @@ jobs:
       new_version: ${{ steps.check.outputs.asusctl_latest }}
       needs_update: ${{ steps.check.outputs.asusctl_needs_update }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       
       - name: Set up Python
         uses: actions/setup-python@v5
