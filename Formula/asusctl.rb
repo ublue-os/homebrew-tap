@@ -7,7 +7,7 @@ class Asusctl < Formula
 
   bottle do
     root_url "https://github.com/ublue-os/homebrew-tap/releases/download/asusctl-6.1.12"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "e1ef395012beaefac52b3c7bfb650908eb64495c20f43991fa7d5074bc413335"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "a3ed5168d651169836b286334951b48eb3335cf972caa7be27df63090794ef54"
   end
 
   depends_on "llvm" => :build
