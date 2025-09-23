@@ -53,14 +53,20 @@ class Asusctl < Formula
     (etc/"systemd"/"user").mkpath
     (etc/"systemd"/"system").mkpath
 
-    # Copy and modify the upstream service file if it exists
+    # Copy and modify the upstream user service file
     service_content = File.read("data/asusd-user.service")
     service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
     (etc/"systemd"/"user"/"asusd-user.service").write(service_content)
 
 
     service_content = File.read("data/asusd.service")
-    service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd")
+    service_content.gsub!("/usr/bin/asusd", "#{opt_bin}/asusd")
+    
+    # Add the [Install] section if it doesn't exist
+    unless service_content.include?("[Install]")
+      service_content += "\n[Install]\nWantedBy=multi-user.target\n"
+    end
+    
     (etc/"systemd"/"system"/"asusd.service").write(service_content)
   end
 
@@ -74,17 +80,25 @@ class Asusctl < Formula
 
   def caveats
     <<~EOS
+      asusctl requires both system and user services to function properly.
+      The system service (asusd) must be running before the user service (asusd-user) will work.
+
+      To install the system service:
+        sudo cp #{etc}/systemd/system/asusd.service /etc/systemd/system/
+        sudo restorecon /etc/systemd/system/asusd.service
+        sudo systemctl daemon-reload
+        sudo systemctl enable asusd.service
+        sudo systemctl start asusd.service
+
       To install the user service:
         ln -sf #{etc}/systemd/user/asusd-user.service ~/.config/systemd/user/
         systemctl --user daemon-reload
         systemctl --user enable asusd-user.service
         systemctl --user start asusd-user.service
 
-      To install the system service:
-        ln -sf #{etc}/systemd/system/asusd.service /etc/systemd/system/
-        systemctl daemon-reload
-        systemctl enable asusd.service
-        systemctl start asusd.service
+      Verify installation:
+        sudo systemctl status asusd.service
+        systemctl --user status asusd-user.service
     EOS
   end
 
