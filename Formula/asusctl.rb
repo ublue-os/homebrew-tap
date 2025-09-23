@@ -50,8 +50,8 @@ class Asusctl < Formula
     end
 
     # Install upstream systemd service file with corrected path
-    (config/"systemd"/"user").mkpath
-    (config/"systemd"/"system").mkpath
+    (etc/"systemd"/"user").mkpath
+    (etc/"systemd"/"system").mkpath
 
     # Copy and modify the upstream service file if it exists
     if File.exist?("data/asusd-user.service")
