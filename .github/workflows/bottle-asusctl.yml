@@ -48,16 +48,13 @@ jobs:
           BRANCH="asusctl-${{ steps.check.outputs.latest_version }}-${{ github.run_number }}"
           echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
 
-      - name: Update formula version and SHA
+      - name: Update formula version
         if: steps.check.outputs.needs_update == 'true'
         run: |
           VERSION="${{ steps.check.outputs.latest_version }}"
-          URL="https://gitlab.com/asus-linux/asusctl/-/archive/${VERSION}/asusctl-${VERSION}.tar.gz"
-          SHA256=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
 
-          # Update Formula/asusctl.rb
-          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/asusctl.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/asusctl.rb
+          # Update Formula/asusctl.rb with new tag
+          sed -i "s|tag: \".*\"|tag: \"${VERSION}\"|" Formula/asusctl.rb
 
       - name: Create PR for formula update
         id: create-pr
