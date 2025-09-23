@@ -54,18 +54,14 @@ class Asusctl < Formula
     (etc/"systemd"/"system").mkpath
 
     # Copy and modify the upstream service file if it exists
-    if File.exist?("data/asusd-user.service")
-      service_content = File.read("data/asusd-user.service")
-      # Replace the path with Homebrew's path
-      service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
-      (etc/"systemd"/"user"/"asusd-user.service").write(service_content)
-    end
-    if File.exist?("data/asusd.service")
-      service_content = File.read("data/asusd.service")
-      # Replace the path with Homebrew's path
-      service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd")
-      (etc/"systemd"/"system"/"asusd.service").write(service_content)
-    end
+    service_content = File.read("data/asusd-user.service")
+    service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
+    (etc/"systemd"/"user"/"asusd-user.service").write(service_content)
+
+
+    service_content = File.read("data/asusd.service")
+    service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd")
+    (etc/"systemd"/"system"/"asusd.service").write(service_content)
   end
 
   service do
