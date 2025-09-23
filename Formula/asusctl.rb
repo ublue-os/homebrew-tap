@@ -46,6 +46,7 @@ class Asusctl < Formula
 
     # Install upstream systemd service file with corrected path
     (share/"systemd"/"user").mkpath
+    (share/"systemd"/"system").mkpath
 
     # Copy and modify the upstream service file if it exists
     if File.exist?("data/asusd-user.service")
@@ -54,10 +55,20 @@ class Asusctl < Formula
       service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
       (share/"systemd"/"user"/"asusd-user.service").write(service_content)
     end
+    if File.exist?("data/asusd.service")
+      service_content = File.read("data/asusd.service")
+      # Replace the path with Homebrew's path
+      service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd")
+      (share/"systemd"/"system"/"asusd.service").write(service_content)
+    end
   end
 
   service do
     name linux: "asusd-user"
+  end
+
+  service do
+    name linux: "asusd"
   end
 
   def caveats
@@ -67,6 +78,12 @@ class Asusctl < Formula
         systemctl --user daemon-reload
         systemctl --user enable asusd-user.service
         systemctl --user start asusd-user.service
+
+      To install the system service:
+        ln -sf #{share}/systemd/system/asusd.service /etc/systemd/system/
+        systemctl daemon-reload
+        systemctl enable asusd.service
+        systemctl start asusd.service
     EOS
   end
 
