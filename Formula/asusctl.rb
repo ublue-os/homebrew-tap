@@ -11,7 +11,7 @@ class Asusctl < Formula
 
   bottle do
     root_url "https://github.com/ublue-os/homebrew-tap/releases/download/asusctl-6.1.12"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "ab7476fadc21a33dda014a766135d47d3b97c33d126e817591f465949471f842"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "sha256:60158bd6f96dfa01fb096d13f606b56050e1e0db862c1d354648a84dfa54b2bc"
   end
 
   depends_on "llvm" => :build
@@ -61,12 +61,12 @@ class Asusctl < Formula
 
     service_content = File.read("data/asusd.service")
     service_content.gsub!("/usr/bin/asusd", "#{opt_bin}/asusd")
-    
+
     # Add the [Install] section if it doesn't exist
     unless service_content.include?("[Install]")
       service_content += "\n[Install]\nWantedBy=multi-user.target\n"
     end
-    
+
     (etc/"systemd"/"system"/"asusd.service").write(service_content)
   end
 
