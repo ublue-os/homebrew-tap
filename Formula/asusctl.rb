@@ -33,7 +33,7 @@ class Asusctl < Formula
     system "cargo", "install", "--path", "asusd-user", "--root", prefix, "--locked"
 
     # Install data files
-    (share/"rog-gui"/layouts).install "rog-aura/data/layouts/*.ron"
+    (share/"rog-gui"/"layouts").install "rog-aura/data/layouts/*.ron"
     (lib/"udev"/"rules.d").install "data/99-asusd.rules"
     (share/"asusd").install "rog-aura/data/aura_support.ron"
     (share/"dbus-1"/"system.d").install "data/asusd.conf"
