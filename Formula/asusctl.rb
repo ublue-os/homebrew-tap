@@ -33,7 +33,10 @@ class Asusctl < Formula
     system "cargo", "install", "--path", "asusd-user", "--root", prefix, "--locked"
 
     # Install data files
+    (share/"rog-gui"/layouts).install "rog-aura/data/layouts/*.ron"
+    (lib/"udev"/"rules.d").install "data/99-asusd.rules"
     (share/"asusd").install "rog-aura/data/aura_support.ron"
+    (share/"dbus-1"/"system.d").install "data/asusd.conf"
 
     # Install icons
     Dir["data/icons/*.png"].each do |icon|
@@ -45,21 +48,21 @@ class Asusctl < Formula
     end
 
     # Install upstream systemd service file with corrected path
-    (share/"systemd"/"user").mkpath
-    (share/"systemd"/"system").mkpath
+    (config/"systemd"/"user").mkpath
+    (config/"systemd"/"system").mkpath
 
     # Copy and modify the upstream service file if it exists
     if File.exist?("data/asusd-user.service")
       service_content = File.read("data/asusd-user.service")
       # Replace the path with Homebrew's path
       service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
-      (share/"systemd"/"user"/"asusd-user.service").write(service_content)
+      (etc/"systemd"/"user"/"asusd-user.service").write(service_content)
     end
     if File.exist?("data/asusd.service")
       service_content = File.read("data/asusd.service")
       # Replace the path with Homebrew's path
       service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd")
-      (share/"systemd"/"system"/"asusd.service").write(service_content)
+      (etc/"systemd"/"system"/"asusd.service").write(service_content)
     end
   end
 
@@ -74,13 +77,13 @@ class Asusctl < Formula
   def caveats
     <<~EOS
       To install the user service:
-        ln -sf #{share}/systemd/user/asusd-user.service ~/.config/systemd/user/
+        ln -sf #{etc}/systemd/user/asusd-user.service ~/.config/systemd/user/
         systemctl --user daemon-reload
         systemctl --user enable asusd-user.service
         systemctl --user start asusd-user.service
 
       To install the system service:
-        ln -sf #{share}/systemd/system/asusd.service /etc/systemd/system/
+        ln -sf #{etc}/systemd/system/asusd.service /etc/systemd/system/
         systemctl daemon-reload
         systemctl enable asusd.service
         systemctl start asusd.service
