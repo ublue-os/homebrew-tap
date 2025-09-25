@@ -1,4 +1,4 @@
-class Emacs < Formula
+class EmacsLinux < Formula
   desc "GNU Emacs text editor"
   homepage "https://www.gnu.org/software/emacs/"
   url "https://mirrors.ocf.berkeley.edu/gnu/emacs/emacs-30.2.tar.xz"
