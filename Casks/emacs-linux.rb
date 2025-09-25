@@ -11,7 +11,7 @@ cask "emacs-linux" do
   depends_on formula: "squashfs"
 
   binary "squashfs-root/AppRun", target: "emacs"
-  artifact "squashfs-root/usr/share/icons/hicolor/0x0/apps/emacs.png",
+  artifact "squashfs-root/share/icons/hicolor/128x128/apps/emacs.png",
            target: "#{Dir.home}/.local/share/icons/emacs.png"
   artifact "squashfs-root/emacs.desktop",
            target: "#{Dir.home}/.local/share/applications/emacs.desktop"
