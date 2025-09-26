@@ -58,14 +58,11 @@ class Asusctl < Formula
     service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
     (etc/"systemd"/"user"/"asusd-user.service").write(service_content)
 
-
     service_content = File.read("data/asusd.service")
     service_content.gsub!("/usr/bin/asusd", "#{opt_bin}/asusd")
 
     # Add the [Install] section if it doesn't exist
-    unless service_content.include?("[Install]")
-      service_content += "\n[Install]\nWantedBy=multi-user.target\n"
-    end
+    service_content += "\n[Install]\nWantedBy=multi-user.target\n" unless service_content.include?("[Install]")
 
     (etc/"systemd"/"system"/"asusd.service").write(service_content)
   end
