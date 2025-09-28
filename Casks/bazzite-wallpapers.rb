@@ -4,21 +4,21 @@ cask "bazzite-wallpapers" do
 
   url "https://github.com/ublue-os/bazzite/tree/main/press_kit/art"
   name "bazzite-wallpapers"
-  desc "Bazzite Wallpapers"
-  homepage "https://bazzite.gg"
+  desc "Wallpapers for Bazzite"
+  homepage "https://bazzite.gg/"
 
   wallpapers = [
     {
       filename: "Convergence_Wallpaper.png",
-      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper.png"
+      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper.png",
     },
     {
       filename: "Convergence_Wallpaper_DX.jxl",
-      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper_DX.jxl"
+      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper_DX.jxl",
     },
     {
       filename: "Bazzite_Giants.jpg",
-      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Bazzite_Giants.jpg"
+      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Bazzite_Giants.jpg",
     }
   ]
 
@@ -35,4 +35,3 @@ cask "bazzite-wallpapers" do
     end
   end
 end
-
