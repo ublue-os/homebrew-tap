@@ -10,16 +10,16 @@ cask "bazzite-wallpapers" do
   wallpapers = [
     {
       filename: "Convergence_Wallpaper.png",
-      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper.png",
+      url:      "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper.png",
     },
     {
       filename: "Convergence_Wallpaper_DX.jxl",
-      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper_DX.jxl",
+      url:      "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Convergence_Wallpaper_DX.jxl",
     },
     {
       filename: "Bazzite_Giants.jpg",
-      url: "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Bazzite_Giants.jpg",
-    }
+      url:      "https://raw.githubusercontent.com/ublue-os/bazzite/main/press_kit/art/Bazzite_Giants.jpg",
+    },
   ]
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
