@@ -16,25 +16,36 @@ brew install --cask jetbrains-toolbox-linux
 brew install --cask lm-studio-linux
 brew install --cask 1password-gui-linux
 brew install --cask framework-tool
-brew install --cask bluefin-wallpapers
-brew install --cask aurora-wallpapers
-brew install --cask bluefin-wallpapers-plasma-dynamic
-brew install --cask bazzite-wallpapers
 brew install asusctl
+
+brew install --cask bluefin-wallpapers
+brew install --cask bluefin-wallpapers-extra
+brew install --cask aurora-wallpapers
+brew install --cask bazzite-wallpapers
+brew install --cask framework-wallpapers
 ```
+
 ## Includes
 
 - 1Password - Password manager
 - ASUSCTL - Control daemon and CLI tools for ASUS ROG laptops
-- Bluefin Wallpapers - Additional wallpapers for Bluefin
-- [Bluefin Wallpapers Plasma Dynamic](https://github.com/renner0e/bluefin-wallpapers-plasma) - utilizes [this KDE Plasma Plugin](https://github.com/zzag/plasma5-wallpapers-dynamic)
-- Aurora Wallpapers - Commissioned art for Aurora
-- Bazzite Wallpapers - Wallpapers made for Bazzite
-- Framework System Tool - Hardware management for Framework laptops
 - JetBrains Toolbox - JetBrains tools manager
 - LM Studio - Local LLM discovery, download, and runtime
 - Visual Studio Code - Microsoft's code editor
 - VSCodium - Open-source build of VS Code
+- Framework System Tool - Hardware management for Framework laptops
+
+### Wallpapers
+
+Metadata for GNOME is usually there.
+
+If you are on KDE then [follow these instructions](https://github.com/renner0e/bluefin-wallpapers-plasma).
+
+- Bluefin Wallpapers - Wallpapers for Bluefin
+- Bluefin Extra Wallpapers - Additional wallpapers for Bluefin
+- Aurora Wallpapers - Art made for Aurora
+- Bazzite Wallpapers - Wallpapers made for Bazzite
+- Framework Wallpapers
 
 ## Scope
 
