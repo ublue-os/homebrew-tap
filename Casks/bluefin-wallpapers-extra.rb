@@ -9,7 +9,7 @@ cask "bluefin-wallpapers-extra" do
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
 
-  if Env["XDG_CURRENT_DESKTOP"] == "KDE"
+  if ENV["XDG_CURRENT_DESKTOP"] == "KDE"
     Dir.glob("#{staged_path}/kde/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end

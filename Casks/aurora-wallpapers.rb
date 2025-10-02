@@ -7,7 +7,7 @@ cask "aurora-wallpapers" do
   desc "Wallpapers for Aurora"
   homepage "https://github.com/projectbluefin/artwork"
 
-  if Env["XDG_CURRENT_DESKTOP"] == "KDE"
+  if ENV["XDG_CURRENT_DESKTOP"] == "KDE"
     Dir.glob("#{staged_path}/kde/aurora-wallpaper-*").each do |dir|
       next if File.basename(dir) == "aurora-wallpaper-1"
 
@@ -20,7 +20,7 @@ cask "aurora-wallpapers" do
       Dir.glob("#{dir}/contents/images/*").each do |file|
         extension = File.extname(file)
         File.basename(file, extension)
-        artifact file, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}.#{extension}"
+        artifact file, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}#{extension}"
       end
     end
   end
