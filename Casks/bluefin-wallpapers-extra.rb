@@ -1,10 +1,10 @@
-cask "bluefin-wallpapers" do
+cask "bluefin-wallpapers-extra" do
   version :latest
   sha256 :no_check
 
-  url "https://github.com/projectbluefin/artwork/releases/latest/download/bazzite-wallpapers.tar.zstd"
-  name "bluefin-wallpapers"
-  desc "Wallpapers for Bluefin"
+  url "https://github.com/projectbluefin/artwork/releases/latest/download/bazzite-wallpapers-extra.tar.zstd"
+  name "bluefin-wallpapers-extra"
+  desc "Extra Wallpapers for Bluefin"
   homepage "https://github.com/projectbluefin/artwork"
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"

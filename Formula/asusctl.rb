@@ -55,11 +55,11 @@ class Asusctl < Formula
 
     # Copy and modify the upstream user service file
     service_content = File.read("data/asusd-user.service")
-    service_content.gsub!("/usr/bin/asusd-user", "#{opt_bin}/asusd-user")
+    service_content.gsub!("/usr/bin/asusd-user", "#{bin}/asusd-user")
     (etc/"systemd"/"user"/"asusd-user.service").write(service_content)
 
     service_content = File.read("data/asusd.service")
-    service_content.gsub!("/usr/bin/asusd", "#{opt_bin}/asusd")
+    service_content.gsub!("/usr/bin/asusd", "#{bin}/asusd")
 
     # Add the [Install] section if it doesn't exist
     service_content += "\n[Install]\nWantedBy=multi-user.target\n" unless service_content.include?("[Install]")
@@ -82,7 +82,10 @@ class Asusctl < Formula
 
       To install the system service:
         sudo cp #{etc}/systemd/system/asusd.service /etc/systemd/system/
-        sudo restorecon /etc/systemd/system/asusd.service
+        sudo semanage fcontext -a -t systemd_unit_file_t #{etc}/systemd/system/asusd.service
+        sudo semanage fcontext -a -t bin_t #{etc}/bin/asusd
+        sudo restorecon -vvRF/etc/systemd/system/asusd.service
+        sudo restorecon -vvRF #{bin}/asusd
         sudo systemctl daemon-reload
         sudo systemctl enable asusd.service
         sudo systemctl start asusd.service

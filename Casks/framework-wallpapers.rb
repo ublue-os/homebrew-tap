@@ -1,13 +1,13 @@
-cask "bluefin-wallpapers" do
+cask "framework-wallpapers" do
   version :latest
   sha256 :no_check
 
-  url "https://github.com/projectbluefin/artwork/releases/latest/download/bazzite-wallpapers.tar.zstd"
-  name "bluefin-wallpapers"
-  desc "Wallpapers for Bluefin"
+  url "https://github.com/projectbluefin/artwork/releases/latest/download/framework-wallpapers.tar.zstd"
+  name "framework-wallpapers"
+  desc "Extra Wallpapers for Bluefin"
   homepage "https://github.com/projectbluefin/artwork"
 
-  destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
+  destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin/framework"
 
   if Env["XDG_CURRENT_DESKTOP"] == "KDE"
     Dir.glob("#{staged_path}/kde/*").each do |file|
