@@ -7,7 +7,7 @@ cask "aurora-wallpapers" do
   desc "Wallpapers for Aurora"
   homepage "https://github.com/projectbluefin/artwork"
 
-  if ENV["XDG_CURRENT_DESKTOP"] == "KDE"
+  if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |dir|
       next if File.basename(dir) == "aurora-wallpaper-1"
 

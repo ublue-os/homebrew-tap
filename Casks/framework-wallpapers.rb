@@ -10,7 +10,7 @@ cask "framework-wallpapers" do
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin/framework"
 
 
-  if File.exists?("/usr/bin/plasmashell")
+  if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end

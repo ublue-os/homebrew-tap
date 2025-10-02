@@ -9,7 +9,7 @@ cask "bazzite-wallpapers" do
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
 
-  if ENV["XDG_CURRENT_DESKTOP"] == "KDE"
+  if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
