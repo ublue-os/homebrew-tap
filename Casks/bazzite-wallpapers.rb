@@ -8,10 +8,11 @@ cask "bazzite-wallpapers" do
   homepage "https://bazzite.gg/"
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
+  kde_destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
 
   if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/images/*").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
   else
     Dir.glob("#{staged_path}/images/*").each do |file|

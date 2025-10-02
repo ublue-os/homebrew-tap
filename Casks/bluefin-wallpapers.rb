@@ -8,10 +8,11 @@ cask "bluefin-wallpapers" do
   homepage "https://github.com/projectbluefin/artwork"
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
+  kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 
   if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
   else
     Dir.glob("#{staged_path}/gnome/images/*").each do |file|
