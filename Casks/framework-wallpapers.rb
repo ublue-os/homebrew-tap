@@ -22,4 +22,12 @@ cask "framework-wallpapers" do
       artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
     end
   end
+
+  preflight do
+    Dir.glob("#{staged_path}/**/*.xml").each do |file|
+      contents = File.read(file)
+      contents.gsub!("~", Dir.home)
+      File.write(file, contents)
+    end
+  end
 end

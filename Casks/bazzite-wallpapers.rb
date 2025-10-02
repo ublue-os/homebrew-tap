@@ -9,7 +9,25 @@ cask "bazzite-wallpapers" do
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
 
-  artifact "images/Convergence_Wallpaper_DX.jxl", target: "#{destination_dir}/Convergence_Wallpaper_DX.jxl"
-  artifact "images/Convergence_Wallpaper.png", target: "#{destination_dir}/Convergence_Wallpaper.png"
-  artifact "images/Bazzite_Giants.jpg", target: "#{destination_dir}/Bazzite_Giants.jpg"
+  if ENV["XDG_CURRENT_DESKTOP"] == "KDE"
+    Dir.glob("#{staged_path}/images/*").each do |file|
+      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+    end
+  else
+    Dir.glob("#{staged_path}/images/*").each do |file|
+      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+    end
+
+    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
+      artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+    end
+  end
+
+  preflight do
+    Dir.glob("#{staged_path}/**/*.xml").each do |file|
+      contents = File.read(file)
+      contents.gsub!("~", Dir.home)
+      File.write(file, contents)
+    end
+  end
 end
