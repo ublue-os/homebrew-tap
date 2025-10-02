@@ -7,13 +7,19 @@ cask "aurora-wallpapers" do
   desc "Wallpapers for Aurora"
   homepage "https://github.com/projectbluefin/artwork"
 
+  livecheck do
+    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_latest
+  end
+
+  auto_updates true
+
   if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |dir|
       next if File.basename(dir) == "aurora-wallpaper-1"
 
-      if dir.include?("gnome-background-properties")
-        next
-      end
+      next if dir.include?("gnome-background-properties")
+
       artifact dir, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
     end
   else

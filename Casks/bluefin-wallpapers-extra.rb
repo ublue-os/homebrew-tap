@@ -7,6 +7,13 @@ cask "bluefin-wallpapers-extra" do
   desc "Extra Wallpapers for Bluefin"
   homepage "https://github.com/projectbluefin/artwork"
 
+  livecheck do
+    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_latest
+  end
+
+  auto_updates true
+
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 
@@ -16,7 +23,7 @@ cask "bluefin-wallpapers-extra" do
     end
   else
     Dir.glob("#{staged_path}/gnome/images/*").each do |file|
-      folder = File.basename(file, File.extname(file)).gsub(/\-night|\-day/, "")
+      folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
       artifact file, target: "#{destination_dir}/#{folder}/#{File.basename(file)}"
     end
 

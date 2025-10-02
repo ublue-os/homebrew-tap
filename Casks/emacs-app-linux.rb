@@ -1,4 +1,4 @@
-cask "emacs-app" do
+cask "emacs-app-linux" do
   arch arm: "arm64-11", intel: "x86_64-10_12"
 
   version "30.2"
@@ -14,6 +14,7 @@ cask "emacs-app" do
     regex(%r{href=.*?/Emacs[._-]v?(\d+(?:\.\d+)*(?:-\d+)?)[._-]universal\.dmg}i)
   end
 
+  auto_updates true
   conflicts_with cask: [
     "emacs@nightly",
     "emacs@pretest",

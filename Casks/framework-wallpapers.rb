@@ -7,9 +7,15 @@ cask "framework-wallpapers" do
   desc "Extra Wallpapers for Bluefin"
   homepage "https://github.com/projectbluefin/artwork"
 
+  livecheck do
+    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_latest
+  end
+
+  auto_updates true
+
   destination_dir = "#{Dir.home}/.local/share/backgrounds/framework"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/framework"
-
 
   if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |file|

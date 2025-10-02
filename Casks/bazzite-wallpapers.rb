@@ -7,6 +7,13 @@ cask "bazzite-wallpapers" do
   desc "Wallpapers for Bazzite"
   homepage "https://bazzite.gg/"
 
+  livecheck do
+    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_latest
+  end
+
+  auto_updates true
+
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
   kde_destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
 
