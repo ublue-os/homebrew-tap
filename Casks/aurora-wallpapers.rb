@@ -9,16 +9,17 @@ cask "aurora-wallpapers" do
 
   if Env["XDG_CURRENT_DESKTOP"] == "KDE"
     Dir.glob("#{staged_path}/kde/aurora-wallpaper-*").each do |dir|
-    next if File.basename(dir) == "aurora-wallpaper-1"
+      next if File.basename(dir) == "aurora-wallpaper-1"
 
-    artifact dir, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
+      artifact dir, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
+    end
   else
     Dir.glob("#{staged_path}/kde/aurora-wallpaper-*").each do |dir|
       next if File.basename(dir) == "aurora-wallpaper-1"
 
       Dir.glob("#{dir}/contents/images/*").each do |file|
         extension = File.extname(file)
-        filename_no_extension = File.basename(file, extension)
+        File.basename(file, extension)
         artifact file, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}.#{extension}"
       end
     end
