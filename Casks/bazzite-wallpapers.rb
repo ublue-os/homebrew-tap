@@ -1,5 +1,5 @@
 cask "bazzite-wallpapers" do
-  version :latest
+  version "2025-10-02"
   sha256 :no_check
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/bazzite-wallpapers.tar.zstd"
