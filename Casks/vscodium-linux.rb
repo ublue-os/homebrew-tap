@@ -2,9 +2,9 @@ cask "vscodium-linux" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.104.16282"
-  sha256 arm64_linux:  "e69f678e0d581da36e45222d1bd403f544e09b8efe426de62567af4e1d0714a3",
-         x86_64_linux: "9c619a1043cfd4b226d0daaa32ee43a18a95930558327d1f23987743248c4f86"
+  version "1.104.26450"
+  sha256 arm64_linux:  "9bd248aa5a28d1ebd820f797b46197f261574679594b6c1e82fa37f2e1d3f520",
+         x86_64_linux: "bfa70638a038c1ec077e15635d65e44019afe7a8923026b1728d86f44432d632"
 
   url "https://github.com/VSCodium/vscodium/releases/download/#{version}/VSCodium-linux-#{arch}-#{version}.tar.gz"
   name "VSCodium"
