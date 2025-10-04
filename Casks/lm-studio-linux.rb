@@ -33,5 +33,10 @@ cask "lm-studio-linux" do
     File.write("#{staged_path}/squashfs-root/lm-studio.desktop", desktop_content)
   end
 
+  uninstall delete: [
+    "#{Dir.home}/.local/share/icons/lm-studio.png",
+    "#{Dir.home}/.local/share/applications/lm-studio.desktop",
+  ]
+
   zap trash: "~/.config/LMStudio"
 end
