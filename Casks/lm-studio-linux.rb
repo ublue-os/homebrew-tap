@@ -7,6 +7,17 @@ cask "lm-studio-linux" do
   desc "Discover, download, and run local LLMs"
   homepage "https://lmstudio.ai/"
 
+  livecheck do
+    url "https://versions-prod.lmstudio.ai/update/linux/x86/#{version}"
+    strategy :json do |json|
+      version = json["version"]
+      build = json["build"]
+      next if version.blank? || build.blank?
+
+      "#{version}-#{build}"
+    end
+  end
+
   auto_updates true
   depends_on formula: "squashfs"
 
