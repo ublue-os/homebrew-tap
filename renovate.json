@@ -1,6 +1,25 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "local>ublue-os/renovate-config"
+  // "extends": ["local>ublue-os/renovate-config"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/1password-gui-linux.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "1password",
+      "datasourceTemplate": "custom.1password"
+    }
+  ],
+  "customDatasources": {
+    "1password": {
+      "defaultRegistryUrlTemplate": "https://releases.1password.com/linux/stable/index.xml",
+      "format": "plain"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.1password"],
+      "extractVersion": "<title>1Password for Linux (?<version>.+)</title>"
+    }
   ]
 }
