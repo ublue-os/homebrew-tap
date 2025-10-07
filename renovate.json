@@ -8,12 +8,26 @@
       "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
       "depNameTemplate": "1password",
       "datasourceTemplate": "custom.1password"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/*-wallpapers*.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "wallpapers",
+      "datasourceTemplate": "custom.wallpapers"
     }
   ],
   "customDatasources": {
     "1password": {
       "defaultRegistryUrlTemplate": "https://releases.1password.com/linux/stable/index.xml",
       "format": "plain"
+    },
+    "wallpapers": {
+      "defaultRegistryUrlTemplate": "https://api.github.com/repos/projectbluefin/artwork/releases",
+      "format": "json",
+      "transformTemplates": [
+        "{\"releases\": [ $[].{\"version\": name, \"releaseTimestamp\": created_at} ]}"
+      ]
     }
   },
   "packageRules": [
