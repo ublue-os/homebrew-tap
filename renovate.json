@@ -37,6 +37,14 @@
       "depNameTemplate": "lm-studio",
       "datasourceTemplate": "custom.lm-studio",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/visual-studio-code-linux.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "vscode",
+      "datasourceTemplate": "custom.vscode",
+      "versioningTemplate": "semver"
     }
   ],
   "customDatasources": {
@@ -53,6 +61,13 @@
       "defaultRegistryUrlTemplate": "https://versions-prod.lmstudio.ai/update/linux/x86",
       "format": "json",
       "transformTemplates": ["{\"releases\": [ $.{\"version\": version} ]}"]
+    },
+    "vscode": {
+      "defaultRegistryUrlTemplate": "https://update.code.visualstudio.com/api/update/linux-x64/stable/latest",
+      "format": "json",
+      "transformTemplates": [
+        "{\"releases\": [ $.{\"version\": productVersion} ]}"
+      ]
     }
   },
   "packageRules": [
