@@ -45,6 +45,13 @@
       "depNameTemplate": "vscode",
       "datasourceTemplate": "custom.vscode",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/vscodium-linux.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "VSCodium/vscodium",
+      "datasourceTemplate": "github-releases"
     }
   ],
   "customDatasources": {
