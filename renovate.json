@@ -15,6 +15,13 @@
       "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
       "depNameTemplate": "projectbluefin/artwork",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/framework-tool.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "FrameworkComputer/framework-system",
+      "datasourceTemplate": "github-releases"
     }
   ],
   "customDatasources": {
