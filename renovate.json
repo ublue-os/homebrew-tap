@@ -22,18 +22,34 @@
       "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
       "depNameTemplate": "FrameworkComputer/framework-system",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/jetbrains-toolbox-linux.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "jetbrains",
+      "datasourceTemplate": "custom.jetbrains"
     }
   ],
   "customDatasources": {
     "1password": {
       "defaultRegistryUrlTemplate": "https://releases.1password.com/linux/stable/index.xml",
       "format": "plain"
+    },
+    "jetbrains": {
+      "defaultRegistryUrlTemplate": "https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release",
+      "format": "json",
+      "transformTemplates": ["{\"releases\": [ $.TBA[].{\"version\": build} ]}"]
     }
   },
   "packageRules": [
     {
       "matchDatasources": ["custom.1password"],
       "extractVersion": "<title>1Password for Linux (?<version>.+)</title>"
+    },
+    {
+      "matchDatasources": ["custom.jetbrains"],
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)$"
     }
   ]
 }
