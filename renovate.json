@@ -29,6 +29,14 @@
       "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
       "depNameTemplate": "jetbrains",
       "datasourceTemplate": "custom.jetbrains"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["Casks/lm-studio-linux.rb"],
+      "matchStrings": ["\\s\\sversion\\s\"(?<currentValue>.*)\""],
+      "depNameTemplate": "lm-studio",
+      "datasourceTemplate": "custom.lm-studio",
+      "versioningTemplate": "semver"
     }
   ],
   "customDatasources": {
@@ -40,6 +48,11 @@
       "defaultRegistryUrlTemplate": "https://data.services.jetbrains.com/products/releases?code=TBA&latest=true&type=release",
       "format": "json",
       "transformTemplates": ["{\"releases\": [ $.TBA[].{\"version\": build} ]}"]
+    },
+    "lm-studio": {
+      "defaultRegistryUrlTemplate": "https://versions-prod.lmstudio.ai/update/linux/x86",
+      "format": "json",
+      "transformTemplates": ["{\"releases\": [ $.{\"version\": version} ]}"]
     }
   },
   "packageRules": [
