@@ -61,5 +61,5 @@ cask "1password-gui-linux" do
     "~/.local/share/keyrings/1password.keyring",
   ]
 
-  caveats "You will need to run `sudo install -Dm0644 #{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy -t /etc/polkit-1/actions/;` to enable unlocking the 1Password app via your system password."
+  caveats "You will need to run `sudo install -Dm0644 #{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl -t /etc/polkit-1/actions/;` to enable unlocking the 1Password app via your system password."
 end
