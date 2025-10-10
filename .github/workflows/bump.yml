@@ -1,0 +1,47 @@
+name: Homebrew Bump
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "0 3 * * *" # daily at 03:00 UTC
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Install Homebrew if missing
+        run: |
+          if ! /home/linuxbrew/.linuxbrew/bin/brew --version >/dev/null 2>&1; then
+            echo "Homebrew not found, installing..."
+            NONINTERACTIVE=1 /bin/bash -c \
+              "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+              eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+              brew tap --force ${{ github.repository }}
+
+              echo "HOMEBREW_PREFIX=$HOMEBREW_PREFIX" >> $GITHUB_ENV
+              echo "HOMEBREW_CELLAR=$HOMEBREW_CELLAR" >> $GITHUB_ENV
+              echo "HOMEBREW_REPOSITORY=$HOMEBREW_REPOSITORY" >> $GITHUB_ENV
+              echo "PATH=$PATH" >> $GITHUB_ENV
+              echo "MANPATH=$MANPATH" >> $GITHUB_ENV
+              echo "INFOPATH=$INFOPATH" >> $GITHUB_ENV
+          else
+            echo "Homebrew already installed"
+          fi
+
+      - name: Configure git
+        uses: Homebrew/actions/git-user-config@main
+        with:
+          username: lambdaclan
+
+      - name: Bump packages
+        env:
+          HOMEBREW_DEVELOPER: 1
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          brew bump --tap ${{ github.repository }} --open-pr --no-fork
