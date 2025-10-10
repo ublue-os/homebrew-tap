@@ -41,6 +41,12 @@ cask "1password-gui-linux" do
          target: "1password"
   binary "1password-#{version}.#{Utils.alternate_arch(arch)}/op-ssh-sign",
          target: "op-ssh-sign"
+  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1Password-BrowserSupport",
+         target: "1Password-BrowserSupport"
+  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1Password-Crash-Handler",
+         target: "1Password-Crash-Handler"
+  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1Password-LastPass-Exporter",
+         target: "1Password-LastPass-Exporter"
   artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/resources/1password.desktop",
            target: "#{Dir.home}/.local/share/applications/1password.desktop"
   artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/resources/icons/hicolor/256x256/apps/1password.png",
@@ -52,6 +58,52 @@ cask "1password-gui-linux" do
                                "Exec=#{HOMEBREW_PREFIX}/bin/1password")
   end
 
+  postflight do
+    system "echo", "Installing polkit policy file to /etc/polkit-1/actions/, you may be prompted for your password."
+    if !File.exist?("/etc/polkit-1/actions/com.1password.1Password.policy") ||
+       !FileUtils.identical?("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl", "/etc/polkit-1/actions/com.1password.1Password.policy")
+      system "sudo", "install", "-Dm0644",
+           "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl",
+           "/etc/polkit-1/actions/com.1password.1Password.policy"
+      puts "Installed /etc/polkit-1/actions/com.1password.1Password.policy"
+    else
+      puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy, as it already exists and the same as the version to be installed."
+    end
+
+
+    system "echo", "Installing flatpak browser integratrion using https://github.com/FlyinPancake/1password-flatpak-browser-integration"
+    system "curl", "-L",
+           "https://github.com/FlyinPancake/1password-flatpak-browser-integration/raw/refs/heads/main/1password-flatpak-browser-integration.sh",
+            "-o", "#{staged_path}/1password-flatpak-browser-integration.sh"
+    system "chmod", "+x", "#{staged_path}/1password-flatpak-browser-integration.sh"
+
+    integration_script = File.read("#{staged_path}/1password-flatpak-browser-integration.sh")
+    integration_script.gsub!(/\/opt\/1Password\/1Password-BrowserSupport/, "#{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport")
+    File.write("#{staged_path}/1password-flatpak-browser-integration.sh", integration_script)
+
+    system "#{staged_path}/1password-flatpak-browser-integration.sh"
+
+    ohai "If you need to integrate with flatpak browsers, you need to install the `1password-flatpak-integrations` cask."
+
+    File.write("#{staged_path}/1password-uninstall.sh", <<~EOS
+      #!/bin/bash
+      set -e
+      echo "Uninstalling polkit policy file from /etc/polkit-1/actions/com.1password.1Password.policy"
+      if [ -f /etc/polkit-1/actions/com.1password.1Password.policy ]; then
+        rm -f /etc/polkit-1/actions/com.1password.1Password.policy
+        echo "Removed /etc/polkit-1/actions/com.1password.1Password.policy"
+      else
+        echo "/etc/polkit-1/actions/com.1password.1Password.policy does not exist, skipping."
+      fi
+    EOS
+    )
+  end
+
+  uninstall_preflight do
+    system "chmod", "+x", "#{staged_path}/1password-uninstall.sh"
+    system "sudo", "#{staged_path}/1password-uninstall.sh"
+  end
+
   zap trash: [
     "~/.cache/1password",
     "~/.config/1Password",
@@ -60,6 +112,4 @@ cask "1password-gui-linux" do
     "~/.local/share/icons/1password.png",
     "~/.local/share/keyrings/1password.keyring",
   ]
-
-  caveats "You will need to run `sudo install -Dm0644 #{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy -t /etc/polkit-1/actions/;` to enable unlocking the 1Password app via your system password."
 end
