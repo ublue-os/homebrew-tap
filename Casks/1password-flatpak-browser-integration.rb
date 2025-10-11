@@ -1,9 +1,9 @@
 module Utils
-  INFO = "\e[0;36m"    # Cyan for general information
-  SUCCESS = "\e[0;32m" # Green for success messages
-  WARN = "\e[0;33m"    # Yellow for warnings
-  ERROR = "\e[0;31m"   # Red for errors
-  NC = "\e[0m"         # No Color
+  INFO = "\e[0;36m".freeze    # Cyan for general information
+  SUCCESS = "\e[0;32m".freeze # Green for success messages
+  WARN = "\e[0;33m".freeze    # Yellow for warnings
+  ERROR = "\e[0;31m".freeze   # Red for errors
+  NC = "\e[0m".freeze         # No Color
 
   ALLOWED_EXTENSIONS_FIREFOX = '"allowed_extensions": [
       "{0a75d802-9aed-41e7-8daa-24c067386e82}",
@@ -24,7 +24,7 @@ module Utils
   BROWSERS_NOT_USING_MOZILLA = [
     "org.mozilla.firefox",
     "io.gitlab.librewolf-community",
-    "net.waterfox.waterfox"
+    "net.waterfox.waterfox",
   ].freeze
 
   CHROMIUM_BROWSERS = [
@@ -35,7 +35,7 @@ module Utils
     "com.microsoft.Edge",
     "ru.yandex.Browser",
     "org.chromium.Chromium",
-    "io.github.ungoogled_software.ungoogled_chromium"
+    "io.github.ungoogled_software.ungoogled_chromium",
   ].freeze
 
   FIREFOX_BROWSERS = [
@@ -46,7 +46,7 @@ module Utils
     "app.zen_browser.zen",
     "org.garudalinux.firedragon",
     "net.mullvad.MullvadBrowser",
-    "net.waterfox.waterfox"
+    "net.waterfox.waterfox",
   ].freeze
 
   GLOBAL_WRAPPER_PATH = "#{Dir.home}/.mozilla/native-messaging-hosts/1password-wrapper.sh".freeze
@@ -76,18 +76,18 @@ module Utils
   end
 
   def self.load_config
-    return nil unless File.exist?(CONFIG_PATH)
+    return unless File.exist?(CONFIG_PATH)
 
     puts "#{INFO}Existing configuration file found at #{CONFIG_PATH}, loading...#{NC}"
     config = JSON.parse(File.read(CONFIG_PATH))
 
     unless FLATPAK_PACKAGE_LIST.include?(config["flatpak_browser_id"])
-      puts "#{WARN}Browser ID #{config['flatpak_browser_id']} from config not found in installed Flatpak applications, please re-run the installation to select a valid browser.#{NC}"
+      puts "#{WARN}Browser ID #{config["flatpak_browser_id"]} from config not found in installed Flatpak applications, please re-run the installation to select a valid browser.#{NC}"
       exit 1
     end
 
     %w[flatpak_browser_id browser_type wrapper_path manifest_path].each do |key|
-      puts "#{INFO}Using #{key.tr('_', ' ')}: #{config[key]} from config.#{NC}"
+      puts "#{INFO}Using #{key.tr("_", " ")}: #{config[key]} from config.#{NC}"
     end
 
     config
@@ -96,7 +96,7 @@ module Utils
   def self.get_browser_lists
     {
       chromium: list_flatpak_browsers(CHROMIUM_BROWSERS),
-      firefox: list_flatpak_browsers(FIREFOX_BROWSERS)
+      firefox:  list_flatpak_browsers(FIREFOX_BROWSERS),
     }
   end
 
@@ -147,7 +147,7 @@ module Utils
   def self.get_wrapper_script_content
     <<~BASH
       #!/bin/bash
-      if [ "\${container-}" = flatpak ]; then
+      if [ "${container-}" = flatpak ]; then
         flatpak-spawn --host #{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport "$@"
       else
         exec #{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport "$@"
@@ -196,13 +196,14 @@ module Utils
     end
   end
 
-  def self.handle_firefox_global_manifest(browser_id, manifest_content, wrapper_path)
+  def self.handle_firefox_global_manifest(browser_id, _manifest_content, wrapper_path)
     return if BROWSERS_NOT_USING_MOZILLA.include?(browser_id)
 
     global_manifest_path = "#{GLOBAL_NATIVE_MESSAGING_PATH}/com.1password.1password.json"
 
     # Check if the global manifest is already correctly set up
-    if is_native_messaging_host_correct(GLOBAL_WRAPPER_PATH, ALLOWED_EXTENSIONS_FIREFOX, GLOBAL_NATIVE_MESSAGING_PATH, true)
+    if is_native_messaging_host_correct(GLOBAL_WRAPPER_PATH, ALLOWED_EXTENSIONS_FIREFOX,
+                                        GLOBAL_NATIVE_MESSAGING_PATH, true)
       puts "#{INFO}Already added to #{global_manifest_path}#{NC}"
       return
     end
@@ -271,9 +272,7 @@ module Utils
     Dir.glob("#{app_dir}/*").each do |dir|
       next unless Dir.exist?(dir)
 
-      if is_firefox_dir(dir)
-        return "#{dir}/native-messaging-hosts"
-      end
+      return "#{dir}/native-messaging-hosts" if is_firefox_dir(dir)
 
       # Check subdirectories (like .mozilla/firefox)
       Dir.glob("#{dir}/*").each do |subdir|
@@ -290,7 +289,8 @@ module Utils
     "#{app_dir}/.mozilla/native-messaging-hosts"
   end
 
-  def self.is_native_messaging_host_correct(wrapper_path, allowed_extensions, native_messaging_dir, should_be_immutable = false)
+  def self.is_native_messaging_host_correct(wrapper_path, allowed_extensions, native_messaging_dir,
+                                            should_be_immutable = false)
     manifest_file = "#{native_messaging_dir}/com.1password.1password.json"
 
     # Check if files exist
@@ -299,7 +299,7 @@ module Utils
     # Check if file should be immutable
     if should_be_immutable
       attrs = `lsattr "#{manifest_file}" 2>/dev/null`.chomp
-      return false unless attrs[4] == 'i' # 5th character indicates immutable
+      return false if attrs[4] != "i" # 5th character indicates immutable
     end
 
     # Check contents
@@ -370,15 +370,15 @@ cask "1password-flatpak-browser-integration" do
     system "flatpak", "override", "--user", "--talk-name=org.freedesktop.Flatpak", flatpak_browser_id
 
     # Create wrapper script and manifest path for new installations
-    unless config
+    if config
+      puts "#{Utils::INFO}Using existing wrapper script and manifest from config...#{Utils::NC}"
+    else
       wrapper_path = Utils.create_wrapper_script(flatpak_browser_id)
       manifest_path = Utils.create_manifest_path(browser_type, flatpak_browser_id)
-    else
-      puts "#{Utils::INFO}Using existing wrapper script and manifest from config...#{Utils::NC}"
     end
 
     # Validate that the native messaging directory was found
-    if manifest_path.nil? || manifest_path.empty?
+    if manifest_path.blank?
       puts "#{Utils::ERROR}ERROR: Could not find Native Messaging Hosts directory#{Utils::NC}"
       exit 1
     end
@@ -406,9 +406,9 @@ cask "1password-flatpak-browser-integration" do
       unless config
         Utils.save_config({
           "flatpak_browser_id" => flatpak_browser_id,
-          "browser_type" => browser_type,
-          "wrapper_path" => wrapper_path,
-          "manifest_path" => manifest_path
+          "browser_type"       => browser_type,
+          "wrapper_path"       => wrapper_path,
+          "manifest_path"      => manifest_path,
         })
       end
     else
@@ -417,6 +417,6 @@ cask "1password-flatpak-browser-integration" do
   end
 
   uninstall_preflight do
-    FileUtils.rm_f(Utils::CONFIG_PATH)
+    FileUtils.rm(Utils::CONFIG_PATH)
   end
 end
