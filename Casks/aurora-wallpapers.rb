@@ -16,16 +16,12 @@ cask "aurora-wallpapers" do
 
   if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |dir|
-      next if File.basename(dir) == "aurora-wallpaper-1"
-
       next if dir.include?("gnome-background-properties")
 
       artifact dir, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
     end
   else
     Dir.glob("#{staged_path}/kde/*").each do |dir|
-      next if File.basename(dir) == "aurora-wallpaper-1"
-
       Dir.glob("#{dir}/contents/images/*").each do |file|
         extension = File.extname(file)
         File.basename(file, extension)
