@@ -63,22 +63,22 @@ cask "1password-gui-linux" do
     if !File.exist?("/etc/polkit-1/actions/com.1password.1Password.policy") ||
        !FileUtils.identical?("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl", "/etc/polkit-1/actions/com.1password.1Password.policy")
       system "sudo", "install", "-Dm0644",
-           "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl",
-           "/etc/polkit-1/actions/com.1password.1Password.policy"
+             "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl",
+             "/etc/polkit-1/actions/com.1password.1Password.policy"
       puts "Installed /etc/polkit-1/actions/com.1password.1Password.policy"
     else
       puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy, as it already exists and the same as the version to be installed."
     end
 
-
     system "echo", "Installing flatpak browser integratrion using https://github.com/FlyinPancake/1password-flatpak-browser-integration"
     system "curl", "-L",
            "https://github.com/FlyinPancake/1password-flatpak-browser-integration/raw/refs/heads/main/1password-flatpak-browser-integration.sh",
-            "-o", "#{staged_path}/1password-flatpak-browser-integration.sh"
+           "-o", "#{staged_path}/1password-flatpak-browser-integration.sh"
     system "chmod", "+x", "#{staged_path}/1password-flatpak-browser-integration.sh"
 
     integration_script = File.read("#{staged_path}/1password-flatpak-browser-integration.sh")
-    integration_script.gsub!(/\/opt\/1Password\/1Password-BrowserSupport/, "#{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport")
+    integration_script.gsub!("/opt/1Password/1Password-BrowserSupport",
+                             "#{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport")
     File.write("#{staged_path}/1password-flatpak-browser-integration.sh", integration_script)
 
     system "#{staged_path}/1password-flatpak-browser-integration.sh"

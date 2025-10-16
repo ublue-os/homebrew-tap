@@ -74,7 +74,7 @@ module Utils
   end
 
   def self.list_flatpak_browsers(browsers)
-    browsers.select { |browser| flatpak_package_list().include?(browser) }
+    browsers.select { |browser| flatpak_package_list.include?(browser) }
   end
 
   def self.load_config
@@ -83,7 +83,7 @@ module Utils
     puts "#{INFO}Existing configuration file found at #{CONFIG_PATH}, loading...#{NC}"
     config = JSON.parse(File.read(CONFIG_PATH))
 
-    unless flatpak_package_list().include?(config["flatpak_browser_id"])
+    unless flatpak_package_list.include?(config["flatpak_browser_id"])
       puts "#{WARN}Browser ID #{config["flatpak_browser_id"]} from config not found in installed Flatpak applications, please re-run the installation to select a valid browser.#{NC}"
       exit 1
     end
@@ -119,7 +119,7 @@ module Utils
       exit 1
     end
 
-    unless flatpak_package_list().include?(browser_id)
+    unless flatpak_package_list.include?(browser_id)
       puts "#{ERROR}Browser ID #{browser_id} not found in installed Flatpak applications, aborting.#{NC}"
       exit 1
     end
