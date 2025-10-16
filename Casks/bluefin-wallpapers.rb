@@ -1,5 +1,5 @@
 cask "bluefin-wallpapers" do
-  version "2025-10-02"
+  version "2025-10-16"
   sha256 :no_check
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/bluefin-wallpapers.tar.zstd"
