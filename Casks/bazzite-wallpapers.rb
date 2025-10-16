@@ -1,6 +1,6 @@
 cask "bazzite-wallpapers" do
   version "2025-10-16"
-  sha256 :no_check
+  sha256 "dbad6b49fde49b731ed2358a6a69ddce77a3bbc29a129756e181657a83390b7b"
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/bazzite-wallpapers.tar.zstd"
   name "bazzite-wallpapers"

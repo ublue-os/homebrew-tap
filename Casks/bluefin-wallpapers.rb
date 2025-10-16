@@ -1,6 +1,6 @@
 cask "bluefin-wallpapers" do
   version "2025-10-16"
-  sha256 :no_check
+  sha256 "a1f29c5f3025ab64d2359f43218b88e2dc7d2d5b3d9e1e5be8cc8f66709363df"
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/bluefin-wallpapers.tar.zstd"
   name "bluefin-wallpapers"
