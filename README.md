@@ -8,32 +8,70 @@ Homebrew has asked us to run this as a tap as opposed to PRing these into indivi
 
 IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put them on their own images. This lets the user also opt-into vscode instead of having it on a -dx image even if you don't use it.
 
+### Installing
+
+Add `Homebrew` `tap` first:
+
 ```shell
 brew tap ublue-os/tap
-brew install --cask visual-studio-code-linux
-brew install --cask vscodium-linux
-brew install --cask jetbrains-toolbox-linux
-brew install --cask lm-studio-linux
+```
+
+Install apps in the `tap` with:
+
+```shell
 brew install --cask 1password-gui-linux
 brew install --cask framework-tool
+brew install --cask jetbrains-toolbox-linux
+brew install --cask lm-studio-linux
+brew install --cask positron-linux
+brew install --cask visual-studio-code-linux
+brew install --cask vscodium-linux
 brew install asusctl
 
-brew install --cask bluefin-wallpapers
-brew install --cask bluefin-wallpapers-extra
 brew install --cask aurora-wallpapers
 brew install --cask bazzite-wallpapers
+brew install --cask bluefin-wallpapers
+brew install --cask bluefin-wallpapers-extra
 brew install --cask framework-wallpapers
+```
+
+### Uninstalling
+
+Remove or uninstall apps with:
+
+```shell
+brew uninstall --cask 1password-gui-linux
+brew uninstall --cask framework-tool
+brew uninstall --cask jetbrains-toolbox-linux
+brew uninstall --cask lm-studio-linux
+brew uninstall --cask positron-linux
+brew uninstall --cask visual-studio-code-linux
+brew uninstall --cask vscodium-linux
+brew uninstall asusctl
+
+brew uninstall --cask aurora-wallpapers
+brew uninstall --cask bazzite-wallpapers
+brew uninstall --cask bluefin-wallpapers
+brew uninstall --cask bluefin-wallpapers-extra
+brew uninstall --cask framework-wallpapers
+```
+
+Remove the `Homebrew` `tap` with:
+
+```shell
+brew untap ublue-os/tap
 ```
 
 ## Includes
 
-- 1Password - Password manager
-- ASUSCTL - Control daemon and CLI tools for ASUS ROG laptops
-- JetBrains Toolbox - JetBrains tools manager
-- LM Studio - Local LLM discovery, download, and runtime
-- Visual Studio Code - Microsoft's code editor
-- VSCodium - Open-source build of VS Code
-- Framework System Tool - Hardware management for Framework laptops
+- [1Password](https://1password.com) - Password manager
+- [ASUSCTL](https://asus-linux.org) - Control daemon and CLI tools for ASUS ROG laptops
+- [Framework System Tool](https://github.com/FrameworkComputer/framework-system) - Hardware management for Framework laptops
+- [JetBrains Toolbox](https://www.jetbrains.com/toolbox-app/) - JetBrains tools manager
+- [LM Studio](https://lmstudio.ai/) - Local LLM discovery, download, and runtime
+- [Positron](https://positron.posit.co/) - Data Science IDE for Python and R
+- [Visual Studio Code](https://code.visualstudio.com) - Microsoft's code editor
+- [VSCodium](https://vscodium.com) - Open-source build of VS Code
 
 ### Wallpapers
 
