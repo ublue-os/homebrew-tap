@@ -24,12 +24,13 @@ jobs:
 
               brew tap --force ${{ github.repository }}
 
-              echo "HOMEBREW_PREFIX=$HOMEBREW_PREFIX" >> $GITHUB_ENV
-              echo "HOMEBREW_CELLAR=$HOMEBREW_CELLAR" >> $GITHUB_ENV
-              echo "HOMEBREW_REPOSITORY=$HOMEBREW_REPOSITORY" >> $GITHUB_ENV
-              echo "PATH=$PATH" >> $GITHUB_ENV
-              echo "MANPATH=$MANPATH" >> $GITHUB_ENV
-              echo "INFOPATH=$INFOPATH" >> $GITHUB_ENV
+              { echo "HOMEBREW_PREFIX=$HOMEBREW_PREFIX", 
+                echo "HOMEBREW_CELLAR=$HOMEBREW_CELLAR", 
+                echo "HOMEBREW_REPOSITORY=$HOMEBREW_REPOSITORY", 
+                echo "PATH=$PATH", 
+                echo "MANPATH=$MANPATH", 
+                echo "INFOPATH=$INFOPATH"
+              } >> "$GITHUB_ENV"
           else
             echo "Homebrew already installed"
           fi

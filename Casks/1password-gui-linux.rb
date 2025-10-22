@@ -65,21 +65,22 @@ cask "1password-gui-linux" do
     if !File.exist?("/etc/polkit-1/actions/com.1password.1Password.policy") ||
        !FileUtils.identical?("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl", "/etc/polkit-1/actions/com.1password.1Password.policy")
 
-      # Get users from /etc/passwd and output first 10 human users ( 1000 >= UID <= 9999) to the policy file in the format `unix-user:username` and is space separated
-      # This is used to allow these users to unlock 1Password via polkit
-      # Note: This is a basic implementation and may need to be adjusted for different Linux distributions
-      # For example, some distros use a different UID range for human users
-      human_users = `awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" { print $1 }' /etc/passwd`.split("\n").first(10)
+      # Get users from /etc/passwd and output first 10 human users ( 1000 >= UID <= 9999) to the policy file in the
+      # format `unix-user:username` and is space separated
+      # This is used to allow these users to unlock 1Password via polkit.
+      human_users = `awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" { print $1 }' /etc/passwd`
+                    .split("\n").first(10)
       policy_owners = human_users.map { |user| "unix-user:#{user}" }.join(" ")
       policy_file = File.read("/etc/polkit-1/actions/com.1password.1Password.policy.tpl")
-      replacedContents = policy_file.gsub("${POLICY_OWNERS}", policy_owners)
-      File.write("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy", replacedContents)
+      replaced_contents = policy_file.gsub("${POLICY_OWNERS}", policy_owners)
+      File.write("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy", replaced_contents)
       system "sudo", "install", "-Dm0644",
              "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy",
              "/etc/polkit-1/actions/com.1password.1Password.policy"
       puts "Installed /etc/polkit-1/actions/com.1password.1Password.policy"
     else
-      puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy, as it already exists and the same as the version to be installed."
+      puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy, as it already exists and is
+            the same as the version to be installed."
     end
 
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS
