@@ -19,7 +19,7 @@ cask "1password-gui-linux" do
   arch intel: "x86_64", arm: "aarch64"
   os linux: "linux"
 
-  version "8.11.12"
+  version "8.11.14"
   sha256 :no_check
 
   url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-latest.tar.gz"
