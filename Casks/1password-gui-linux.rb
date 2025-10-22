@@ -51,6 +51,8 @@ cask "1password-gui-linux" do
            target: "#{Dir.home}/.local/share/applications/1password.desktop"
   artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/resources/icons/hicolor/256x256/apps/1password.png",
            target: "#{Dir.home}/.local/share/icons/1password.png"
+  artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl",
+           target: "#{HOMEBREW_PREFIX}/etc/polkit-1/actions/com.1password.1Password.policy"
 
   preflight do
     Utils.replace_path_in_file("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/resources/1password.desktop",
@@ -62,28 +64,23 @@ cask "1password-gui-linux" do
     system "echo", "Installing polkit policy file to /etc/polkit-1/actions/, you may be prompted for your password."
     if !File.exist?("/etc/polkit-1/actions/com.1password.1Password.policy") ||
        !FileUtils.identical?("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl", "/etc/polkit-1/actions/com.1password.1Password.policy")
+
+      # Get users from /etc/passwd and output first 10 human users ( 1000 >= UID <= 9999) to the policy file in the format `unix-user:username` and is space separated
+      # This is used to allow these users to unlock 1Password via polkit
+      # Note: This is a basic implementation and may need to be adjusted for different Linux distributions
+      # For example, some distros use a different UID range for human users
+      human_users = `awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" { print $1 }' /etc/passwd`.split("\n").first(10)
+      policy_owners = human_users.map { |user| "unix-user:#{user}" }.join(" ")
+      policy_file = File.read("/etc/polkit-1/actions/com.1password.1Password.policy.tpl")
+      replacedContents = policy_file.gsub("${POLICY_OWNERS}", policy_owners)
+      File.write("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy", replacedContents)
       system "sudo", "install", "-Dm0644",
-             "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl",
+             "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy",
              "/etc/polkit-1/actions/com.1password.1Password.policy"
       puts "Installed /etc/polkit-1/actions/com.1password.1Password.policy"
     else
       puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy, as it already exists and the same as the version to be installed."
     end
-
-    system "echo", "Installing flatpak browser integratrion using https://github.com/FlyinPancake/1password-flatpak-browser-integration"
-    system "curl", "-L",
-           "https://github.com/FlyinPancake/1password-flatpak-browser-integration/raw/refs/heads/main/1password-flatpak-browser-integration.sh",
-           "-o", "#{staged_path}/1password-flatpak-browser-integration.sh"
-    system "chmod", "+x", "#{staged_path}/1password-flatpak-browser-integration.sh"
-
-    integration_script = File.read("#{staged_path}/1password-flatpak-browser-integration.sh")
-    integration_script.gsub!("/opt/1Password/1Password-BrowserSupport",
-                             "#{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport")
-    File.write("#{staged_path}/1password-flatpak-browser-integration.sh", integration_script)
-
-    system "#{staged_path}/1password-flatpak-browser-integration.sh"
-
-    ohai "If you need to integrate with flatpak browsers, you need to install the `1password-flatpak-integrations` cask."
 
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS
       #!/bin/bash
@@ -107,9 +104,6 @@ cask "1password-gui-linux" do
   zap trash: [
     "~/.cache/1password",
     "~/.config/1Password",
-    "~/.local/share/1password",
-    "~/.local/share/applications/1password.desktop",
-    "~/.local/share/icons/1password.png",
     "~/.local/share/keyrings/1password.keyring",
   ]
 end
