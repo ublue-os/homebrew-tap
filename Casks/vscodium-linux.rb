@@ -16,8 +16,6 @@ cask "vscodium-linux" do
     strategy :github_latest
   end
 
-  auto_updates true
-
   binary "bin/codium"
   binary "bin/codium-tunnel"
   bash_completion "resources/completions/bash/codium"

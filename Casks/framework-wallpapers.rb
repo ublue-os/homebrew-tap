@@ -12,8 +12,6 @@ cask "framework-wallpapers" do
     strategy :github_latest
   end
 
-  auto_updates true
-
   destination_dir = "#{Dir.home}/.local/share/backgrounds/framework"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/framework"
 

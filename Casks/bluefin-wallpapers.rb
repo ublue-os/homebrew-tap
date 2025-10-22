@@ -12,8 +12,6 @@ cask "bluefin-wallpapers" do
     strategy :github_latest
   end
 
-  auto_updates true
-
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 

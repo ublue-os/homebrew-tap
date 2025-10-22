@@ -35,8 +35,6 @@ cask "1password-gui-linux" do
     end
   end
 
-  auto_updates true
-
   binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1password",
          target: "1password"
   binary "1password-#{version}.#{Utils.alternate_arch(arch)}/op-ssh-sign",

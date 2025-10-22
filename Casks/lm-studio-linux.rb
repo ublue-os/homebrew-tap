@@ -18,7 +18,6 @@ cask "lm-studio-linux" do
     end
   end
 
-  auto_updates true
   depends_on formula: "squashfs"
 
   binary "squashfs-root/AppRun", target: "lm-studio"

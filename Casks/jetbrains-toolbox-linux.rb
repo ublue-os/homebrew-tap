@@ -14,8 +14,6 @@ cask "jetbrains-toolbox-linux" do
     end
   end
 
-  auto_updates true
-
   # Correct binary path inside the tarball
   binary "jetbrains-toolbox-#{version}/bin/jetbrains-toolbox"
   artifact "jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop",

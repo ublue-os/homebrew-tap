@@ -12,8 +12,6 @@ cask "aurora-wallpapers" do
     strategy :github_latest
   end
 
-  auto_updates true
-
   if File.exist?("/usr/bin/plasmashell")
     Dir.glob("#{staged_path}/kde/*").each do |dir|
       next if File.basename(dir) == "aurora-wallpaper-1"

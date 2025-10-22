@@ -19,8 +19,6 @@ cask "visual-studio-code-linux" do
     end
   end
 
-  auto_updates true
-
   binary "VSCode-linux-#{arch}/bin/code"
   binary "VSCode-linux-#{arch}/bin/code-tunnel"
   bash_completion "#{staged_path}/VSCode-linux-#{arch}/resources/completions/bash/code"

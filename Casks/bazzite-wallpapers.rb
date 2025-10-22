@@ -12,8 +12,6 @@ cask "bazzite-wallpapers" do
     strategy :github_latest
   end
 
-  auto_updates true
-
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
   kde_destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
 
