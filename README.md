@@ -16,7 +16,6 @@ brew install --cask jetbrains-toolbox-linux
 brew install --cask lm-studio-linux
 brew install --cask 1password-gui-linux
 brew install --cask framework-tool
-brew install asusctl
 
 brew install --cask bluefin-wallpapers
 brew install --cask bluefin-wallpapers-extra
@@ -28,7 +27,6 @@ brew install --cask framework-wallpapers
 ## Includes
 
 - 1Password - Password manager
-- ASUSCTL - Control daemon and CLI tools for ASUS ROG laptops
 - JetBrains Toolbox - JetBrains tools manager
 - LM Studio - Local LLM discovery, download, and runtime
 - Visual Studio Code - Microsoft's code editor
@@ -60,3 +58,6 @@ If you are on KDE then [follow these instructions](https://github.com/renner0e/b
 - GUI apps, every effort to use flatpak should be exhausted, or are out of our control (eg. vscode)
 - General requests for common apps. We don't expect users to use this repo directly, the packages are there for us to automate in the background, ideall they never know this tap exists.
 
+## Experimental Tap
+
+We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out.
