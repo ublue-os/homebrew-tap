@@ -41,8 +41,6 @@ cask "positron-linux" do
     strategy :github_latest
   end
 
-  auto_updates true
-
   # Do not directly use the extracted desktop files: incorrect Exec path
   artifact "positron.desktop",
            target: "#{Dir.home}/.local/share/applications/positron.desktop"
