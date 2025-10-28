@@ -69,7 +69,7 @@ cask "1password-gui-linux" do
       human_users = `awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" { print $1 }' /etc/passwd`
                     .split("\n").first(10)
       policy_owners = human_users.map { |user| "unix-user:#{user}" }.join(" ")
-      policy_file = File.read("/etc/polkit-1/actions/com.1password.1Password.policy.tpl")
+      policy_file = File.read("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl")
       replaced_contents = policy_file.gsub("${POLICY_OWNERS}", policy_owners)
       File.write("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy", replaced_contents)
       system "sudo", "install", "-Dm0644",
