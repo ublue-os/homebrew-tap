@@ -1,6 +1,6 @@
 cask "bluefin-wallpapers-extra" do
-  version "2025-10-16"
-  sha256 "e2a50d504efcbf60a025a347bafd20c52cafd0168360bf8b7b103229556566df"
+  version "2025-10-29"
+  sha256 "8893969a3e4bc5de206dcbbb3fdfdaf356913cd4e3bf5add875b86ace5c9cb68"
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/bluefin-wallpapers-extra.tar.zstd"
   name "bluefin-wallpapers-extra"
