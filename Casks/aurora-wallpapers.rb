@@ -1,6 +1,6 @@
 cask "aurora-wallpapers" do
-  version "2025-10-16"
-  sha256 "4cc33766c6f2035848251ea896162feef71ba16c4491d8cb8d025d578a9d570c"
+  version "2025-10-29"
+  sha256 "9ca146a905c330e3a411e2f9036eacbeaa9683ca0c73b32d10110e81cc8e82ff"
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/aurora-wallpapers.tar.zstd"
   name "aurora-wallpapers"
