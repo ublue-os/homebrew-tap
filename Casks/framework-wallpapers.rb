@@ -1,6 +1,6 @@
 cask "framework-wallpapers" do
-  version "2025-10-16"
-  sha256 "78877403aa22cda64d573bdddd1e4e133c297e14fa599996f85edd2e23ecd35a"
+  version "2025-10-29"
+  sha256 "4c5d8742d7b1e6e44a04911a92fc363ca9a39bd7de1bec927a23741793cbe3e4"
 
   url "https://github.com/projectbluefin/artwork/releases/latest/download/framework-wallpapers.tar.zstd"
   name "framework-wallpapers"
