@@ -2,8 +2,8 @@ name: Homebrew Bump
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "0 3 * * *" # daily at 03:00 UTC
+  schedule:
+    - cron: "0 3,15 * * *" # daily at 03:00 and 15:00 UTC
 
 jobs:
   bump:
