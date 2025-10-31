@@ -67,21 +67,6 @@ cask "bluefin-wallpapers" do
     FileUtils.mkdir_p destination_dir if is_gnome
     FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties" if is_gnome
 
-    # Convert KDE wallpapers to PNG if not on KDE or GNOME
-    unless is_gnome || is_kde
-      puts "Converting wallpapers to PNG for #{ENV['XDG_CURRENT_DESKTOP'] || ENV['DESKTOP_SESSION'] || 'unknown'} desktop..."
-      Dir.glob("#{staged_path}/kde/*").each do |file|
-        next unless File.file?(file)
-        
-        filename = File.basename(file)
-        output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/, '.png')}"
-        
-        puts "Converting #{filename} to PNG..."
-        # Convert image to PNG using ImageMagick
-        system("convert", file, output_file)
-      end
-    end
-
     Dir.glob("#{staged_path}/**/*.xml").each do |file|
       next unless File.file?(file)
       
@@ -92,6 +77,38 @@ cask "bluefin-wallpapers" do
         contents.gsub!(/\.(avif|jxl)(?=['"])/, '.png')
       end
       File.write(file, contents)
+    end
+  end
+
+  postflight do
+    # Detect if GNOME is actually running
+    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") || 
+               ENV["DESKTOP_SESSION"]&.include?("gnome") ||
+               (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell 2>/dev/null`.strip != "")
+
+    # Detect if KDE is running
+    is_kde = ENV["XDG_CURRENT_DESKTOP"]&.include?("KDE") ||
+             ENV["DESKTOP_SESSION"]&.include?("kde") ||
+             File.exist?("/usr/bin/plasmashell")
+
+    kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
+
+    # Convert KDE wallpapers to PNG if not on KDE or GNOME
+    unless is_gnome || is_kde
+      puts "Converting wallpapers to PNG for #{ENV['XDG_CURRENT_DESKTOP'] || ENV['DESKTOP_SESSION'] || 'unknown'} desktop..."
+      Dir.glob("#{kde_destination_dir}/*.{avif,jxl}", File::FNM_CASEFOLD).each do |file|
+        next unless File.file?(file)
+        
+        filename = File.basename(file)
+        output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/i, '.png')}"
+        
+        puts "Converting #{filename} to PNG..."
+        # Convert image to PNG using ImageMagick
+        system("convert", file, output_file)
+        
+        # Remove the original AVIF/JXL file after conversion
+        File.delete(file) if File.exist?(output_file)
+      end
     end
   end
 end
