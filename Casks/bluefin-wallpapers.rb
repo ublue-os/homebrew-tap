@@ -13,7 +13,7 @@ cask "bluefin-wallpapers" do
   end
 
   # Detect if GNOME is actually running
-  is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") || 
+  is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
              ENV["DESKTOP_SESSION"]&.include?("gnome") ||
              (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell`.strip != "")
 
@@ -50,7 +50,7 @@ cask "bluefin-wallpapers" do
 
   preflight do
     # Detect if GNOME is actually running
-    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") || 
+    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
                ENV["DESKTOP_SESSION"]&.include?("gnome") ||
                (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell 2>/dev/null`.strip != "")
 
@@ -69,7 +69,7 @@ cask "bluefin-wallpapers" do
 
     Dir.glob("#{staged_path}/**/*.xml").each do |file|
       next unless File.file?(file)
-      
+
       contents = File.read(file)
       contents.gsub!("~", Dir.home)
       # Replace image extensions for converted files if not GNOME/KDE
@@ -80,7 +80,7 @@ cask "bluefin-wallpapers" do
 
   postflight do
     # Detect if GNOME is actually running
-    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") || 
+    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
                ENV["DESKTOP_SESSION"]&.include?("gnome") ||
                (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell 2>/dev/null`.strip != "")
 
@@ -98,29 +98,29 @@ cask "bluefin-wallpapers" do
 
       convert_cmd = `which magick`.strip
       convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty?
-      
+
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
-      
+
       # Determine number of threads (use number of CPU cores, max 6 to avoid overwhelming system)
-      require 'etc'
+      require "etc"
       num_threads = [Etc.nprocessors, 6].min
-      
+
       # Convert files concurrently
       threads = []
       files_to_convert.each_slice((files_to_convert.size.to_f / num_threads).ceil) do |file_batch|
         threads << Thread.new do
           file_batch.each do |file|
             next unless File.file?(file)
-            
+
             filename = File.basename(file)
-            output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/i, '.png')}"
-            
+            output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
+
             puts "Converting #{filename} to PNG..."
-            
+
             # Convert image to PNG using ImageMagick
             result = system(convert_cmd, file, output_file)
-            
+
             if result && File.exist?(output_file)
               puts "Successfully converted #{filename}, removing original..."
               File.delete(file)
@@ -130,7 +130,7 @@ cask "bluefin-wallpapers" do
           end
         end
       end
-      
+
       # Wait for all threads to complete
       threads.each(&:join)
       puts "Wallpaper conversion complete!"
