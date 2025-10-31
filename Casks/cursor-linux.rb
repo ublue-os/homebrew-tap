@@ -24,8 +24,8 @@ cask "cursor-linux" do
   end
 
   binary "Cursor-#{version.csv.first}-#{file_arch}.AppImage", target: "cursor"
-  bash_completion "#{staged_path}/resources/completions/bash/cursor"
-  zsh_completion  "#{staged_path}/resources/completions/zsh/_cursor"
+  bash_completion "#{staged_path}/squashfs-root/usr/share/cursor/resources/completions/bash/cursor"
+  zsh_completion  "#{staged_path}/squashfs-root/usr/share/cursor/resources/completions/zsh/_cursor"
   artifact "cursor.desktop",
            target: "#{Dir.home}/.local/share/applications/cursor.desktop"
   artifact "cursor.png",
@@ -42,13 +42,10 @@ cask "cursor-linux" do
     # Extract AppImage contents to get resources (icon, completions, etc.)
     system "#{staged_path}/#{appimage_name}", "--appimage-extract", chdir: staged_path
 
-    # Copy extracted resources
-    if Dir.exist?("#{staged_path}/squashfs-root/resources")
-      FileUtils.cp_r "#{staged_path}/squashfs-root/resources", "#{staged_path}/"
-
-      # Copy icon if it exists
-      icon_path = Dir.glob("#{staged_path}/squashfs-root/*.png").first
-      FileUtils.cp icon_path, "#{staged_path}/cursor.png" if icon_path
+    # Copy icon from extracted AppImage
+    icon_source = "#{staged_path}/squashfs-root/usr/share/icons/hicolor/512x512/apps/cursor.png"
+    if File.exist?(icon_source)
+      FileUtils.cp icon_source, "#{staged_path}/cursor.png"
     end
 
     File.write("#{staged_path}/cursor.desktop", <<~EOS)
