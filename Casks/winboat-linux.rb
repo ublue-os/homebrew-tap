@@ -1,4 +1,5 @@
 cask "winboat-linux" do
+  os linux: "linux"
   version "0.8.7"
   sha256 "e0d57d9f214b609b7db73de29034dbd684a924600aaf5238f43d151eaa6dcb72"
 
