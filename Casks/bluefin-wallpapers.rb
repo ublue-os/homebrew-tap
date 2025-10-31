@@ -97,6 +97,9 @@ cask "bluefin-wallpapers" do
     unless is_gnome || is_kde
       puts "Converting wallpapers to PNG for #{ENV['XDG_CURRENT_DESKTOP'] || ENV['DESKTOP_SESSION'] || 'unknown'} desktop..."
       
+      convert_cmd = `which convert`.strip
+      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty?
+      
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
       
@@ -109,13 +112,13 @@ cask "bluefin-wallpapers" do
         puts "Converting #{filename} to PNG..."
         
         # Convert image to PNG using ImageMagick
-        result = system("convert", file, output_file)
+        result = system(convert_cmd, file, output_file)
         
         if result && File.exist?(output_file)
           puts "Successfully converted #{filename}, removing original..."
           File.delete(file)
         else
-          puts "WARNING: Failed to convert #{filename}"
+          puts "WARNING: Failed to convert #{filename} (using #{convert_cmd})"
         end
       end
     end
