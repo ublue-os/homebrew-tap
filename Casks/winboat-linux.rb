@@ -17,7 +17,20 @@ cask "winboat-linux" do
   binary "winboat-#{version}-x64/winboat"
 
   preflight do
+    require "open-uri"
+    
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
+    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
+    
+    # Download icon from GitHub repo
+    icon_url = "https://raw.githubusercontent.com/TibixDev/winboat/main/src/renderer/public/img/winboat_logo.png"
+    icon_path = "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/winboat.png"
+    
+    URI.open(icon_url) do |remote_file|
+      File.open(icon_path, "wb") do |local_file|
+        local_file.write(remote_file.read)
+      end
+    end
     
     desktop_file = <<~EOS
       [Desktop Entry]
@@ -37,5 +50,6 @@ cask "winboat-linux" do
     "~/.config/winboat",
     "~/.local/share/winboat",
     "~/.local/share/applications/winboat.desktop",
+    "~/.local/share/icons/hicolor/512x512/apps/winboat.png",
   ]
 end
