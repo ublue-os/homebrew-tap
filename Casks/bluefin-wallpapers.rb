@@ -103,24 +103,37 @@ cask "bluefin-wallpapers" do
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
       
-      files_to_convert.each do |file|
-        next unless File.file?(file)
-        
-        filename = File.basename(file)
-        output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/i, '.png')}"
-        
-        puts "Converting #{filename} to PNG..."
-        
-        # Convert image to PNG using ImageMagick
-        result = system(convert_cmd, file, output_file)
-        
-        if result && File.exist?(output_file)
-          puts "Successfully converted #{filename}, removing original..."
-          File.delete(file)
-        else
-          puts "WARNING: Failed to convert #{filename} (using #{convert_cmd})"
+      # Determine number of threads (use number of CPU cores, max 4 to avoid overwhelming system)
+      num_threads = [require('etc') && Etc.nprocessors, 4].min
+      
+      # Convert files concurrently
+      threads = []
+      files_to_convert.each_slice((files_to_convert.size.to_f / num_threads).ceil) do |file_batch|
+        threads << Thread.new do
+          file_batch.each do |file|
+            next unless File.file?(file)
+            
+            filename = File.basename(file)
+            output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/i, '.png')}"
+            
+            puts "Converting #{filename} to PNG..."
+            
+            # Convert image to PNG using ImageMagick
+            result = system(convert_cmd, file, output_file)
+            
+            if result && File.exist?(output_file)
+              puts "Successfully converted #{filename}, removing original..."
+              File.delete(file)
+            else
+              puts "WARNING: Failed to convert #{filename}"
+            end
+          end
         end
       end
+      
+      # Wait for all threads to complete
+      threads.each(&:join)
+      puts "Wallpaper conversion complete!"
     end
   end
 end
