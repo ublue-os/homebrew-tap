@@ -1,24 +1,29 @@
 cask "cursor-linux" do
   arch arm: "arm64", intel: "x64"
+  file_arch arm: "aarch64", intel: "x86_64"
 
-  version "2.0.43"
+  version "2.0.43,8e4da76ad196925accaa169efcae28c45454cce3"
   sha256 arm64_linux:  "PLACEHOLDER_ARM64",
          x86_64_linux: "PLACEHOLDER_X64"
 
-  url "https://downloads.cursor.com/production/8e4da76ad196925accaa169efcae28c45454cce3/linux/#{arch}/Cursor-#{version}-#{Hardware::CPU.arch}.AppImage",
+  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage",
       verified: "downloads.cursor.com/"
   name "Cursor"
   desc "AI-first coding environment"
   homepage "https://www.cursor.com/"
 
   livecheck do
-    url "https://api2.cursor.sh/updates/api/update/linux-x64/cursor/1.0.0/hash/stable"
-    strategy :json do |json|
-      json["version"]
+    url "https://api2.cursor.sh/updates/api/update/linux-x64/cursor/0.0.0/stable"
+    regex(%r{/production/(\h+)/linux/x64/Cursor[._-]([0-9.]+)[._-]x86_64\.AppImage}i)
+    strategy :json do |json, regex|
+      match = json["url"]&.match(regex)
+      next if match.blank?
+
+      "#{match[2]},#{match[1]}"
     end
   end
 
-  binary "Cursor-#{version}-#{Hardware::CPU.arch}.AppImage", target: "cursor"
+  binary "Cursor-#{version.csv.first}-#{file_arch}.AppImage", target: "cursor"
   bash_completion "#{staged_path}/resources/completions/bash/cursor"
   zsh_completion  "#{staged_path}/resources/completions/zsh/_cursor"
   artifact "cursor.desktop",
@@ -31,7 +36,8 @@ cask "cursor-linux" do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
 
     # Make AppImage executable
-    appimage_name = "Cursor-#{version}-#{Hardware::CPU.arch}.AppImage"
+    file_arch = Hardware::CPU.intel? ? "x86_64" : "aarch64"
+    appimage_name = "Cursor-#{version.csv.first}-#{file_arch}.AppImage"
     FileUtils.chmod "+x", "#{staged_path}/#{appimage_name}"
 
     # Extract AppImage contents to get resources (icon, completions, etc.)
