@@ -1,15 +1,14 @@
 cask "cursor-linux" do
   arch arm: "arm64", intel: "x64"
-  file_arch arm: "aarch64", intel: "x86_64"
 
   version "2.0.43,8e4da76ad196925accaa169efcae28c45454cce3"
   sha256 arm64_linux:  "PLACEHOLDER_ARM64",
          x86_64_linux: "PLACEHOLDER_X64"
 
-  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage",
+  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{Hardware::CPU.intel? ? "x86_64" : "aarch64"}.AppImage",
       verified: "downloads.cursor.com/"
   name "Cursor"
-  desc "AI-first coding environment"
+  desc "Write, edit, and chat about your code with AI"
   homepage "https://www.cursor.com/"
 
   livecheck do
@@ -19,11 +18,11 @@ cask "cursor-linux" do
       match = json["url"]&.match(regex)
       next if match.blank?
 
-      "#{match[2]},#{match[1]}"
+      "#{json["name"]},#{match[1]}"
     end
   end
 
-  binary "Cursor-#{version.csv.first}-#{file_arch}.AppImage", target: "cursor"
+  binary "Cursor-#{version.csv.first}-#{Hardware::CPU.intel? ? "x86_64" : "aarch64"}.AppImage", target: "cursor"
   bash_completion "#{staged_path}/resources/completions/bash/cursor"
   zsh_completion  "#{staged_path}/resources/completions/zsh/_cursor"
   artifact "cursor.desktop",
