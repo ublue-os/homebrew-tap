@@ -96,15 +96,27 @@ cask "bluefin-wallpapers" do
       desktop_env = ENV["XDG_CURRENT_DESKTOP"] || ENV["DESKTOP_SESSION"] || "unknown"
       puts "Converting wallpapers to PNG for #{desktop_env} desktop..."
 
+      # Prefer ImageMagick v7 'magick', fall back to 'convert' if necessary
       convert_cmd = `which magick`.strip
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty?
+      if convert_cmd.empty?
+        convert_cmd = `which convert`.strip
+      end
+      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/magick")
+      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/convert")
 
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
 
-      if files_to_convert.empty?
+      if convert_cmd.empty?
+        puts "No 'magick' or 'convert' found in PATH; skipping image conversion."
+      elsif files_to_convert.empty?
         puts "No AVIF or JXL wallpapers to convert for #{desktop_env} desktop"
       else
+        puts "Using #{convert_cmd} to convert images"
+        if File.basename(convert_cmd) == "convert"
+          puts "WARNING: 'convert' is deprecated in ImageMagick 7; consider installing 'magick'."
+        end
+
         # Determine number of threads (use number of CPU cores, max 6 to avoid overwhelming system)
         require "etc"
         num_threads = [Etc.nprocessors, 6].min

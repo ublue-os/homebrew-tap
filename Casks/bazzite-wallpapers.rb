@@ -77,15 +77,27 @@ cask "bazzite-wallpapers" do
       desktop_env = ENV["XDG_CURRENT_DESKTOP"] || ENV["DESKTOP_SESSION"] || "unknown"
       puts "Converting wallpapers to PNG for #{desktop_env} desktop..."
 
-      convert_cmd = `which convert`.strip
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty?
+      # Prefer ImageMagick v7 'magick', fall back to 'convert' if necessary
+      convert_cmd = `which magick`.strip
+      if convert_cmd.empty?
+        convert_cmd = `which convert`.strip
+      end
+      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/magick")
+      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/convert")
 
-      # Find all AVIF and JXL files recursively
+      # Create a list of files to convert
       files_to_convert = Dir.glob("#{wallpaper_dir}/**/*.avif") + Dir.glob("#{wallpaper_dir}/**/*.jxl")
 
-      if files_to_convert.empty?
+      if convert_cmd.empty?
+        puts "No 'magick' or 'convert' found in PATH; skipping image conversion."
+      elsif files_to_convert.empty?
         puts "No AVIF or JXL wallpapers to convert for #{desktop_env} desktop"
       else
+        puts "Using #{convert_cmd} to convert images"
+        if File.basename(convert_cmd) == "convert"
+          puts "WARNING: 'convert' is deprecated in ImageMagick 7; consider installing 'magick'."
+        end
+
         # Determine number of threads (use number of CPU cores, max 6 to avoid overwhelming system)
         require "etc"
         num_threads = [Etc.nprocessors, 6].min
@@ -93,32 +105,31 @@ cask "bazzite-wallpapers" do
         # Convert files concurrently
         threads = []
         files_to_convert.each_slice((files_to_convert.size.to_f / num_threads).ceil) do |file_batch|
-          threads << Thread.new do
-            file_batch.each do |file|
-              next unless File.file?(file)
+        threads << Thread.new do
+          file_batch.each do |file|
+            next unless File.file?(file)
 
-              filename = File.basename(file)
-              output_file = "#{File.dirname(file)}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
+            filename = File.basename(file)
+            output_file = "#{File.dirname(file)}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
 
-              puts "Converting #{filename} to PNG..."
+            puts "Converting #{filename} to PNG..."
 
-              # Convert image to PNG using ImageMagick
-              result = system(convert_cmd, file, output_file)
+            # Convert image to PNG using ImageMagick
+            result = system(convert_cmd, file, output_file)
 
-              if result && File.exist?(output_file)
-                puts "Successfully converted #{filename}, removing original..."
-                File.delete(file)
-              else
-                puts "WARNING: Failed to convert #{filename}"
-              end
+            if result && File.exist?(output_file)
+              puts "Successfully converted #{filename}, removing original..."
+              File.delete(file)
+            else
+              puts "WARNING: Failed to convert #{filename}"
             end
           end
         end
-
-        # Wait for all threads to complete
-        threads.each(&:join)
-        puts "Wallpaper conversion complete!"
       end
+
+      # Wait for all threads to complete
+      threads.each(&:join)
+      puts "Wallpaper conversion complete!"
     end
   end
 end
