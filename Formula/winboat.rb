@@ -5,12 +5,12 @@ class Winboat < Formula
   sha256 "bf74ba69a303235d671a61b881dc42c9ce0dc99bcbcaab6713f43eb160984014"
   license "MIT"
 
-  depends_on :linux
-
   livecheck do
     url :stable
     strategy :github_latest
   end
+
+  depends_on :linux
 
   def install
     bin.install "winboat"
