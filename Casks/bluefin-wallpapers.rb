@@ -23,7 +23,7 @@ cask "bluefin-wallpapers" do
            File.exist?("/usr/bin/plasmashell")
 
   # Only depend on ImageMagick if not on GNOME or KDE
-  depends_on formula: "imagemagick" unless is_gnome || is_kde
+  depends_on formula: "imagemagick" if !is_gnome && !is_kde
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
@@ -73,9 +73,7 @@ cask "bluefin-wallpapers" do
       contents = File.read(file)
       contents.gsub!("~", Dir.home)
       # Replace image extensions for converted files if not GNOME/KDE
-      unless is_gnome || is_kde
-        contents.gsub!(/\.(avif|jxl)(?=['"])/, '.png')
-      end
+      contents.gsub!(/\.(avif|jxl)(?=['"])/, ".png") if !is_gnome && !is_kde
       File.write(file, contents)
     end
   end
@@ -94,18 +92,19 @@ cask "bluefin-wallpapers" do
     kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 
     # Convert KDE wallpapers to PNG if not on KDE or GNOME
-    unless is_gnome || is_kde
-      puts "Converting wallpapers to PNG for #{ENV['XDG_CURRENT_DESKTOP'] || ENV['DESKTOP_SESSION'] || 'unknown'} desktop..."
-      
-      convert_cmd = `which convert`.strip
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty?
+    if !is_gnome && !is_kde
+      desktop_env = ENV["XDG_CURRENT_DESKTOP"] || ENV["DESKTOP_SESSION"] || "unknown"
+      puts "Converting wallpapers to PNG for #{desktop_env} desktop..."
+
+      convert_cmd = `which magick`.strip
+      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty?
       
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
       
-      # Determine number of threads (use number of CPU cores, max 4 to avoid overwhelming system)
+      # Determine number of threads (use number of CPU cores, max 6 to avoid overwhelming system)
       require 'etc'
-      num_threads = [Etc.nprocessors, 4].min
+      num_threads = [Etc.nprocessors, 6].min
       
       # Convert files concurrently
       threads = []
