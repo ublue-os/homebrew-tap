@@ -1,11 +1,12 @@
 cask "cursor-linux" do
   arch arm: "arm64", intel: "x64"
+  file_arch = on_arch_conditional arm: "aarch64", intel: "x86_64"
 
   version "2.0.43,8e4da76ad196925accaa169efcae28c45454cce3"
   sha256 arm64_linux:  "PLACEHOLDER_ARM64",
          x86_64_linux: "PLACEHOLDER_X64"
 
-  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{Hardware::CPU.intel? ? "x86_64" : "aarch64"}.AppImage",
+  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage",
       verified: "downloads.cursor.com/"
   name "Cursor"
   desc "Write, edit, and chat about your code with AI"
@@ -22,7 +23,7 @@ cask "cursor-linux" do
     end
   end
 
-  binary "Cursor-#{version.csv.first}-#{Hardware::CPU.intel? ? "x86_64" : "aarch64"}.AppImage", target: "cursor"
+  binary "Cursor-#{version.csv.first}-#{file_arch}.AppImage", target: "cursor"
   bash_completion "#{staged_path}/resources/completions/bash/cursor"
   zsh_completion  "#{staged_path}/resources/completions/zsh/_cursor"
   artifact "cursor.desktop",
@@ -35,7 +36,6 @@ cask "cursor-linux" do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
 
     # Make AppImage executable
-    file_arch = Hardware::CPU.intel? ? "x86_64" : "aarch64"
     appimage_name = "Cursor-#{version.csv.first}-#{file_arch}.AppImage"
     FileUtils.chmod "+x", "#{staged_path}/#{appimage_name}"
 
