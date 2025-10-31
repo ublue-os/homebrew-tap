@@ -104,7 +104,8 @@ cask "bluefin-wallpapers" do
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
       
       # Determine number of threads (use number of CPU cores, max 4 to avoid overwhelming system)
-      num_threads = [require('etc') && Etc.nprocessors, 4].min
+      require 'etc'
+      num_threads = [Etc.nprocessors, 4].min
       
       # Convert files concurrently
       threads = []
