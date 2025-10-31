@@ -4,6 +4,10 @@ This is a _staging area_ to test Linux casks builds of things we want. It is int
 
 Homebrew has asked us to run this as a tap as opposed to PRing these into individual projects, and that will take some work so in the meantime we can test.
 
+### Experimental Tap
+
+We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out. Please send pull requests first, this is the production tap! 
+
 ## This is useful for
 
 IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put them on their own images. This lets the user also opt-into vscode instead of having it on a -dx image even if you don't use it.
@@ -58,6 +62,3 @@ If you are on KDE then [follow these instructions](https://github.com/renner0e/b
 - GUI apps, every effort to use flatpak should be exhausted, or are out of our control (eg. vscode)
 - General requests for common apps. We don't expect users to use this repo directly, the packages are there for us to automate in the background, ideall they never know this tap exists.
 
-## Experimental Tap
-
-We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out.
