@@ -12,7 +12,7 @@ cask "cursor-linux" do
   homepage "https://www.cursor.com/"
 
   livecheck do
-    url "https://www.cursor.com/api/latest-version"
+    url "https://api2.cursor.sh/updates/api/update/linux-x64/cursor/1.0.0/hash/stable"
     strategy :json do |json|
       json["version"]
     end
