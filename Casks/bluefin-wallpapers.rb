@@ -96,18 +96,27 @@ cask "bluefin-wallpapers" do
     # Convert KDE wallpapers to PNG if not on KDE or GNOME
     unless is_gnome || is_kde
       puts "Converting wallpapers to PNG for #{ENV['XDG_CURRENT_DESKTOP'] || ENV['DESKTOP_SESSION'] || 'unknown'} desktop..."
-      Dir.glob("#{kde_destination_dir}/*.{avif,jxl}", File::FNM_CASEFOLD).each do |file|
+      
+      # Create a list of files to convert
+      files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")
+      
+      files_to_convert.each do |file|
         next unless File.file?(file)
         
         filename = File.basename(file)
         output_file = "#{kde_destination_dir}/#{filename.gsub(/\.(avif|jxl)$/i, '.png')}"
         
         puts "Converting #{filename} to PNG..."
-        # Convert image to PNG using ImageMagick
-        system("convert", file, output_file)
         
-        # Remove the original AVIF/JXL file after conversion
-        File.delete(file) if File.exist?(output_file)
+        # Convert image to PNG using ImageMagick
+        result = system("convert", file, output_file)
+        
+        if result && File.exist?(output_file)
+          puts "Successfully converted #{filename}, removing original..."
+          File.delete(file)
+        else
+          puts "WARNING: Failed to convert #{filename}"
+        end
       end
     end
   end
