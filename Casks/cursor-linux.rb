@@ -1,13 +1,11 @@
 cask "cursor-linux" do
   arch arm: "arm64", intel: "x64"
-  arch_suffix arm: "aarch64", intel: "x86_64"
 
   version "2.0.43"
-  commit_sha "8e4da76ad196925accaa169efcae28c45454cce3"
   sha256 arm64_linux:  "PLACEHOLDER_ARM64",
          x86_64_linux: "PLACEHOLDER_X64"
 
-  url "https://downloads.cursor.com/production/#{commit_sha}/linux/#{arch}/Cursor-#{version}-#{arch_suffix}.AppImage",
+  url "https://downloads.cursor.com/production/8e4da76ad196925accaa169efcae28c45454cce3/linux/#{arch}/Cursor-#{version}-#{Hardware::CPU.arch}.AppImage",
       verified: "downloads.cursor.com/"
   name "Cursor"
   desc "AI-first coding environment"
@@ -20,7 +18,7 @@ cask "cursor-linux" do
     end
   end
 
-  binary "Cursor-#{version}-#{arch_suffix}.AppImage", target: "cursor"
+  binary "Cursor-#{version}-#{Hardware::CPU.arch}.AppImage", target: "cursor"
   bash_completion "#{staged_path}/resources/completions/bash/cursor"
   zsh_completion  "#{staged_path}/resources/completions/zsh/_cursor"
   artifact "cursor.desktop",
@@ -33,10 +31,11 @@ cask "cursor-linux" do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
 
     # Make AppImage executable
-    FileUtils.chmod "+x", "#{staged_path}/Cursor-#{version}-#{arch_suffix}.AppImage"
+    appimage_name = "Cursor-#{version}-#{Hardware::CPU.arch}.AppImage"
+    FileUtils.chmod "+x", "#{staged_path}/#{appimage_name}"
 
     # Extract AppImage contents to get resources (icon, completions, etc.)
-    system "#{staged_path}/Cursor-#{version}-#{arch_suffix}.AppImage", "--appimage-extract", chdir: staged_path
+    system "#{staged_path}/#{appimage_name}", "--appimage-extract", chdir: staged_path
 
     # Copy extracted resources
     if Dir.exist?("#{staged_path}/squashfs-root/resources")
