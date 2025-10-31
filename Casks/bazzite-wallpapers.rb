@@ -83,38 +83,42 @@ cask "bazzite-wallpapers" do
       # Find all AVIF and JXL files recursively
       files_to_convert = Dir.glob("#{wallpaper_dir}/**/*.avif") + Dir.glob("#{wallpaper_dir}/**/*.jxl")
 
-      # Determine number of threads (use number of CPU cores, max 6 to avoid overwhelming system)
-      require "etc"
-      num_threads = [Etc.nprocessors, 6].min
+      if files_to_convert.empty?
+        puts "No AVIF or JXL wallpapers to convert for #{desktop_env} desktop"
+      else
+        # Determine number of threads (use number of CPU cores, max 6 to avoid overwhelming system)
+        require "etc"
+        num_threads = [Etc.nprocessors, 6].min
 
-      # Convert files concurrently
-      threads = []
-      files_to_convert.each_slice((files_to_convert.size.to_f / num_threads).ceil) do |file_batch|
-        threads << Thread.new do
-          file_batch.each do |file|
-            next unless File.file?(file)
+        # Convert files concurrently
+        threads = []
+        files_to_convert.each_slice((files_to_convert.size.to_f / num_threads).ceil) do |file_batch|
+          threads << Thread.new do
+            file_batch.each do |file|
+              next unless File.file?(file)
 
-            filename = File.basename(file)
-            output_file = "#{File.dirname(file)}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
+              filename = File.basename(file)
+              output_file = "#{File.dirname(file)}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
 
-            puts "Converting #{filename} to PNG..."
+              puts "Converting #{filename} to PNG..."
 
-            # Convert image to PNG using ImageMagick
-            result = system(convert_cmd, file, output_file)
+              # Convert image to PNG using ImageMagick
+              result = system(convert_cmd, file, output_file)
 
-            if result && File.exist?(output_file)
-              puts "Successfully converted #{filename}, removing original..."
-              File.delete(file)
-            else
-              puts "WARNING: Failed to convert #{filename}"
+              if result && File.exist?(output_file)
+                puts "Successfully converted #{filename}, removing original..."
+                File.delete(file)
+              else
+                puts "WARNING: Failed to convert #{filename}"
+              end
             end
           end
         end
-      end
 
-      # Wait for all threads to complete
-      threads.each(&:join)
-      puts "Wallpaper conversion complete!"
+        # Wait for all threads to complete
+        threads.each(&:join)
+        puts "Wallpaper conversion complete!"
+      end
     end
   end
 end
