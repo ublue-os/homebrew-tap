@@ -18,7 +18,7 @@ cask "cursor-linux" do
       match = json["url"]&.match(regex)
       next if match.blank?
 
-      "#{json["name"]},#{match[1]}"
+      "#{json["version"]},#{match[1]}"
     end
   end
 
