@@ -2,9 +2,19 @@ class BluefinCli < Formula
   desc "Complete shell experience: bling, MOTD, and premium CLI tools"
   homepage "https://github.com/ublue-os/packages"
   url "https://github.com/ublue-os/packages/archive/refs/tags/homebrew-2025-10-28-01-29-41.tar.gz"
-  version "0.3.0"
+  version "2025.10.28.01.29.41"
   sha256 "2de1cf76b2f76f90a7ef5a93b11e5cf1a24edbffc32f8db72849e75e0b61b92e"
   license "Apache-2.0"
+
+  livecheck do
+    url :stable
+    regex(/^homebrew[._-](\d{4})[._-](\d{2})[._-](\d{2})[._-](\d{2})[._-](\d{2})[._-](\d{2})$/i)
+    strategy :github_latest do |json, regex|
+      json["tag_name"].scan(regex).map do |match|
+        "#{match[0]}.#{match[1]}.#{match[2]}.#{match[3]}.#{match[4]}.#{match[5]}"
+      end.first
+    end
+  end
 
   # CLI tools that bling integrates (core experience enhancements)
   depends_on "atuin"
@@ -283,16 +293,11 @@ class BluefinCli < Formula
       🔧 Setup Your Shell - Choose your shell and enable bling:
 
       BASH:
-        echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc
-        source ~/.bashrc
-
+        bluefin-cli bling bash on && bluefin-cli motd on
       ZSH:
-        echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc
-        source ~/.zshrc
-
+        bluefin-cli bling zsh on && bluefin-cli motd on
       FISH:
-        echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish
-        source ~/.config/fish/config.fish
+        bluefin-cli bling fish on; bluefin-cli motd on
 
       📋 Management Commands:
 
