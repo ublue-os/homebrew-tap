@@ -4,7 +4,7 @@ class BluefinSchemas < Formula
   url "https://github.com/ublue-os/packages/archive/refs/tags/homebrew-2025-10-28-01-29-41.tar.gz"
   version "0.2.21"
   sha256 "2de1cf76b2f76f90a7ef5a93b11e5cf1a24edbffc32f8db72849e75e0b61b92e"
-  license "CC-BY-SA"
+  license "Apache-2.0"
 
   depends_on "dconf"
 
