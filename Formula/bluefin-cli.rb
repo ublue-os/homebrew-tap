@@ -154,7 +154,11 @@ class BluefinCli < Formula
   end
 
   def setup_bash
-    bashrc = Pathname.home / ".bashrc"
+    # Get the real user home directory (not linuxbrew)
+    real_home = user_home
+    return if real_home.nil?
+
+    bashrc = Pathname.new(real_home) / ".bashrc"
     bling_source = "[ -f #{libexec}/bling/bling.sh ] && . #{libexec}/bling/bling.sh"
 
     return unless bashrc.exist?
@@ -164,7 +168,12 @@ class BluefinCli < Formula
   end
 
   def setup_zsh
-    zshrc = Pathname.new(ENV["ZDOTDIR"] || (Pathname.home / ".zshrc"))
+    # Get the real user home directory (not linuxbrew)
+    real_home = user_home
+    return if real_home.nil?
+
+    zdotdir = ENV["ZDOTDIR"] || File.join(real_home, ".zshrc")
+    zshrc = Pathname.new(zdotdir)
     bling_source = "[ -f #{libexec}/bling/bling.sh ] && . #{libexec}/bling/bling.sh"
 
     return unless zshrc.exist?
@@ -174,7 +183,12 @@ class BluefinCli < Formula
   end
 
   def setup_fish
-    fish_config = Pathname.new(ENV["XDG_CONFIG_HOME"] || (Pathname.home / ".config")) / "fish" / "config.fish"
+    # Get the real user home directory (not linuxbrew)
+    real_home = user_home
+    return if real_home.nil?
+
+    xdg_config = ENV["XDG_CONFIG_HOME"] || File.join(real_home, ".config")
+    fish_config = Pathname.new(xdg_config) / "fish" / "config.fish"
     bling_source = "[ -f #{libexec}/bling/bling.fish ] && . #{libexec}/bling/bling.fish"
 
     return unless fish_config.exist?
@@ -184,7 +198,10 @@ class BluefinCli < Formula
   end
 
   def remove_from_bash
-    bashrc = Pathname.home / ".bashrc"
+    real_home = user_home
+    return if real_home.nil?
+
+    bashrc = Pathname.new(real_home) / ".bashrc"
     return unless bashrc.exist?
 
     content = bashrc.read
@@ -195,7 +212,11 @@ class BluefinCli < Formula
   end
 
   def remove_from_zsh
-    zshrc = Pathname.new(ENV["ZDOTDIR"] || (Pathname.home / ".zshrc"))
+    real_home = user_home
+    return if real_home.nil?
+
+    zdotdir = ENV["ZDOTDIR"] || File.join(real_home, ".zshrc")
+    zshrc = Pathname.new(zdotdir)
     return unless zshrc.exist?
 
     content = zshrc.read
@@ -206,7 +227,11 @@ class BluefinCli < Formula
   end
 
   def remove_from_fish
-    fish_config = Pathname.new(ENV["XDG_CONFIG_HOME"] || (Pathname.home / ".config")) / "fish" / "config.fish"
+    real_home = user_home
+    return if real_home.nil?
+
+    xdg_config = ENV["XDG_CONFIG_HOME"] || File.join(real_home, ".config")
+    fish_config = Pathname.new(xdg_config) / "fish" / "config.fish"
     return unless fish_config.exist?
 
     content = fish_config.read
@@ -214,5 +239,17 @@ class BluefinCli < Formula
 
     new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.fish \] && \. .*\n/, "\n")
     fish_config.write(new_content)
+  end
+
+  def user_home
+    # Try to get the real user home directory
+    # If running with sudo, use SUDO_USER
+    # Otherwise use the current user
+    real_user = ENV["SUDO_USER"] || ENV["USER"]
+    return if real_user.blank?
+
+    # Get home directory for the real user
+    real_home = File.expand_path("~#{real_user}")
+    real_home unless real_home.include?("~")
   end
 end
