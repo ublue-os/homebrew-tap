@@ -2,10 +2,10 @@ cask "bluefin-wallpapers" do
   version "2025-10-29"
   sha256 "76915478e38f702c4c01d906116a216c2040c7f3e33bd64a6a6ffa54727795a4"
 
-  url "https://github.com/projectbluefin/artwork/releases/latest/download/bluefin-wallpapers.tar.zstd"
+  url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers.tar.zstd"
   name "bluefin-wallpapers"
   desc "Wallpapers for Bluefin"
-  homepage "https://github.com/projectbluefin/artwork"
+  homepage "https://github.com/hanthor/artwork"
 
   livecheck do
     regex(/v?(\d{4}-\d{2}-\d{2})/)
