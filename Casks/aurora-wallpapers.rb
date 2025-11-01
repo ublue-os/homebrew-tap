@@ -2,7 +2,7 @@ cask "aurora-wallpapers" do
   version "2025-10-29"
   sha256 :no_check
 
-  url "https://github.com/projectbluefin/artwork/releases/latest/download/aurora-wallpapers.tar.zstd"
+  url "https://github.com/hanthor/artwork/releases/latest/download/aurora-wallpapers.tar.zstd"
   name "aurora-wallpapers"
   desc "Wallpapers for Aurora"
   homepage "https://github.com/projectbluefin/artwork"
@@ -26,9 +26,9 @@ cask "aurora-wallpapers" do
 
   on_linux do
     # Detect if GNOME is actually running
-    ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
-      ENV["DESKTOP_SESSION"]&.include?("gnome") ||
-      (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell 2>/dev/null`.strip != "")
+    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
+               ENV["DESKTOP_SESSION"]&.include?("gnome") ||
+               (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell 2>/dev/null`.strip != "")
 
     # Detect if KDE is running
     is_kde = ENV["XDG_CURRENT_DESKTOP"]&.include?("KDE") ||
@@ -93,6 +93,8 @@ cask "aurora-wallpapers" do
       puts "To use: System Settings > Wallpaper > Add Folder > #{destination_dir}"
     end
 
-    puts "Wallpapers installed to: #{Dir.home}/.local/share/backgrounds/aurora" if OS.linux?
+    if OS.linux?
+      puts "Wallpapers installed to: #{Dir.home}/.local/share/backgrounds/aurora"
+    end
   end
 end
