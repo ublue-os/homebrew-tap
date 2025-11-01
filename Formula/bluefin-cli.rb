@@ -1,3 +1,5 @@
+require "etc"
+
 class BluefinCli < Formula
   desc "Shell integration with eza, starship, atuin, zoxide, bat, and ugrep"
   homepage "https://github.com/ublue-os/packages"
@@ -243,13 +245,13 @@ class BluefinCli < Formula
 
   def user_home
     # Try to get the real user home directory
-    # If running with sudo, use SUDO_USER
-    # Otherwise use the current user
-    real_user = ENV["SUDO_USER"] || ENV["USER"]
+    # Check multiple sources in order of preference
+    real_user = ENV["SUDO_USER"] || ENV["USER"] || `whoami`.strip
+
     return if real_user.blank?
 
-    # Get home directory for the real user
-    real_home = File.expand_path("~#{real_user}")
-    real_home unless real_home.include?("~")
+    Etc.getpwnam(real_user).dir
+  rescue
+    nil
   end
 end
