@@ -2,7 +2,29 @@ cask "bluefin-wallpapers" do
   version "2025-10-29"
   sha256 :no_check
 
-  url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers.tar.zstd"
+  on_macos do
+    url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-macos.tar.zstd"
+  end
+
+  on_linux do
+    # Detect desktop environment to download appropriate format
+    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
+               ENV["DESKTOP_SESSION"]&.include?("gnome") ||
+               (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell`.strip != "")
+
+    is_kde = ENV["XDG_CURRENT_DESKTOP"]&.include?("KDE") ||
+             ENV["DESKTOP_SESSION"]&.include?("kde") ||
+             File.exist?("/usr/bin/plasmashell")
+
+    if is_gnome
+      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-gnome.tar.zstd"
+    elsif is_kde
+      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-kde.tar.zstd"
+    else
+      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-png.tar.zstd"
+    end
+  end
+
   name "bluefin-wallpapers"
   desc "Wallpapers for Bluefin"
   homepage "https://github.com/hanthor/artwork"
@@ -17,7 +39,7 @@ cask "bluefin-wallpapers" do
     destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bluefin"
 
     # Install macOS HEIC wallpapers
-    Dir.glob("#{staged_path}/macos/*.heic").each do |file|
+    Dir.glob("#{staged_path}/*.heic").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
@@ -38,25 +60,25 @@ cask "bluefin-wallpapers" do
 
     if is_gnome
       # GNOME - install JXL wallpapers
-      Dir.glob("#{staged_path}/gnome/images/*.jxl").each do |file|
+      Dir.glob("#{staged_path}/*.jxl").each do |file|
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
       end
 
-      Dir.glob("#{staged_path}/gnome/images/*.xml").each do |file|
+      Dir.glob("#{staged_path}/*.xml").each do |file|
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
       end
 
-      Dir.glob("#{staged_path}/gnome/gnome-background-properties/*").each do |file|
+      Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
         artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
       end
     elsif is_kde
       # KDE - install AVIF wallpapers
-      Dir.glob("#{staged_path}/kde/*.avif").each do |file|
+      Dir.glob("#{staged_path}/*.avif").each do |file|
         artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
       end
     else
       # Other desktops (Hyprland, Niri, Sway, etc.) - install PNG wallpapers
-      Dir.glob("#{staged_path}/png/*.png").each do |file|
+      Dir.glob("#{staged_path}/*.png").each do |file|
         artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
       end
     end
