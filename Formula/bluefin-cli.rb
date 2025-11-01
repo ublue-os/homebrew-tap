@@ -6,6 +6,12 @@ class BluefinCli < Formula
   sha256 "fdc1a5ac6bfa48c710abe3ad9286ce1129cb7e4c3acb9978aaecf88157fbc6b4"
   license "Apache-2.0"
 
+  livecheck do
+    url :stable
+    regex(/homebrew[._-](\d{4}[._-]\d{2}[._-]\d{2}[._-]\d{2}[._-]\d{2}[._-]\d{2})/i)
+    strategy :github_latest
+  end
+
   # CLI tools that bling integrates (core experience enhancements)
   depends_on "atuin"
   depends_on "bat"
