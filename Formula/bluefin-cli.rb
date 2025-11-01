@@ -3,7 +3,7 @@ class BluefinCli < Formula
   homepage "https://github.com/ublue-os/packages"
   url "https://github.com/ublue-os/packages/archive/refs/tags/homebrew-2025-10-28-01-29-41.tar.gz"
   version "2025.10.28.01.29.41"
-  sha256 "2de1cf76b2f76f90a7ef5a93b11e5cf1a24edbffc32f8db72849e75e0b61b92e"
+  sha256 "fdc1a5ac6bfa48c710abe3ad9286ce1129cb7e4c3acb9978aaecf88157fbc6b4"
   license "Apache-2.0"
 
   livecheck do
