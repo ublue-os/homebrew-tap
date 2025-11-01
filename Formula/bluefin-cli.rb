@@ -12,7 +12,6 @@ class BluefinCli < Formula
     strategy :github_latest
   end
 
-  # CLI tools that bling integrates (core experience enhancements)
   depends_on "atuin"
   depends_on "bat"
   depends_on "eza"
@@ -20,7 +19,13 @@ class BluefinCli < Formula
   depends_on "ugrep"
   depends_on "zoxide"
 
+  # Optional dependencies for full MOTD functionality
+  depends_on "glow" => :recommended
+  depends_on "jq" => :recommended
+
   def install
+    # Needed for JSON.pretty_generate
+    require "json"
     source_dir = buildpath / "packages"
 
     # Install CLI logos
@@ -81,48 +86,194 @@ class BluefinCli < Formula
       (share / "bluefin" / "bling" / "bling.fish").chmod 0755
     end
 
-    # Install MOTD banner script
+    # Install MOTD system (based on ublue-motd)
     (libexec / "motd").mkpath
-    motd_content = <<~EOS
-      #!/bin/sh
-      # Bluefin MOTD Banner
+    (libexec / "motd" / "themes").mkpath
+    (libexec / "motd" / "tips").mkpath
 
-      # Terminal color codes
-      BLUE="\\033[0;34m"
-      LIGHT_BLUE="\\033[1;34m"
-      RESET="\\033[0m"
+    # Install ublue-motd script adapted for cross-platform use
+    motd_script = source_dir / "ublue-motd/src/ublue-motd"
+    if motd_script.exist?
+      motd_content = motd_script.read
 
-      # Check if we're on Bluefin or related system
-      if grep -q "bluefin\\|ublue" /etc/os-release 2>/dev/null; then
-        echo "${LIGHT_BLUE}"
-        echo "███████╗███████╗"
-        echo "╚════██║██╔════╝"
-        echo "    ██║█████╗  "
-        echo "    ██║██╔══╝  "
-        echo "███████║███████╗"
-        echo "╚══════╝╚══════╝"
-        echo "${RESET}"
+      # Adapt for cross-platform use with hardcoded paths
+      motd_content.gsub!('MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-/etc/ublue-os/motd.json}"',
+                         'MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-#{libexec}/motd/motd.json}"')
+      motd_content.gsub!('TIP_DIRECTORY="$(get_config \'.\"tips-directory\"\' "/usr/share/ublue-os/motd/tips")"',
+                         'TIP_DIRECTORY="$(get_config \'.\"tips-directory\"\' "#{libexec}/motd/tips")"')
+      motd_content.gsub!('IMAGE_INFO="$(get_config \'.\"image-info-file\"\' "/usr/share/ublue-os/image-info.json")"',
+                         'IMAGE_INFO="$(get_config \'.\"image-info-file\"\' "#{libexec}/motd/image-info.json")"')
+      motd_content.gsub!(
+        'TEMPLATE_FILE="$(get_config \'.\"template-file\"\' "/usr/share/ublue-os/motd/template.md")"',
+        'TEMPLATE_FILE="$(get_config \'.\"template-file\"\' "#{libexec}/motd/template.md")"',
+      )
+      motd_content.gsub!(
+        'THEMES_DIRECTORY="$(get_config \'.\"themes-directory\"\' "/usr/share/ublue-os/motd/themes")"',
+        'THEMES_DIRECTORY="$(get_config \'.\"themes-directory\"\' "#{libexec}/motd/themes")"',
+      )
 
-        if [ -f /etc/os-release ]; then
-          . /etc/os-release
-          echo "Welcome to ${PRETTY_NAME:-Bluefin}!"
-          [ -n "$VERSION_ID" ] && echo "Version: $VERSION_ID"
-        fi
-      fi
+      # Make CHECK_OUTDATED work on non-rpm-ostree systems
+      motd_content.gsub!('if [ "$CHECK_OUTDATED" == "true" ] ; then
+	IMAGE_DATE_SECONDS=$(rpm-ostree status --booted --json | jq -r \'.deployments[].timestamp\')
+	CURRENT_SECONDS=$(date +%s)
+	DIFFERENCE=$((CURRENT_SECONDS - IMAGE_DATE_SECONDS))
+	ONE_MONTH=$((30 * 24 * 60 * 60))
+	if [ "$DIFFERENCE" -ge "$ONE_MONTH" ]; then
+		#shellcheck disable=2016
+		TIP=\'# 󰇻 Your current image is over 1 month old, run `ujust update`\'
+	fi
+fi',
+                         'if [ "$CHECK_OUTDATED" == "true" ] && command -v rpm-ostree &>/dev/null; then
+	IMAGE_DATE_SECONDS=$(rpm-ostree status --booted --json 2>/dev/null | \
+		jq -r \'.deployments[].timestamp\' 2>/dev/null || echo "0")
+	if [ "$IMAGE_DATE_SECONDS" != "0" ]; then
+		CURRENT_SECONDS=$(date +%s)
+		DIFFERENCE=$((CURRENT_SECONDS - IMAGE_DATE_SECONDS))
+		ONE_MONTH=$((30 * 24 * 60 * 60))
+		if [ "$DIFFERENCE" -ge "$ONE_MONTH" ]; then
+			TIP=\'# 󰇻 Your current image is over 1 month old, run `brew upgrade` to update\'
+		fi
+	fi
+fi')
+
+      # Remove GNOME-specific theme detection, use default
+      motd_content.gsub!(
+        "THEME=$(dconf read /org/gnome/desktop/interface/accent-color 2>/dev/null || " \
+        'echo -e "$DEFAULT_THEME")
+# Dconf will fail if the accent-color has not been changed yet
+if [ "$THEME" == "" ] ; then
+	# Gsettings will not update if the system\'s schemas have not been configured properly
+	THEME=$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null || echo -e "$DEFAULT_THEME")
+fi
+THEME=${THEME//\\\'/}',
+        'THEME="$DEFAULT_THEME"',
+      )
+
+      # Remove secureboot key warning check
+      motd_content.gsub!('KEY_WARN_FILE="/run/user-motd-sbkey-warn.md"
+[ -e $KEY_WARN_FILE ] && KEY_WARN="**WARNING**: $(cat $KEY_WARN_FILE)"
+KEY_WARN_ESCAPED=$(escape "$KEY_WARN")',
+                         'KEY_WARN=""
+KEY_WARN_ESCAPED=""')
+
+      # Add fallback if glow is not available
+      motd_content.gsub!('sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
+	-e "s/%IMAGE_TAG%/$IMAGE_TAG_ESCAPED/g" \\
+	-e "s/%TIP%/$TIP_ESCAPED/g" \\
+	-e "s/%KEY_WARN%/$KEY_WARN_ESCAPED/g" \\
+	"$TEMPLATE_FILE" | tr \'~\' \'\\n\' | /usr/bin/glow -s "${THEMES_DIRECTORY}/${THEME}.json" -w $(tput cols) -',
+                         'if command -v glow &>/dev/null; then
+	sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
+		-e "s/%IMAGE_TAG%/$IMAGE_TAG_ESCAPED/g" \\
+		-e "s/%TIP%/$TIP_ESCAPED/g" \\
+		-e "s/%KEY_WARN%/$KEY_WARN_ESCAPED/g" \\
+		"$TEMPLATE_FILE" | tr \'~\' \'\\n\' | glow -s "${THEMES_DIRECTORY}/${THEME}.json" -w $(tput cols) -
+else
+	# Fallback: simple text output without glow
+	sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
+		-e "s/%IMAGE_TAG%/$IMAGE_TAG_ESCAPED/g" \\
+		-e "s/%TIP%/$TIP_ESCAPED/g" \\
+		-e "s/%KEY_WARN%/$KEY_WARN_ESCAPED/g" \\
+		"$TEMPLATE_FILE" | tr \'~\' \'\\n\' | \
+		sed -E \'s/\\*\\*([^*]+)\\*\\*/\\1/g; s/`([^`]+)`/\\1/g; s/^#+\\s*//; s/^[│┃┆┊]\\s*//; s/^[•-]\\s*/  • /\'
+fi')
+
+      (libexec / "motd" / "bluefin-motd").write(motd_content)
+      (libexec / "motd" / "bluefin-motd").chmod 0755
+    end
+
+    # Install MOTD template from bluefin repository
+    template_content = <<~EOS
+      # 󱍢 Welcome to Bluefin
+      󱋩 `%IMAGE_NAME%:%IMAGE_TAG%`
+
+      |  Command | Description |
+      | ------- | ----------- |
+      | `bluefin-cli bling bash on`  | Enable terminal bling for bash  |
+      | `bluefin-cli status` | Show current configuration |
+      | `bluefin-cli help` | Show all available commands |
+      | `brew help` | Manage command line packages |
+
+      %TIP%
+
+      - **󰊤** [Issues](https://issues.projectbluefin.io)
+      - **󰊤** [Ask Bluefin](https://ask.projectbluefin.io)
+      - **󰈙** [Documentation](http://docs.projectbluefin.io)
+
+
+      %KEY_WARN%
     EOS
 
-    (libexec / "motd" / "bluefin-motd.sh").write(motd_content)
-    (libexec / "motd" / "bluefin-motd.sh").chmod 0755
+    (libexec / "motd" / "template.md").write(template_content)
+
+    # Install theme files
+    themes_source = source_dir / "ublue-motd/src/themes"
+    if themes_source.directory?
+      Dir.glob(themes_source / "*.json").each do |theme|
+        (libexec / "motd" / "themes").install theme
+      end
+    end
+
+    # Create image-info.json for non-Bluefin systems
+    image_info = {
+      "image-name"     => "bluefin-cli",
+      "image-tag"      => version.to_s,
+      "image-flavor"   => "homebrew",
+      "image-vendor"   => "ublue-os",
+      "fedora-version" => "N/A",
+    }
+    (libexec / "motd" / "image-info.json").write(JSON.pretty_generate(image_info))
+
+    # Create default motd.json config
+    motd_config = {
+      "tips-directory"   => "#{libexec}/motd/tips",
+      "check-outdated"   => "false",
+      "image-info-file"  => "#{libexec}/motd/image-info.json",
+      "default-theme"    => "slate",
+      "template-file"    => "#{libexec}/motd/template.md",
+      "themes-directory" => "#{libexec}/motd/themes",
+    }
+    (libexec / "motd" / "motd.json").write(JSON.pretty_generate(motd_config))
+
+    # Install sample tips (cross-platform friendly)
+    tips = [
+      "Use `brew search` and `brew install` to install packages. Homebrew will take care of updates automatically",
+      "`tldr vim` will give you the basic rundown on commands for a given tool",
+      "Performance profiling tools are built-in: try `top`, `htop`, and other debugging tools",
+      "Switch shells safely: change your shell in Terminal settings instead of system-wide",
+      "Container development is OS-agnostic - your devcontainers work on Linux, macOS, and Windows",
+      "Use `docker compose` for multi-container development if devcontainers don't fit your workflow",
+      "Bluefin separates the OS from your development environment - embrace the cloud-native workflow",
+      "Check out DevPod for open-source, client-only development environments that work with any IDE",
+      "Develop with devcontainers! Use `devcontainer.json` files in your projects for isolated, " \
+      "reproducible environments",
+      "VS Code comes with devcontainers extension pre-installed - perfect for containerized development",
+    ]
+
+    tips.each_with_index do |tip, idx|
+      (libexec / "motd" / "tips" / "#{format("%02d", idx + 10)}-tip.md").write(tip)
+    end
 
     # Install bluefin-cli command for toggling bling and MOTD
     cli_command = <<~EOS
       #!/bin/sh
       # Bluefin CLI - Bling and MOTD manager
 
+      remove_block() {
+        file="$1"
+        marker="$2"
+        lines="${3:-1}"
+        awk -v m="$marker" -v n="$lines" '
+          skip>0 { skip--; next }
+          $0 ~ m { skip=n; next }
+          { print }
+        ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+      }
+
       BLING_MARKER="# bluefin-cli bling"
       MOTD_MARKER="# bluefin-cli motd"
       BLING_SH="#{libexec}/bling/bling.sh"
-      MOTD_SH="#{libexec}/motd/bluefin-motd.sh"
+      MOTD_SH="#{libexec}/motd/bluefin-motd"
 
       show_help() {
         cat << 'EOF'
@@ -132,14 +283,18 @@ class BluefinCli < Formula
 
       Commands:
         bling SHELL [on|off]     Toggle bling for bash, zsh, or fish (default: on)
-        motd [on|off]            Toggle MOTD display (default: on)
+        motd [SHELL|all] [on|off]  Toggle MOTD for bash, zsh, fish, or all (default: all on)
+        install NAME|PATH         Install a Brew bundle by name (ai, cli, fonts, k8s) or local path
         status                   Show current configuration status
         help                     Show this help message
 
       Examples:
         bluefin-cli bling bash on     # Enable bling for bash
         bluefin-cli bling zsh off     # Disable bling for zsh
-        bluefin-cli motd on           # Enable MOTD
+        bluefin-cli motd zsh on       # Enable MOTD for zsh
+        bluefin-cli motd all off      # Disable MOTD for all shells
+        bluefin-cli install ai        # Install the Bluefin AI Brew bundle
+        bluefin-cli install ./Brewfile  # Install from a local Brewfile path
         bluefin-cli status            # Check all settings
       EOF
       }
@@ -186,7 +341,7 @@ class BluefinCli < Formula
             echo "Bling already disabled for $shell"
             return 0
           fi
-          sed -i "/$BLING_MARKER/,+1d" "$config"
+          remove_block "$config" "$BLING_MARKER" 1
           echo "✓ Bling disabled for $shell"
         else
           echo "Unknown action: $action (use 'on' or 'off')"
@@ -195,30 +350,121 @@ class BluefinCli < Formula
       }
 
       toggle_motd() {
-        action=${1:-on}
-        config="$HOME/.bashrc"
+        shell_or_action=${1:-all}
+        action=${2:-on}
 
-        if [ "$action" = "on" ]; then
-          if grep -q "$MOTD_MARKER" "$config" 2>/dev/null; then
-            echo "MOTD already enabled"
-            return 0
+        # If first arg is on/off, treat as action and target all shells
+        case "$shell_or_action" in
+          on|off)
+            action="$shell_or_action"
+            shell_or_action="all"
+            ;;
+        esac
+
+        enable_for_shell() {
+          s="$1"; a="$2"
+          case "$s" in
+            bash)
+              config="$HOME/.bashrc"
+              line="[ -x #{libexec}/motd/bluefin-motd ] && #{libexec}/motd/bluefin-motd"
+              lines_to_remove=1
+              ;;
+            zsh)
+              config="$HOME/.zshrc"
+              line="[ -x #{libexec}/motd/bluefin-motd ] && #{libexec}/motd/bluefin-motd"
+              lines_to_remove=1
+              ;;
+            fish)
+              config="$HOME/.config/fish/config.fish"
+              line="if status is-interactive; and test -x #{libexec}/motd/bluefin-motd; #{libexec}/motd/bluefin-motd; end"
+              lines_to_remove=2
+              ;;
+            *)
+              echo "Unknown shell: $s" >&2; return 1 ;;
+          esac
+
+          [ -f "$config" ] || mkdir -p "$(dirname "$config")" && touch "$config"
+
+          if [ "$a" = "on" ]; then
+            if grep -q "$MOTD_MARKER" "$config" 2>/dev/null; then
+              echo "MOTD already enabled for $s"
+            else
+              {
+                echo ""
+                echo "$MOTD_MARKER"
+                echo "$line"
+              } >> "$config"
+              echo "✓ MOTD enabled for $s"
+            fi
+          elif [ "$a" = "off" ]; then
+            if ! grep -q "$MOTD_MARKER" "$config" 2>/dev/null; then
+              echo "MOTD already disabled for $s"
+            else
+              remove_block "$config" "$MOTD_MARKER" "$lines_to_remove"
+              echo "✓ MOTD disabled for $s"
+            fi
+          else
+            echo "Unknown action: $a (use 'on' or 'off')"
+            return 1
           fi
-          [ -f "$config" ] || touch "$config"
-          echo "" >> "$config"
-          echo "$MOTD_MARKER" >> "$config"
-          echo "[ -x $MOTD_SH ] && $MOTD_SH" >> "$config"
-          echo "✓ MOTD enabled"
-        elif [ "$action" = "off" ]; then
-          if ! grep -q "$MOTD_MARKER" "$config" 2>/dev/null; then
-            echo "MOTD already disabled"
-            return 0
-          fi
-          sed -i "/$MOTD_MARKER/,+1d" "$config"
-          echo "✓ MOTD disabled"
-        else
-          echo "Unknown action: $action (use 'on' or 'off')"
+        }
+
+        shells="bash zsh fish"
+        if [ "$shell_or_action" != "all" ]; then
+          shells="$shell_or_action"
+        fi
+        for s in $shells; do
+          enable_for_shell "$s" "$action"
+        done
+      }
+
+      install_bundle() {
+        name_or_path="$1"
+        if [ -z "$name_or_path" ]; then
+          echo "Usage: bluefin-cli install <ai|cli|fonts|k8s|PATH>"
           return 1
         fi
+
+        if ! command -v brew >/dev/null 2>&1; then
+          echo "Homebrew not found on PATH. Please install Homebrew first: https://brew.sh"
+          return 1
+        fi
+
+        # If contains a slash, treat as a filesystem path
+        if printf '%s' "$name_or_path" | grep -q "/"; then
+          brewfile="$name_or_path"
+          if [ ! -f "$brewfile" ]; then
+            echo "Brewfile path not found: $brewfile"
+            return 1
+          fi
+        else
+          # Map known bundle names to Bluefin Brewfiles on GitHub
+          base_url="${BLUEFIN_BREW_BASE:-https://raw.githubusercontent.com/ublue-os/bluefin/refs/heads/main/brew}"
+          case "$name_or_path" in
+            ai)    file="bluefin-ai.Brewfile" ;;
+            cli)   file="bluefin-cli.Brewfile" ;;
+            fonts) file="bluefin-fonts.Brewfile" ;;
+            k8s)   file="bluefin-k8s.Brewfile" ;;
+            list)
+              echo "Available bundles: ai, cli, fonts, k8s"
+              return 0
+              ;;
+            *)
+              echo "Unknown bundle: $name_or_path"
+              echo "Use one of: ai, cli, fonts, k8s, or provide a path"
+              return 1
+              ;;
+          esac
+          url="$base_url/$file"
+          brewfile="${TMPDIR:-/tmp}/$file"
+          if ! curl -fsSL "$url" -o "$brewfile"; then
+            echo "Failed to download: $url"
+            return 1
+          fi
+        fi
+
+        echo "Installing bundle from: $brewfile"
+        BREW_NONINTERACTIVE=1 brew bundle --file="$brewfile"
       }
 
       show_status() {
@@ -237,11 +483,18 @@ class BluefinCli < Formula
           fi
         done
         echo ""
-        if [ -f "$HOME/.bashrc" ] && grep -q "$MOTD_MARKER" "$HOME/.bashrc" 2>/dev/null; then
-          echo "  ✓ MOTD: enabled"
-        else
-          echo "  ✗ MOTD: disabled"
-        fi
+        for shell in bash zsh fish; do
+          case "$shell" in
+            bash) config="$HOME/.bashrc" ;;
+            zsh) config="$HOME/.zshrc" ;;
+            fish) config="$HOME/.config/fish/config.fish" ;;
+          esac
+          if [ -f "$config" ] && grep -q "$MOTD_MARKER" "$config" 2>/dev/null; then
+            echo "  ✓ MOTD: $shell (enabled)"
+          else
+            echo "  ✗ MOTD: $shell (disabled)"
+          fi
+        done
       }
 
       case "${1:-help}" in
@@ -249,7 +502,10 @@ class BluefinCli < Formula
           toggle_bling "$2" "${3:-on}"
           ;;
         motd)
-          toggle_motd "${2:-on}"
+          toggle_motd "${2:-all}" "${3:-on}"
+          ;;
+        install)
+          install_bundle "$2"
           ;;
         status)
           show_status
@@ -272,47 +528,63 @@ class BluefinCli < Formula
 
   def caveats
     <<~EOS
-      🚀 Bluefin CLI - Complete Shell Experience Enhanced!
+          🚀 Bluefin CLI - Complete Shell Experience Enhanced!
 
-      ✅ Installed Components:
-      • Premium CLI Tools: eza, starship, atuin, zoxide, bat, ugrep
-      • Bling Integration: Shell aliases, prompt, history, navigation
-      • MOTD Banner: Bluefin welcome message
-      • Management Command: bluefin-cli
+          ✅ Installed Components:
+          • Premium CLI Tools: eza, starship, atuin, zoxide, bat, ugrep
+          • Bling Integration: Shell aliases, prompt, history, navigation
+          • MOTD System: Dynamic welcome messages with tips and themes
+          • Management Command: bluefin-cli
 
-      📁 Resources:
-      • CLI Logos: #{libexec}/bluefin-logos/
-      • Fastfetch Config: #{libexec}/fastfetch/
-      • Bling Scripts: #{libexec}/bling/
-      • MOTD Script: #{libexec}/motd/
+          📁 Resources:
+          • CLI Logos: #{libexec}/bluefin-logos/
+          • Fastfetch Config: #{libexec}/fastfetch/
+          • Bling Scripts: #{libexec}/bling/
+          • MOTD System: #{libexec}/motd/
+            - Templates: #{libexec}/motd/template.md
+            - Themes: #{libexec}/motd/themes/
+            - Tips: #{libexec}/motd/tips/
+
+      💡 Optional Dependencies for Full MOTD Experience:
+          • glow - Beautiful markdown rendering (recommended)
+          • jq - JSON processing (recommended)
+
+          If not installed, MOTD will fall back to simple text output.
+          Install with: brew install glow jq
 
       🔧 Setup Your Shell - Choose your shell and enable bling:
 
-      BASH:
-        echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc
-        source ~/.bashrc
+          BASH:
+            echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc
+            source ~/.bashrc
 
-      ZSH:
-        echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc
-        source ~/.zshrc
+          ZSH:
+            echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc
+            source ~/.zshrc
 
-      FISH:
-        echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish
-        source ~/.config/fish/config.fish
+          FISH:
+            echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish
+            source ~/.config/fish/config.fish
 
-      📋 Management Commands:
+          📋 Management Commands:
 
-        bluefin-cli bling bash on       # Enable bling for bash
-        bluefin-cli bling bash off      # Disable bling for bash
-        bluefin-cli motd on             # Enable MOTD banner
-        bluefin-cli motd off            # Disable MOTD banner
-        bluefin-cli status              # Show current configuration
-        bluefin-cli help                # Show all available commands
+            bluefin-cli bling bash on       # Enable bling for bash
+            bluefin-cli bling bash off      # Disable bling for bash
+            bluefin-cli motd on             # Enable MOTD banner
+            bluefin-cli motd off            # Disable MOTD banner
+            bluefin-cli status              # Show current configuration
+            bluefin-cli help                # Show all available commands
 
-      ✨ After setup, restart your terminal or re-source your shell config
-      to activate all bling enhancements and see the MOTD banner!
+          🎨 Customize Your MOTD:
+          • Add custom tips: #{libexec}/motd/tips/*.md
+          • Change theme: Edit #{libexec}/motd/motd.json
+          • Available themes: slate, blue, green, orange, pink, purple, red, teal, yellow
+          • Edit template: #{libexec}/motd/template.md
 
-      📖 Docs: https://docs.projectbluefin.io/command-line
+          ✨ After setup, restart your terminal or re-source your shell config
+          to activate all bling enhancements and see the MOTD banner!
+
+          📖 Docs: https://docs.projectbluefin.io/command-line
     EOS
   end
 
@@ -321,7 +593,15 @@ class BluefinCli < Formula
     assert_predicate libexec / "bling" / "bling.fish", :file?
     assert_predicate libexec / "bluefin-logos", :directory?
     assert_predicate libexec / "fastfetch", :directory?
-    assert_predicate libexec / "motd" / "bluefin-motd.sh", :file?
+    assert_predicate libexec / "motd" / "bluefin-motd", :executable?
+    assert_predicate libexec / "motd" / "template.md", :file?
+    assert_predicate libexec / "motd" / "themes", :directory?
+    assert_predicate libexec / "motd" / "tips", :directory?
+    assert_predicate libexec / "motd" / "motd.json", :file?
+    assert_predicate libexec / "motd" / "image-info.json", :file?
     assert_predicate bin / "bluefin-cli", :executable?
+
+    # Test MOTD script can run (even without glow/jq)
+    system libexec / "motd" / "bluefin-motd"
   end
 end
