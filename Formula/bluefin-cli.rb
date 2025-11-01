@@ -174,9 +174,15 @@ KEY_WARN_ESCAPED=$(escape "$KEY_WARN")',
                          'KEY_WARN=""
 KEY_WARN_ESCAPED=""')
 
+      # Replace shuf with portable awk implementation
+      motd_content.gsub!(
+        "| shuf -n 1",
+        "| awk 'BEGIN {srand()} {line[NR] = $0} END {print line[int(rand() * NR) + 1]}'",
+      )
+
       # Replace shuf with portable version for macOS
-      motd_content.gsub!(' shuf ', ' $SHUF_CMD ')
-      motd_content.gsub!('| shuf', '| $SHUF_CMD')
+      motd_content.gsub!(" shuf ", " $SHUF_CMD ")
+      motd_content.gsub!("| shuf", "| $SHUF_CMD")
 
       # Add fallback if glow is not available
       motd_content.gsub!('sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
