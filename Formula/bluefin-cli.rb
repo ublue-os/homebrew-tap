@@ -109,13 +109,23 @@ class BluefinCli < Formula
         TIP=""
       fi
 
-      # Read image info
+      # Read image info or detect OS
       if command -v jq >/dev/null 2>&1 && [ -f "$IMAGE_INFO" ]; then
         IMAGE_NAME="$(jq -r '."image-name"' "$IMAGE_INFO" 2>/dev/null || echo "bluefin-cli")"
         IMAGE_TAG="$(jq -r '."image-tag"' "$IMAGE_INFO" 2>/dev/null || echo "homebrew")"
       else
-        IMAGE_NAME="bluefin-cli"
-        IMAGE_TAG="homebrew"
+        # Detect OS and version for non-Bluefin systems
+        if [ "$(uname)" = "Darwin" ]; then
+          IMAGE_NAME="macOS"
+          IMAGE_TAG="$(sw_vers -productVersion 2>/dev/null || echo "unknown")"
+        elif [ -f /etc/os-release ]; then
+          . /etc/os-release
+          IMAGE_NAME="${NAME:-Linux}"
+          IMAGE_TAG="${VERSION_ID:-${VERSION:-unknown}}"
+        else
+          IMAGE_NAME="$(uname -s)"
+          IMAGE_TAG="$(uname -r)"
+        fi
       fi
 
       # Process template
