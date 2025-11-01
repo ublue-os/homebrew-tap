@@ -125,26 +125,7 @@ cask "bluefin-wallpapers" do
     if OS.mac?
       destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bluefin"
       puts "Wallpapers installed to: #{destination_dir}"
-
-      # Try to set first wallpaper using AppleScript
-      puts "Attempting to set wallpaper..."
-
-      first_wallpaper = Dir.glob("#{destination_dir}/*.heic").first
-      if first_wallpaper
-        applescript = <<~APPLESCRIPT
-          tell application "System Events"
-            tell every desktop
-              set picture to "#{first_wallpaper}"
-            end tell
-          end tell
-        APPLESCRIPT
-
-        system("osascript", "-e", applescript)
-        puts "Wallpaper set to: #{File.basename(first_wallpaper)}"
-      end
-
-      puts "All wallpapers are available in System Settings > Wallpaper"
-      puts "Location: #{destination_dir}"
+      puts "To use: System Settings > Wallpaper > Add Folder > #{destination_dir}"
     end
 
     if OS.linux?
