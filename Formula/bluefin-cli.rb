@@ -528,63 +528,12 @@ class BluefinCli < Formula
 
   def caveats
     <<~EOS
-          🚀 Bluefin CLI - Complete Shell Experience Enhanced!
+      To enable bling and MOTD, run:
+        bluefin-cli bling <bash|zsh|fish> on
+        bluefin-cli motd on
 
-          ✅ Installed Components:
-          • Premium CLI Tools: eza, starship, atuin, zoxide, bat, ugrep
-          • Bling Integration: Shell aliases, prompt, history, navigation
-          • MOTD System: Dynamic welcome messages with tips and themes
-          • Management Command: bluefin-cli
-
-          📁 Resources:
-          • CLI Logos: #{libexec}/bluefin-logos/
-          • Fastfetch Config: #{libexec}/fastfetch/
-          • Bling Scripts: #{libexec}/bling/
-          • MOTD System: #{libexec}/motd/
-            - Templates: #{libexec}/motd/template.md
-            - Themes: #{libexec}/motd/themes/
-            - Tips: #{libexec}/motd/tips/
-
-      💡 Optional Dependencies for Full MOTD Experience:
-          • glow - Beautiful markdown rendering (recommended)
-          • jq - JSON processing (recommended)
-
-          If not installed, MOTD will fall back to simple text output.
-          Install with: brew install glow jq
-
-      🔧 Setup Your Shell - Choose your shell and enable bling:
-
-          BASH:
-            echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc
-            source ~/.bashrc
-
-          ZSH:
-            echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc
-            source ~/.zshrc
-
-          FISH:
-            echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish
-            source ~/.config/fish/config.fish
-
-          📋 Management Commands:
-
-            bluefin-cli bling bash on       # Enable bling for bash
-            bluefin-cli bling bash off      # Disable bling for bash
-            bluefin-cli motd on             # Enable MOTD banner
-            bluefin-cli motd off            # Disable MOTD banner
-            bluefin-cli status              # Show current configuration
-            bluefin-cli help                # Show all available commands
-
-          🎨 Customize Your MOTD:
-          • Add custom tips: #{libexec}/motd/tips/*.md
-          • Change theme: Edit #{libexec}/motd/motd.json
-          • Available themes: slate, blue, green, orange, pink, purple, red, teal, yellow
-          • Edit template: #{libexec}/motd/template.md
-
-          ✨ After setup, restart your terminal or re-source your shell config
-          to activate all bling enhancements and see the MOTD banner!
-
-          📖 Docs: https://docs.projectbluefin.io/command-line
+      View all commands:
+        bluefin-cli help
     EOS
   end
 
