@@ -125,7 +125,7 @@ cask "bluefin-wallpapers" do
     if OS.mac?
       destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bluefin"
       puts "Wallpapers installed to: #{destination_dir}"
-      puts "To use: System Settings > Wallpaper > Add Folder > #{destination_dir}"
+      puts "To use: System Settings > Wallpaper > Add Photo > Choose Folder > #{destination_dir}"
     end
 
     if OS.linux?
