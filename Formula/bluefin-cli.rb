@@ -102,7 +102,9 @@ class BluefinCli < Formula
 
       # Get a random tip (portable - no shuf needed)
       if [ -d "$TIP_DIRECTORY" ] && [ -n "$(ls -A "$TIP_DIRECTORY"/*.md 2>/dev/null)" ]; then
-        TIP="$(cat "$TIP_DIRECTORY"/*.md 2>/dev/null | awk 'BEGIN {srand()} {line[NR] = $0} END {if (NR > 0) print line[int(rand() * NR) + 1]}')"
+        # Pick a random file, then read its content
+        TIP_FILE="$(ls "$TIP_DIRECTORY"/*.md 2>/dev/null | awk 'BEGIN {srand()} {line[NR] = $0} END {if (NR > 0) print line[int(rand() * NR) + 1]}')"
+        TIP="$(cat "$TIP_FILE" 2>/dev/null)"
       else
         TIP=""
       fi
