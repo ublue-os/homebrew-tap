@@ -16,7 +16,45 @@ All changes must be committed and pushed to git before testing. The tap is confi
 
 ## Testing Formulas and Casks
 
-### 1. Install from Tap
+### 1. Code Quality Checks (BEFORE Committing)
+
+These checks run automatically via git pre-commit hook, but you can run manually:
+
+```bash
+# Check for style violations (runs automatically on commit)
+brew style Formula/bluefin-cli.rb
+brew style Casks/wallpaper-name.rb
+
+# Auto-fix style issues
+brew style --fix Formula/bluefin-cli.rb
+
+# Full audit (includes deprecations, dependencies, etc)
+# ⚠️ NOTE: Run AFTER pushing to remote, not before commit
+brew audit --strict hanthor/tap/bluefin-cli
+brew audit --strict hanthor/tap/wallpaper-name
+```
+
+### 2. Git Workflow (with Auto-Style Checking)
+
+The pre-commit hook automatically runs `brew style` on all changed .rb files:
+
+```bash
+# Stage changes
+git add Formula/bluefin-cli.rb
+
+# Commit (pre-commit hook will check brew style)
+git commit -m "Update bluefin-cli formula"
+# ✓ If style checks pass, commit succeeds
+# ✗ If style checks fail, commit is blocked - fix with: brew style --fix <file>
+
+# Push to remote
+git push origin main
+
+# ✅ IMPORTANT: Run brew audit AFTER push
+brew audit --strict hanthor/tap/bluefin-cli
+```
+
+### 3. Install from Tap (AFTER Pushing)
 
 After pushing changes to git:
 
@@ -32,24 +70,7 @@ brew install hanthor/tap/<formula-name>
 brew install --build-from-source hanthor/tap/<formula-name>
 ```
 
-### 2. Code Quality Checks
-
-Before committing, always run these checks:
-
-```bash
-# Check for style violations
-brew style Formula/bluefin-cli.rb
-brew style Casks/wallpaper-name.rb
-
-# Full audit (includes deprecations, dependencies, etc)
-brew audit --strict Formula/bluefin-cli.rb
-brew audit --strict Casks/wallpaper-name.rb
-
-# Test the formula/cask
-brew test hanthor/tap/<formula-name>
-```
-
-### 3. Verify Installation
+### 4. Verify Installation
 
 After installation, verify the expected files exist:
 
@@ -240,10 +261,39 @@ brew install --build-from-source --verbose hanthor/tap/<formula-name> 2>&1 | gre
 ## Important Notes
 
 - **Always push before testing**: The Homebrew tap pulls from the remote git repository
+- **Pre-commit hook enforces brew style**: All commits automatically check style compliance
+- **Run brew audit after each push**: The workflow is commit → push → audit → install
 - **Use --build-from-source**: When testing formulas, always use this flag to avoid cached bottles
 - **Check both audit and style**: Style is formatting, audit is functionality
 - **Document failures**: If a formula fails, save the full error output
 - **Keep hack/ in sync**: Periodically update cloned repos in hack/ to see latest source code
+
+## Pre-Commit Hook Setup
+
+The repository includes a pre-commit hook that automatically checks `brew style` on all changed Ruby files:
+
+```bash
+# The hook is located at:
+.git/hooks/pre-commit
+
+# It runs automatically when you commit
+# If style check fails, commit is blocked until issues are fixed
+# Fix with: brew style --fix <file>
+
+# To manually run the hook:
+.git/hooks/pre-commit
+```
+
+## Complete Development Workflow
+
+1. Make changes to `.rb` files
+2. `git add <files>` (stage your changes)
+3. `git commit -m "description"` (pre-commit hook runs automatically)
+4. If brew style fails: `brew style --fix <file>` and commit again
+5. `git push origin main` (push to remote)
+6. `brew audit --strict hanthor/tap/<formula-name>` (audit after push)
+7. `brew install --build-from-source hanthor/tap/<formula-name>` (test install)
+8. Verify all files are present and functionality works
 
 ## References
 
