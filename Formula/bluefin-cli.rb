@@ -99,7 +99,13 @@ class BluefinCli < Formula
         "# set -x\n",
         "# set -x\n\n" \
         "SELF_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\n" \
-        "export MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-$SELF_DIR/motd.json}\"\n",
+        "export MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-$SELF_DIR/motd.json}\"\n\n" \
+        "# Portable shuf replacement for macOS (GNU shuf not available)\n" \
+        "portable_shuf() {\n  " \
+        "awk 'BEGIN{srand()} {print rand(), $0}' \"$@\" | sort -n | cut -d' ' -f2-\n" \
+        "}\n" \
+        "SHUF_CMD=\"shuf\"\n" \
+        "command -v shuf >/dev/null 2>&1 || SHUF_CMD=\"portable_shuf\"\n",
       )
 
       # Adapt for cross-platform use with hardcoded paths (use Ruby interpolation for libexec)
@@ -167,6 +173,9 @@ THEME=${THEME//\\\'/}',
 KEY_WARN_ESCAPED=$(escape "$KEY_WARN")',
                          'KEY_WARN=""
 KEY_WARN_ESCAPED=""')
+
+      # Replace shuf with portable version for macOS
+      motd_content.gsub!("shuf", "$SHUF_CMD")
 
       # Add fallback if glow is not available
       motd_content.gsub!('sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
