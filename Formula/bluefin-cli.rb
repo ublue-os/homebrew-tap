@@ -96,8 +96,8 @@ class BluefinCli < Formula
 
       # Ensure script always reads our installed motd.json next to it, regardless of system defaults
       motd_content.sub!(
-        "#!/usr/bin/env bash\n",
-        "#!/usr/bin/env bash\n" \
+        "# set -x\n",
+        "# set -x\n\n" \
         "SELF_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\n" \
         "export MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-$SELF_DIR/motd.json}\"\n",
       )
