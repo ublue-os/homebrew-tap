@@ -446,7 +446,14 @@ class BluefinCli < Formula
             fonts) file="bluefin-fonts.Brewfile" ;;
             k8s)   file="bluefin-k8s.Brewfile" ;;
             list)
-              echo "Available bundles: ai, cli, fonts, k8s"
+              echo "ai:"
+              echo "   AI tools: Goose, Codex, Gemini, Ramalama, etc."
+              echo "cli:"
+              echo "    CLI fun: GitHub CLI, chezmoi, etc."
+              echo "fonts:"
+              echo "    Fonts: Fira Code, JetBrains Mono, etc."
+              echo "k8s:"
+              echo "    Kubernetes tools: kubectl, k9s, kind, etc."
               return 0
               ;;
             *)
