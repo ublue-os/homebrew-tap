@@ -456,6 +456,13 @@ class BluefinCli < Formula
               echo "    Kubernetes tools: kubectl, k9s, kind, etc."
               return 0
               ;;
+            all)
+              bluefin-cli install ai
+              bluefin-cli install cli
+              bluefin-cli install fonts
+              bluefin-cli install k8s
+              return 0
+              ;;
             *)
               echo "Unknown bundle: $name_or_path"
               echo "Use one of: ai, cli, fonts, k8s, or provide a path"
