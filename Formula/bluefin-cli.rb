@@ -77,43 +77,20 @@ class BluefinCli < Formula
   end
 
   def caveats
-    bash_cmd = "echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc"
-    zsh_cmd = "echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc"
-    fish_cmd = "echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish"
+    bash_cmd = "echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc && source ~/.bashrc"
+    zsh_cmd = "echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc && source ~/.zshrc"
+    fish_cmd = "echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish;"
+    fish_source = "source ~/.config/fish/config.fish"
 
     <<~EOS
-      🚀 Bluefin CLI - Complete Shell Experience Enhanced!
-
-      ✅ Installed Tools & Resources:
-      • eza - Modern ls replacement with icons and colors
-      • starship - Cross-shell prompt with git integration
-      • atuin - Enhanced shell history with search
-      • zoxide - Smart directory navigation (better cd)
-      • bat - Syntax-highlighted cat replacement
-      • ugrep - Fast, colorful grep with regex support
-
-      📁 Resources:
-      • CLI Logos: #{libexec}/bluefin-logos/
-      • Fastfetch Config: #{libexec}/fastfetch/
-      • Bling Scripts: #{libexec}/bling/
 
       🔧 Setup Instructions - Choose your shell:
 
-      BASH:
         #{bash_cmd}
 
-      ZSH:
         #{zsh_cmd}
 
-      FISH:
-        #{fish_cmd}
-
-      After running the appropriate command for your shell, restart your terminal or run:
-        source ~/.bashrc           # for bash
-        source ~/.zshrc            # for zsh
-        source ~/.config/fish/config.fish  # for fish
-
-      Then all the premium tools will be ready to use!
+        #{fish_cmd} #{fish_source}
 
       � Docs: https://docs.projectbluefin.io/command-line
     EOS
