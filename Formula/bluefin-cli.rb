@@ -84,131 +84,63 @@ class BluefinCli < Formula
       (share / "bluefin" / "bling" / "bling.fish").chmod 0755
     end
 
-    # Install MOTD system (based on ublue-motd)
+    # Install MOTD system (simplified portable version)
     (libexec / "motd").mkpath
     (libexec / "motd" / "themes").mkpath
     (libexec / "motd" / "tips").mkpath
 
-    # Install ublue-motd script adapted for cross-platform use
-    motd_script = source_dir / "ublue-motd/src/ublue-motd"
-    if motd_script.exist?
-      motd_content = motd_script.read
+    # Create a clean, portable MOTD script from scratch
+    motd_script_content = <<~'MOTD_SCRIPT'
+      #!/usr/bin/env bash
 
-      # Ensure script always reads our installed motd.json next to it, regardless of system defaults
-      motd_content.sub!(
-        "# set -x\n",
-        "# set -x\n\n" \
-        "SELF_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\n" \
-        "export MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-$SELF_DIR/motd.json}\"\n\n" \
-        "# Portable shuf replacement for macOS (GNU shuf not available)\n" \
-        "portable_shuf() {\n  " \
-        "awk 'BEGIN{srand()} {print rand(), $0}' \"$@\" | sort -n | cut -d' ' -f2-\n" \
-        "}\n" \
-        "SHUF_CMD=\"shuf\"\n" \
-        "command -v shuf >/dev/null 2>&1 || SHUF_CMD=\"portable_shuf\"\n",
-      )
+      SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+      TIP_DIRECTORY="${TIP_DIRECTORY:-$SELF_DIR/tips}"
+      IMAGE_INFO="${IMAGE_INFO:-$SELF_DIR/image-info.json}"
+      TEMPLATE_FILE="${TEMPLATE_FILE:-$SELF_DIR/template.md}"
+      THEMES_DIRECTORY="${THEMES_DIRECTORY:-$SELF_DIR/themes}"
+      DEFAULT_THEME="${DEFAULT_THEME:-slate}"
 
-      # Adapt for cross-platform use with hardcoded paths (use Ruby interpolation for libexec)
-      motd_content.gsub!(
-        'MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-/etc/ublue-os/motd.json}"',
-        "MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-#{libexec}/motd/motd.json}\"",
-      )
-      motd_content.gsub!(
-        'TIP_DIRECTORY="$(get_config \'\.\"tips-directory\"\' "/usr/share/ublue-os/motd/tips")"',
-        "TIP_DIRECTORY=\"$(get_config '.\"tips-directory\"' \"#{libexec}/motd/tips\")\"",
-      )
-      motd_content.gsub!(
-        'IMAGE_INFO="$(get_config \'\.\"image-info-file\"\' "/usr/share/ublue-os/image-info.json")"',
-        "IMAGE_INFO=\"$(get_config '.\"image-info-file\"' \"#{libexec}/motd/image-info.json\")\"",
-      )
-      motd_content.gsub!(
-        'TEMPLATE_FILE="$(get_config \'\.\"template-file\"\' "/usr/share/ublue-os/motd/template.md")"',
-        "TEMPLATE_FILE=\"$(get_config '.\"template-file\"' \"#{libexec}/motd/template.md\")\"",
-      )
-      motd_content.gsub!(
-        'THEMES_DIRECTORY="$(get_config \'\.\"themes-directory\"\' "/usr/share/ublue-os/motd/themes")"',
-        "THEMES_DIRECTORY=\"$(get_config '.\"themes-directory\"' \"#{libexec}/motd/themes\")\"",
-      )
+      # Get a random tip (portable - no shuf needed)
+      if [ -d "$TIP_DIRECTORY" ] && [ -n "$(ls -A "$TIP_DIRECTORY"/*.md 2>/dev/null)" ]; then
+        TIP="$(cat "$TIP_DIRECTORY"/*.md 2>/dev/null | awk 'BEGIN {srand()} {line[NR] = $0} END {if (NR > 0) print line[int(rand() * NR) + 1]}')"
+      else
+        TIP=""
+      fi
 
-      # Make CHECK_OUTDATED work on non-rpm-ostree systems
-      motd_content.gsub!('if [ "$CHECK_OUTDATED" == "true" ] ; then
-	IMAGE_DATE_SECONDS=$(rpm-ostree status --booted --json | jq -r \'.deployments[].timestamp\')
-	CURRENT_SECONDS=$(date +%s)
-	DIFFERENCE=$((CURRENT_SECONDS - IMAGE_DATE_SECONDS))
-	ONE_MONTH=$((30 * 24 * 60 * 60))
-	if [ "$DIFFERENCE" -ge "$ONE_MONTH" ]; then
-		#shellcheck disable=2016
-		TIP=\'# 󰇻 Your current image is over 1 month old, run `ujust update`\'
-	fi
-fi',
-                         'if [ "$CHECK_OUTDATED" == "true" ] && command -v rpm-ostree &>/dev/null; then
-	IMAGE_DATE_SECONDS=$(rpm-ostree status --booted --json 2>/dev/null | \
-		jq -r \'.deployments[].timestamp\' 2>/dev/null || echo "0")
-	if [ "$IMAGE_DATE_SECONDS" != "0" ]; then
-		CURRENT_SECONDS=$(date +%s)
-		DIFFERENCE=$((CURRENT_SECONDS - IMAGE_DATE_SECONDS))
-		ONE_MONTH=$((30 * 24 * 60 * 60))
-		if [ "$DIFFERENCE" -ge "$ONE_MONTH" ]; then
-			TIP=\'# 󰇻 Your current image is over 1 month old, run `brew upgrade` to update\'
-		fi
-	fi
-fi')
+      # Read image info
+      if command -v jq >/dev/null 2>&1 && [ -f "$IMAGE_INFO" ]; then
+        IMAGE_NAME="$(jq -r '."image-name"' "$IMAGE_INFO" 2>/dev/null || echo "bluefin-cli")"
+        IMAGE_TAG="$(jq -r '."image-tag"' "$IMAGE_INFO" 2>/dev/null || echo "homebrew")"
+      else
+        IMAGE_NAME="bluefin-cli"
+        IMAGE_TAG="homebrew"
+      fi
 
-      # Remove GNOME-specific theme detection, use default
-      motd_content.gsub!(
-        "THEME=$(dconf read /org/gnome/desktop/interface/accent-color 2>/dev/null || " \
-        'echo -e "$DEFAULT_THEME")
-# Dconf will fail if the accent-color has not been changed yet
-if [ "$THEME" == "" ] ; then
-	# Gsettings will not update if the system\'s schemas have not been configured properly
-	THEME=$(gsettings get org.gnome.desktop.interface accent-color 2>/dev/null || echo -e "$DEFAULT_THEME")
-fi
-THEME=${THEME//\\\'/}',
-        'THEME="$DEFAULT_THEME"',
-      )
+      # Process template
+      if [ ! -f "$TEMPLATE_FILE" ]; then
+        echo "Error: Template file not found: $TEMPLATE_FILE" >&2
+        exit 1
+      fi
 
-      # Remove secureboot key warning check
-      motd_content.gsub!('KEY_WARN_FILE="/run/user-motd-sbkey-warn.md"
-[ -e $KEY_WARN_FILE ] && KEY_WARN="**WARNING**: $(cat $KEY_WARN_FILE)"
-KEY_WARN_ESCAPED=$(escape "$KEY_WARN")',
-                         'KEY_WARN=""
-KEY_WARN_ESCAPED=""')
+      # Simple variable substitution
+      CONTENT="$(cat "$TEMPLATE_FILE" | \
+        sed "s|%IMAGE_NAME%|$IMAGE_NAME|g" | \
+        sed "s|%IMAGE_TAG%|$IMAGE_TAG|g" | \
+        sed "s|%TIP%|$TIP|g" | \
+        sed "s|%KEY_WARN%||g" | \
+        tr '~' '\n')"
 
-      # Replace shuf with portable awk implementation
-      motd_content.gsub!(
-        "| shuf -n 1",
-        "| awk 'BEGIN {srand()} {line[NR] = $0} END {print line[int(rand() * NR) + 1]}'",
-      )
+      # Render with glow if available, otherwise plain text
+      if command -v glow >/dev/null 2>&1 && [ -f "$THEMES_DIRECTORY/${DEFAULT_THEME}.json" ]; then
+        echo "$CONTENT" | glow -s "$THEMES_DIRECTORY/${DEFAULT_THEME}.json" -w "$(tput cols 2>/dev/null || echo 80)" -
+      else
+        # Plain text fallback
+        echo "$CONTENT" | sed -E 's/\*\*([^*]+)\*\*/\1/g; s/`([^`]+)`/\1/g; s/^#+\s*//; s/^[│┃┆┊]\s*//; s/^[•-]\s*/  • /'
+      fi
+    MOTD_SCRIPT
 
-      # Replace shuf with portable version for macOS
-      motd_content.gsub!(" shuf ", " $SHUF_CMD ")
-      motd_content.gsub!("| shuf", "| $SHUF_CMD")
-
-      # Add fallback if glow is not available
-      motd_content.gsub!('sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
-	-e "s/%IMAGE_TAG%/$IMAGE_TAG_ESCAPED/g" \\
-	-e "s/%TIP%/$TIP_ESCAPED/g" \\
-	-e "s/%KEY_WARN%/$KEY_WARN_ESCAPED/g" \\
-	"$TEMPLATE_FILE" | tr \'~\' \'\\n\' | /usr/bin/glow -s "${THEMES_DIRECTORY}/${THEME}.json" -w $(tput cols) -',
-                         'if command -v glow &>/dev/null; then
-	sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
-		-e "s/%IMAGE_TAG%/$IMAGE_TAG_ESCAPED/g" \\
-		-e "s/%TIP%/$TIP_ESCAPED/g" \\
-		-e "s/%KEY_WARN%/$KEY_WARN_ESCAPED/g" \\
-		"$TEMPLATE_FILE" | tr \'~\' \'\\n\' | glow -s "${THEMES_DIRECTORY}/${THEME}.json" -w $(tput cols) -
-else
-	# Fallback: simple text output without glow
-	sed -e "s/%IMAGE_NAME%/$IMAGE_NAME_ESCAPED/g" \\
-		-e "s/%IMAGE_TAG%/$IMAGE_TAG_ESCAPED/g" \\
-		-e "s/%TIP%/$TIP_ESCAPED/g" \\
-		-e "s/%KEY_WARN%/$KEY_WARN_ESCAPED/g" \\
-		"$TEMPLATE_FILE" | tr \'~\' \'\\n\' | \
-		sed -E \'s/\\*\\*([^*]+)\\*\\*/\\1/g; s/`([^`]+)`/\\1/g; s/^#+\\s*//; s/^[│┃┆┊]\\s*//; s/^[•-]\\s*/  • /\'
-fi')
-
-      (libexec / "motd" / "bluefin-motd").write(motd_content)
-      (libexec / "motd" / "bluefin-motd").chmod 0755
-    end
+    (libexec / "motd" / "bluefin-motd").write(motd_script_content)
+    (libexec / "motd" / "bluefin-motd").chmod 0755
 
     # Install MOTD template from bluefin repository
     template_content = <<~EOS
