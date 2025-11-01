@@ -47,8 +47,10 @@ class BluefinCli < Formula
 
     # Create bling shell script files
     (libexec / "bling").mkpath
-    (libexec / "bling").install create_bling_sh_script, "bling.sh"
-    (libexec / "bling").install create_bling_fish_script, "bling.fish"
+    (libexec / "bling" / "bling.sh").write(create_bling_sh_script)
+    (libexec / "bling" / "bling.sh").chmod 0755
+    (libexec / "bling" / "bling.fish").write(create_bling_fish_script)
+    (libexec / "bling" / "bling.fish").chmod 0755
 
     # Install into share directory for user access
     (share / "bluefin").mkpath
