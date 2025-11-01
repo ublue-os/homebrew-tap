@@ -6,13 +6,13 @@ class BluefinCli < Formula
   sha256 "2de1cf76b2f76f90a7ef5a93b11e5cf1a24edbffc32f8db72849e75e0b61b92e"
   license "CC-BY-SA"
 
-  # Optional tools that bling will use if available
-  depends_on "eza" => :optional
-  depends_on "starship" => :optional
-  depends_on "atuin" => :optional
-  depends_on "zoxide" => :optional
-  depends_on "bat" => :optional
-  depends_on "ugrep" => :optional
+  # CLI tools that bling integrates (core experience enhancements)
+  depends_on "eza"       # Better ls with icons and colors
+  depends_on "starship"  # Modern shell prompt
+  depends_on "atuin"     # Enhanced shell history search
+  depends_on "zoxide"    # Smarter cd command (like autojump)
+  depends_on "bat"       # Better cat with syntax highlighting
+  depends_on "ugrep"     # Faster grep with colors
 
   def install
     source_dir = buildpath / "packages"
@@ -131,35 +131,36 @@ class BluefinCli < Formula
 
   def caveats
     <<~EOS
-      Bluefin CLI bling shell integration has been installed!
+      🚀 Bluefin CLI - Complete Shell Experience Enhanced!
 
-      📦 Resources Installed:
+      Your shell has been automatically configured with these premium tools:
+
+      📦 Installed Tools:
+      • eza - Modern ls replacement with icons and colors
+      • starship - Cross-shell prompt with git integration
+      • atuin - Enhanced shell history with search
+      • zoxide - Smart directory navigation (better cd)
+      • bat - Syntax-highlighted cat replacement
+      • ugrep - Fast, colorful grep with regex support
+
+      🎨 Resources Installed:
       • CLI Logos: #{libexec}/bluefin-logos/
       • Fastfetch Config: #{libexec}/fastfetch/
       • Bling Scripts: #{libexec}/bling/
 
-      🚀 Shell Integration:
-      Your installed shells have been automatically configured with bling!
-      
-      Available tools (optional):
-      - eza: Better ls replacement
-      - starship: Cross-shell prompt
-      - atuin: Shell history search
-      - zoxide: Smarter cd command
-      - bat: Better cat
-      - ugrep: Faster grep
+      ✨ What Just Happened:
+      1. All premium CLI tools installed
+      2. Shell configuration (bash/zsh/fish) updated automatically
+      3. Tools are ready to use immediately!
 
-      Install any of these tools to enhance your bling experience:
-        brew install eza starship atuin zoxide bat ugrep
-
-      📝 Manual Shell Setup:
-      If you need to manually add bling to a shell config, add this line:
+      📝 Shell Configuration:
+      Your shell configs have been updated with bling integration:
       
       Bash/Zsh:
-        source #{libexec}/bling/bling.sh
+        ~/.bashrc and ~/.zshrc now source #{libexec}/bling/bling.sh
       
       Fish:
-        source #{libexec}/bling/bling.fish
+        ~/.config/fish/config.fish now sources #{libexec}/bling/bling.fish
 
       🔗 Documentation: https://docs.projectbluefin.io/command-line
     EOS
