@@ -89,6 +89,13 @@ class BluefinCli < Formula
     end
   end
 
+  def post_uninstall
+    # Remove bling from shell configs on uninstall
+    remove_from_bash
+    remove_from_zsh
+    remove_from_fish
+  end
+
   private
 
   def detect_installed_shells
@@ -127,6 +134,42 @@ class BluefinCli < Formula
     return if fish_config.read.include?(bling_source)
     
     fish_config.append_lines("\n# bluefin-cli bling\n#{bling_source}\n")
+  end
+
+  def remove_from_bash
+    bashrc = Pathname.home / ".bashrc"
+    return unless bashrc.exist?
+    
+    content = bashrc.read
+    return unless content.include?("# bluefin-cli bling")
+    
+    # Remove the bling section
+    new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.sh \] && \. .*\n/, "\n")
+    bashrc.write(new_content)
+  end
+
+  def remove_from_zsh
+    zshrc = Pathname.new(ENV["ZDOTDIR"] || (Pathname.home / ".zshrc"))
+    return unless zshrc.exist?
+    
+    content = zshrc.read
+    return unless content.include?("# bluefin-cli bling")
+    
+    # Remove the bling section
+    new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.sh \] && \. .*\n/, "\n")
+    zshrc.write(new_content)
+  end
+
+  def remove_from_fish
+    fish_config = Pathname.new(ENV["XDG_CONFIG_HOME"] || (Pathname.home / ".config")) / "fish" / "config.fish"
+    return unless fish_config.exist?
+    
+    content = fish_config.read
+    return unless content.include?("# bluefin-cli bling")
+    
+    # Remove the bling section
+    new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.fish \] && \. .*\n/, "\n")
+    fish_config.write(new_content)
   end
 
   def caveats
