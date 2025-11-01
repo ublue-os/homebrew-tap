@@ -60,7 +60,7 @@ class BluefinSchemas < Formula
         relative_path = Pathname.new(path).relative_path_from(skel_source)
         target_dir = libexec / "skel" / relative_path.dirname
         target_dir.mkpath
-        FileUtils.cp(path, target_dir / File.basename(path))
+        cp(path, target_dir / File.basename(path))
       end
     end
 

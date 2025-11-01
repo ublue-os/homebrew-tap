@@ -79,11 +79,13 @@ cask "bazzite-wallpapers" do
 
       # Prefer ImageMagick v7 'magick', fall back to 'convert' if necessary
       convert_cmd = `which magick`.strip
-      if convert_cmd.empty?
-        convert_cmd = `which convert`.strip
+      convert_cmd = `which convert`.strip if convert_cmd.empty?
+      if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/magick")
+        convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick"
       end
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/magick")
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/convert")
+      if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/convert")
+        convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert"
+      end
 
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{wallpaper_dir}/**/*.avif") + Dir.glob("#{wallpaper_dir}/**/*.jxl")
@@ -105,31 +107,32 @@ cask "bazzite-wallpapers" do
         # Convert files concurrently
         threads = []
         files_to_convert.each_slice((files_to_convert.size.to_f / num_threads).ceil) do |file_batch|
-        threads << Thread.new do
-          file_batch.each do |file|
-            next unless File.file?(file)
+          threads << Thread.new do
+            file_batch.each do |file|
+              next unless File.file?(file)
 
-            filename = File.basename(file)
-            output_file = "#{File.dirname(file)}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
+              filename = File.basename(file)
+              output_file = "#{File.dirname(file)}/#{filename.gsub(/\.(avif|jxl)$/i, ".png")}"
 
-            puts "Converting #{filename} to PNG..."
+              puts "Converting #{filename} to PNG..."
 
-            # Convert image to PNG using ImageMagick
-            result = system(convert_cmd, file, output_file)
+              # Convert image to PNG using ImageMagick
+              result = system(convert_cmd, file, output_file)
 
-            if result && File.exist?(output_file)
-              puts "Successfully converted #{filename}, removing original..."
-              File.delete(file)
-            else
-              puts "WARNING: Failed to convert #{filename}"
+              if result && File.exist?(output_file)
+                puts "Successfully converted #{filename}, removing original..."
+                File.delete(file)
+              else
+                puts "WARNING: Failed to convert #{filename}"
+              end
             end
           end
         end
-      end
 
-      # Wait for all threads to complete
-      threads.each(&:join)
-      puts "Wallpaper conversion complete!"
+        # Wait for all threads to complete
+        threads.each(&:join)
+        puts "Wallpaper conversion complete!"
+      end
     end
   end
 end

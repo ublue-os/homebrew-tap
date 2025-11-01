@@ -98,11 +98,13 @@ cask "bluefin-wallpapers" do
 
       # Prefer ImageMagick v7 'magick', fall back to 'convert' if necessary
       convert_cmd = `which magick`.strip
-      if convert_cmd.empty?
-        convert_cmd = `which convert`.strip
+      convert_cmd = `which convert`.strip if convert_cmd.empty?
+      if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/magick")
+        convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick"
       end
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/magick" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/magick")
-      convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert" if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/convert")
+      if convert_cmd.empty? && File.exist?("/home/linuxbrew/.linuxbrew/bin/convert")
+        convert_cmd = "/home/linuxbrew/.linuxbrew/bin/convert"
+      end
 
       # Create a list of files to convert
       files_to_convert = Dir.glob("#{kde_destination_dir}/*.avif") + Dir.glob("#{kde_destination_dir}/*.jxl")

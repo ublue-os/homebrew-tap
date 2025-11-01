@@ -44,9 +44,7 @@ cask "cursor-linux" do
 
     # Copy icon from extracted AppImage
     icon_source = "#{staged_path}/squashfs-root/usr/share/icons/hicolor/512x512/apps/cursor.png"
-    if File.exist?(icon_source)
-      FileUtils.cp icon_source, "#{staged_path}/cursor.png"
-    end
+    FileUtils.cp icon_source, "#{staged_path}/cursor.png" if File.exist?(icon_source)
 
     File.write("#{staged_path}/cursor.desktop", <<~EOS)
       [Desktop Entry]
