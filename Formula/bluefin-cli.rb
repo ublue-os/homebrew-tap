@@ -15,13 +15,11 @@ class BluefinCli < Formula
   depends_on "atuin"
   depends_on "bat"
   depends_on "eza"
+  depends_on "glow"
+  depends_on "jq"
   depends_on "starship"
   depends_on "ugrep"
   depends_on "zoxide"
-
-  # Optional dependencies for full MOTD functionality
-  depends_on "glow" => :recommended
-  depends_on "jq" => :recommended
 
   def install
     # Needed for JSON.pretty_generate
@@ -96,20 +94,26 @@ class BluefinCli < Formula
     if motd_script.exist?
       motd_content = motd_script.read
 
-      # Adapt for cross-platform use with hardcoded paths
-      motd_content.gsub!('MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-/etc/ublue-os/motd.json}"',
-                         'MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-#{libexec}/motd/motd.json}"')
-      motd_content.gsub!('TIP_DIRECTORY="$(get_config \'.\"tips-directory\"\' "/usr/share/ublue-os/motd/tips")"',
-                         'TIP_DIRECTORY="$(get_config \'.\"tips-directory\"\' "#{libexec}/motd/tips")"')
-      motd_content.gsub!('IMAGE_INFO="$(get_config \'.\"image-info-file\"\' "/usr/share/ublue-os/image-info.json")"',
-                         'IMAGE_INFO="$(get_config \'.\"image-info-file\"\' "#{libexec}/motd/image-info.json")"')
+      # Adapt for cross-platform use with hardcoded paths (use Ruby interpolation for libexec)
       motd_content.gsub!(
-        'TEMPLATE_FILE="$(get_config \'.\"template-file\"\' "/usr/share/ublue-os/motd/template.md")"',
-        'TEMPLATE_FILE="$(get_config \'.\"template-file\"\' "#{libexec}/motd/template.md")"',
+        'MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-/etc/ublue-os/motd.json}"',
+        "MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-#{libexec}/motd/motd.json}\"",
       )
       motd_content.gsub!(
-        'THEMES_DIRECTORY="$(get_config \'.\"themes-directory\"\' "/usr/share/ublue-os/motd/themes")"',
-        'THEMES_DIRECTORY="$(get_config \'.\"themes-directory\"\' "#{libexec}/motd/themes")"',
+        'TIP_DIRECTORY="$(get_config \'\.\"tips-directory\"\' "/usr/share/ublue-os/motd/tips")"',
+        "TIP_DIRECTORY=\"$(get_config '.\"tips-directory\"' \"#{libexec}/motd/tips\")\"",
+      )
+      motd_content.gsub!(
+        'IMAGE_INFO="$(get_config \'\.\"image-info-file\"\' "/usr/share/ublue-os/image-info.json")"',
+        "IMAGE_INFO=\"$(get_config '.\"image-info-file\"' \"#{libexec}/motd/image-info.json\")\"",
+      )
+      motd_content.gsub!(
+        'TEMPLATE_FILE="$(get_config \'\.\"template-file\"\' "/usr/share/ublue-os/motd/template.md")"',
+        "TEMPLATE_FILE=\"$(get_config '.\"template-file\"' \"#{libexec}/motd/template.md\")\"",
+      )
+      motd_content.gsub!(
+        'THEMES_DIRECTORY="$(get_config \'\.\"themes-directory\"\' "/usr/share/ublue-os/motd/themes")"',
+        "THEMES_DIRECTORY=\"$(get_config '.\"themes-directory\"' \"#{libexec}/motd/themes\")\"",
       )
 
       # Make CHECK_OUTDATED work on non-rpm-ostree systems
