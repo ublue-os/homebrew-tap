@@ -75,8 +75,10 @@ cask "bazzite-wallpapers" do
   end
 
   postflight do
-    # PNG wallpapers are ready to use on macOS
-    # Linux installations use native formats (AVIF/JXL) or PNG depending on desktop environment
-    system_command "/usr/bin/true"
+    if OS.mac?
+      destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bazzite"
+      puts "Wallpapers installed to: #{destination_dir}"
+      puts "To use: System Settings > Wallpaper > Add Folder > #{destination_dir}"
+    end
   end
 end
