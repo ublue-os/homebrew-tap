@@ -62,3 +62,6 @@ If you are on KDE then [follow these instructions](https://github.com/renner0e/b
 - GUI apps, every effort to use flatpak should be exhausted, or are out of our control (eg. vscode)
 - General requests for common apps. We don't expect users to use this repo directly, the packages are there for us to automate in the background, ideall they never know this tap exists.
 
+## Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/c4eb0b1a3a2baeb3cdb87b3a463a98e21e78eafc.svg "Repobeats analytics image")
