@@ -94,6 +94,14 @@ class BluefinCli < Formula
     if motd_script.exist?
       motd_content = motd_script.read
 
+      # Ensure script always reads our installed motd.json next to it, regardless of system defaults
+      motd_content.sub!(
+        "#!/usr/bin/env bash\n",
+        "#!/usr/bin/env bash\n" \
+        "SELF_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\n" \
+        "export MOTD_CONFIG_FILE=\"${MOTD_CONFIG_FILE:-$SELF_DIR/motd.json}\"\n",
+      )
+
       # Adapt for cross-platform use with hardcoded paths (use Ruby interpolation for libexec)
       motd_content.gsub!(
         'MOTD_CONFIG_FILE="${MOTD_CONFIG_FILE:-/etc/ublue-os/motd.json}"',
