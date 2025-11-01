@@ -271,8 +271,9 @@ class BluefinCli < Formula
 
       BLING_MARKER="# bluefin-cli bling"
       MOTD_MARKER="# bluefin-cli motd"
-      BLING_SH="#{libexec}/bling/bling.sh"
-      MOTD_SH="#{libexec}/motd/bluefin-motd"
+      BLING_SH="#{opt_libexec}/bling/bling.sh"
+      BLING_FISH="#{opt_libexec}/bling/bling.fish"
+      MOTD_SH="#{opt_libexec}/motd/bluefin-motd"
 
       show_help() {
         cat << 'EOF'
@@ -313,7 +314,7 @@ class BluefinCli < Formula
             ;;
           fish)
             config="$HOME/.config/fish/config.fish"
-            source_line="source $BLING_SH"
+            source_line="source $BLING_FISH"
             ;;
           *)
             echo "Unknown shell: $shell"
@@ -365,17 +366,17 @@ class BluefinCli < Formula
           case "$s" in
             bash)
               config="$HOME/.bashrc"
-              line="[ -x #{libexec}/motd/bluefin-motd ] && #{libexec}/motd/bluefin-motd"
+              line="[ -x #{opt_libexec}/motd/bluefin-motd ] && #{opt_libexec}/motd/bluefin-motd"
               lines_to_remove=1
               ;;
             zsh)
               config="$HOME/.zshrc"
-              line="[ -x #{libexec}/motd/bluefin-motd ] && #{libexec}/motd/bluefin-motd"
+              line="[ -x #{opt_libexec}/motd/bluefin-motd ] && #{opt_libexec}/motd/bluefin-motd"
               lines_to_remove=1
               ;;
             fish)
               config="$HOME/.config/fish/config.fish"
-              line="if status is-interactive; and test -x #{libexec}/motd/bluefin-motd; #{libexec}/motd/bluefin-motd; end"
+              line="if status is-interactive; and test -x #{opt_libexec}/motd/bluefin-motd; #{opt_libexec}/motd/bluefin-motd; end"
               lines_to_remove=2
               ;;
             *)
