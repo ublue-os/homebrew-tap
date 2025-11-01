@@ -1,5 +1,3 @@
-require "etc"
-
 class BluefinCli < Formula
   desc "Shell integration with eza, starship, atuin, zoxide, bat, and ugrep"
   homepage "https://github.com/ublue-os/packages"
@@ -78,36 +76,15 @@ class BluefinCli < Formula
     end
   end
 
-  def post_install
-    # Detect installed shells and add bling to their configs
-    shells = detect_installed_shells
-
-    shells.each do |shell_name|
-      case shell_name
-      when "bash"
-        setup_bash
-      when "zsh"
-        setup_zsh
-      when "fish"
-        setup_fish
-      end
-    end
-  end
-
-  def post_uninstall
-    # Remove bling from shell configs on uninstall
-    remove_from_bash
-    remove_from_zsh
-    remove_from_fish
-  end
-
   def caveats
+    bash_cmd = "echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc"
+    zsh_cmd = "echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc"
+    fish_cmd = "echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish"
+
     <<~EOS
       🚀 Bluefin CLI - Complete Shell Experience Enhanced!
 
-      Your shell has been automatically configured with these premium tools:
-
-      📦 Installed Tools:
+      ✅ Installed Tools & Resources:
       • eza - Modern ls replacement with icons and colors
       • starship - Cross-shell prompt with git integration
       • atuin - Enhanced shell history with search
@@ -115,26 +92,30 @@ class BluefinCli < Formula
       • bat - Syntax-highlighted cat replacement
       • ugrep - Fast, colorful grep with regex support
 
-      🎨 Resources Installed:
+      📁 Resources:
       • CLI Logos: #{libexec}/bluefin-logos/
       • Fastfetch Config: #{libexec}/fastfetch/
       • Bling Scripts: #{libexec}/bling/
 
-      ✨ What Just Happened:
-      1. All premium CLI tools installed
-      2. Shell configuration (bash/zsh/fish) updated automatically
-      3. Tools are ready to use immediately!
+      🔧 Setup Instructions - Choose your shell:
 
-      📝 Shell Configuration:
-      Your shell configs have been updated with bling integration:
+      BASH:
+        #{bash_cmd}
 
-      Bash/Zsh:
-        ~/.bashrc and ~/.zshrc now source #{libexec}/bling/bling.sh
+      ZSH:
+        #{zsh_cmd}
 
-      Fish:
-        ~/.config/fish/config.fish now sources #{libexec}/bling/bling.fish
+      FISH:
+        #{fish_cmd}
 
-      🔗 Documentation: https://docs.projectbluefin.io/command-line
+      After running the appropriate command for your shell, restart your terminal or run:
+        source ~/.bashrc           # for bash
+        source ~/.zshrc            # for zsh
+        source ~/.config/fish/config.fish  # for fish
+
+      Then all the premium tools will be ready to use!
+
+      � Docs: https://docs.projectbluefin.io/command-line
     EOS
   end
 
@@ -143,115 +124,5 @@ class BluefinCli < Formula
     assert_predicate libexec / "bling" / "bling.fish", :file?
     assert_predicate libexec / "bluefin-logos", :directory?
     assert_predicate libexec / "fastfetch", :directory?
-  end
-
-  private
-
-  def detect_installed_shells
-    shells = []
-    shells << "bash" if system("command -v bash > /dev/null 2>&1")
-    shells << "zsh" if system("command -v zsh > /dev/null 2>&1")
-    shells << "fish" if system("command -v fish > /dev/null 2>&1")
-    shells
-  end
-
-  def setup_bash
-    # Get the real user home directory (not linuxbrew)
-    real_home = user_home
-    return if real_home.nil?
-
-    bashrc = Pathname.new(real_home) / ".bashrc"
-    bling_source = "[ -f #{libexec}/bling/bling.sh ] && . #{libexec}/bling/bling.sh"
-
-    return unless bashrc.exist?
-    return if bashrc.read.include?(bling_source)
-
-    bashrc.append_lines("\n# bluefin-cli bling\n#{bling_source}\n")
-  end
-
-  def setup_zsh
-    # Get the real user home directory (not linuxbrew)
-    real_home = user_home
-    return if real_home.nil?
-
-    zdotdir = ENV["ZDOTDIR"] || File.join(real_home, ".zshrc")
-    zshrc = Pathname.new(zdotdir)
-    bling_source = "[ -f #{libexec}/bling/bling.sh ] && . #{libexec}/bling/bling.sh"
-
-    return unless zshrc.exist?
-    return if zshrc.read.include?(bling_source)
-
-    zshrc.append_lines("\n# bluefin-cli bling\n#{bling_source}\n")
-  end
-
-  def setup_fish
-    # Get the real user home directory (not linuxbrew)
-    real_home = user_home
-    return if real_home.nil?
-
-    xdg_config = ENV["XDG_CONFIG_HOME"] || File.join(real_home, ".config")
-    fish_config = Pathname.new(xdg_config) / "fish" / "config.fish"
-    bling_source = "[ -f #{libexec}/bling/bling.fish ] && . #{libexec}/bling/bling.fish"
-
-    return unless fish_config.exist?
-    return if fish_config.read.include?(bling_source)
-
-    fish_config.append_lines("\n# bluefin-cli bling\n#{bling_source}\n")
-  end
-
-  def remove_from_bash
-    real_home = user_home
-    return if real_home.nil?
-
-    bashrc = Pathname.new(real_home) / ".bashrc"
-    return unless bashrc.exist?
-
-    content = bashrc.read
-    return unless content.include?("# bluefin-cli bling")
-
-    new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.sh \] && \. .*\n/, "\n")
-    bashrc.write(new_content)
-  end
-
-  def remove_from_zsh
-    real_home = user_home
-    return if real_home.nil?
-
-    zdotdir = ENV["ZDOTDIR"] || File.join(real_home, ".zshrc")
-    zshrc = Pathname.new(zdotdir)
-    return unless zshrc.exist?
-
-    content = zshrc.read
-    return unless content.include?("# bluefin-cli bling")
-
-    new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.sh \] && \. .*\n/, "\n")
-    zshrc.write(new_content)
-  end
-
-  def remove_from_fish
-    real_home = user_home
-    return if real_home.nil?
-
-    xdg_config = ENV["XDG_CONFIG_HOME"] || File.join(real_home, ".config")
-    fish_config = Pathname.new(xdg_config) / "fish" / "config.fish"
-    return unless fish_config.exist?
-
-    content = fish_config.read
-    return unless content.include?("# bluefin-cli bling")
-
-    new_content = content.gsub(/\n# bluefin-cli bling\n\[ -f .* bling\.fish \] && \. .*\n/, "\n")
-    fish_config.write(new_content)
-  end
-
-  def user_home
-    # Try to get the real user home directory
-    # Check multiple sources in order of preference
-    real_user = ENV["SUDO_USER"] || ENV["USER"] || `whoami`.strip
-
-    return if real_user.blank?
-
-    Etc.getpwnam(real_user).dir
-  rescue
-    nil
   end
 end
