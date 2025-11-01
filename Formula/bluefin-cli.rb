@@ -186,12 +186,39 @@ class BluefinCli < Formula
       end
     end
 
-    # Create image-info.json for non-Bluefin systems
+    # Create image-info.json with OS detection
+    os_name = if OS.mac?
+      "macOS"
+    elsif OS.linux?
+      os_release = Pathname.new("/etc/os-release")
+      if os_release.exist?
+        os_release.read.match(/^NAME="?([^"\n]+)"?/m)&.captures&.first || "Linux"
+      else
+        "Linux"
+      end
+    else
+      "Unknown"
+    end
+
+    os_version = if OS.mac?
+      Utils.safe_popen_read("sw_vers", "-productVersion").strip
+    elsif OS.linux?
+      os_release = Pathname.new("/etc/os-release")
+      if os_release.exist?
+        os_release.read.match(/^VERSION_ID="?([^"\n]+)"?/m)&.captures&.first ||
+          os_release.read.match(/^VERSION="?([^"\n]+)"?/m)&.captures&.first || "unknown"
+      else
+        "unknown"
+      end
+    else
+      "unknown"
+    end
+
     image_info = {
-      "image-name"     => "bluefin-cli",
-      "image-tag"      => version.to_s,
+      "image-name"     => os_name,
+      "image-tag"      => os_version,
       "image-flavor"   => "homebrew",
-      "image-vendor"   => "ublue-os",
+      "image-vendor"   => "bluefin-cli",
       "fedora-version" => "N/A",
     }
     (libexec / "motd" / "image-info.json").write(JSON.pretty_generate(image_info))
