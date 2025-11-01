@@ -6,16 +6,6 @@ class BluefinCli < Formula
   sha256 "fdc1a5ac6bfa48c710abe3ad9286ce1129cb7e4c3acb9978aaecf88157fbc6b4"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-    regex(/^homebrew[._-](\d{4})[._-](\d{2})[._-](\d{2})[._-](\d{2})[._-](\d{2})[._-](\d{2})$/i)
-    strategy :github_latest do |json, regex|
-      json["tag_name"].scan(regex).map do |match|
-        "#{match[0]}.#{match[1]}.#{match[2]}.#{match[3]}.#{match[4]}.#{match[5]}"
-      end.first
-    end
-  end
-
   # CLI tools that bling integrates (core experience enhancements)
   depends_on "atuin"
   depends_on "bat"
@@ -293,11 +283,16 @@ class BluefinCli < Formula
       🔧 Setup Your Shell - Choose your shell and enable bling:
 
       BASH:
-        bluefin-cli bling bash on && bluefin-cli motd on
+        echo '. #{libexec}/bling/bling.sh' >> ~/.bashrc
+        source ~/.bashrc
+
       ZSH:
-        bluefin-cli bling zsh on && bluefin-cli motd on
+        echo '. #{libexec}/bling/bling.sh' >> ~/.zshrc
+        source ~/.zshrc
+
       FISH:
-        bluefin-cli bling fish on; bluefin-cli motd on
+        echo 'source #{libexec}/bling/bling.fish' >> ~/.config/fish/config.fish
+        source ~/.config/fish/config.fish
 
       📋 Management Commands:
 
