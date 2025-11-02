@@ -20,9 +20,10 @@ cask "1password-gui-linux" do
   os linux: "linux"
 
   version "8.11.16"
-  sha256 :no_check
+  sha256 arm64_linux: "8adca470eb570ad383789ec2b5ab0df0ce00abc0c2576a6e9a9cbae3a3c00e21",
+         x86_64_linux: "2d9d15dbde862cb75ea248f79a00f42e74021ea94c1e73303cb1e5c08e5bd4ad"
 
-  url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-latest.tar.gz"
+  url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-#{version}.#{Utils.alternate_arch(arch)}.tar.gz"
   name "1Password"
   desc "Password manager that keeps all passwords secure behind one password"
   homepage "https://1password.com/"
@@ -81,12 +82,20 @@ cask "1password-gui-linux" do
             the same as the version to be installed."
     end
 
+    File.write("#{staged_path}/zpass.sh", <<~EOS
+      #!/bin/bash
+      zenity --password --title="Homebrew Sudo Password Prompt"
+    EOS
+    )
+
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS
       #!/bin/bash
       set -e
+
+      SUDO_ASKPASS=#{staged_path}/zpass.sh
       echo "Uninstalling polkit policy file from /etc/polkit-1/actions/com.1password.1Password.policy"
       if [ -f /etc/polkit-1/actions/com.1password.1Password.policy ]; then
-        rm -f /etc/polkit-1/actions/com.1password.1Password.policy
+        sudo rm -f /etc/polkit-1/actions/com.1password.1Password.policy
         echo "Removed /etc/polkit-1/actions/com.1password.1Password.policy"
       else
         echo "/etc/polkit-1/actions/com.1password.1Password.policy does not exist, skipping."
@@ -97,7 +106,7 @@ cask "1password-gui-linux" do
 
   uninstall_preflight do
     system "chmod", "+x", "#{staged_path}/1password-uninstall.sh"
-    system "sudo", "#{staged_path}/1password-uninstall.sh"
+    system "#{staged_path}/1password-uninstall.sh"
   end
 
   zap trash: [
