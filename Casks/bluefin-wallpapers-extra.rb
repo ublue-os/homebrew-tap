@@ -30,7 +30,7 @@ cask "bluefin-wallpapers-extra" do
   homepage "https://github.com/hanthor/artwork"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    regex(/^bluefin-extra-v?(\d{4}-\d{2}-\d{2})$/i)
     strategy :github_latest
   end
 

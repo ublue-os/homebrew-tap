@@ -30,7 +30,7 @@ cask "framework-wallpapers" do
   homepage "https://github.com/hanthor/artwork"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    regex(/^framework-v?(\d{4}-\d{2}-\d{2})$/i)
     strategy :github_latest
   end
 
