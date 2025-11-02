@@ -6,7 +6,7 @@ Homebrew has asked us to run this as a tap as opposed to PRing these into indivi
 
 ### Experimental Tap
 
-We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out. Please send pull requests first, this is the production tap! 
+We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out. Please send pull requests first, this is the production tap!
 
 ## This is useful for
 

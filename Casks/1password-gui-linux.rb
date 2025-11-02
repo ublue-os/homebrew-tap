@@ -20,7 +20,7 @@ cask "1password-gui-linux" do
   os linux: "linux"
 
   version "8.11.16"
-  sha256 arm64_linux: "8adca470eb570ad383789ec2b5ab0df0ce00abc0c2576a6e9a9cbae3a3c00e21",
+  sha256 arm64_linux:  "8adca470eb570ad383789ec2b5ab0df0ce00abc0c2576a6e9a9cbae3a3c00e21",
          x86_64_linux: "2d9d15dbde862cb75ea248f79a00f42e74021ea94c1e73303cb1e5c08e5bd4ad"
 
   url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-#{version}.#{Utils.alternate_arch(arch)}.tar.gz"
