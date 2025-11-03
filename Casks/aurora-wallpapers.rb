@@ -8,7 +8,7 @@ cask "aurora-wallpapers" do
   homepage "https://github.com/projectbluefin/artwork"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    regex(/^aurora-v?(\d{4}-\d{2}-\d{2})$/i)
     strategy :github_latest
   end
 

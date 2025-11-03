@@ -9,7 +9,7 @@ cask "bazzite-wallpapers" do
   homepage "https://bazzite.gg/"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
+    regex(/^bazzite-v?(\d{4}-\d{2}-\d{2})$/i)
     strategy :github_latest
   end
 
