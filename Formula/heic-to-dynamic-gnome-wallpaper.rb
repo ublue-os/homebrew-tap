@@ -19,6 +19,6 @@ class HeicToDynamicGnomeWallpaper < Formula
   end
 
   test do
-    system "#{bin}/heic-to-dynamic-gnome-wallpaper", "--help"
+    system bin / "heic-to-dynamic-gnome-wallpaper", "--help"
   end
 end
