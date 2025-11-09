@@ -14,6 +14,11 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 
 ```shell
 brew tap ublue-os/tap
+
+# Formulas
+brew install heic-to-dynamic-gnome-wallpaper
+
+# Casks
 brew install --cask visual-studio-code-linux
 brew install --cask vscodium-linux
 brew install --cask jetbrains-toolbox-linux
@@ -29,6 +34,12 @@ brew install --cask framework-wallpapers
 ```
 
 ## Includes
+
+### CLI
+
+- heic-to-dynamic-gnome-wallpaper - Convert HEIC dynamic wallpapers to GNOME dynamic wallpapers
+
+### GUI
 
 - 1Password - Password manager
 - JetBrains Toolbox - JetBrains tools manager
