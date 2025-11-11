@@ -9,6 +9,13 @@ class Pmbootstrap < Formula
 
   depends_on "python@3.14"
 
+  livecheck do
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :git do |tags, regex|
+      tags.map { |tag| tag[regex, 1] }.compact
+    end
+  end
+
   def install
     virtualenv_install_with_resources
   end
