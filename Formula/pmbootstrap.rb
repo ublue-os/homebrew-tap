@@ -1,20 +1,22 @@
 class Pmbootstrap < Formula
   include Language::Python::Virtualenv
 
-  version "3.6.0"
-  desc "A sophisticated chroot / build / flash tool to develop and install postmarketOS'"
+  desc "Sophisticated chroot / build / flash tool to develop and install postmarketOS'"
   homepage "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
+  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", revision: version.to_s
+  version "3.6.0"
   license "GPL-3.0-or-later"
-  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", revision: "#{version}"
-
-  depends_on "python@3.14"
 
   livecheck do
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
     strategy :git do |tags, regex|
-      tags.map { |tag| tag[regex, 1] }.compact
+      tags.filter_map { |tag| tag[regex, 1] }
     end
   end
+
+  depends_on linux: :any
+  depends_on "python@3.14"
 
   def install
     virtualenv_install_with_resources
