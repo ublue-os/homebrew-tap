@@ -1,7 +1,7 @@
 class Pmbootstrap < Formula
   include Language::Python::Virtualenv
 
-  desc "Sophisticated chroot / build / flash tool to develop and install postmarketOS'"
+  desc "Sophisticated chroot / build / flash tool to develop and install postmarketOS"
   homepage "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
   url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", tag: "3.6.0", revision: "e847f1a4dac77b17b6d48325006754cd22bdb9a8"
 
