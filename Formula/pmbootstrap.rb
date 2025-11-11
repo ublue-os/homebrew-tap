@@ -3,9 +3,9 @@ class Pmbootstrap < Formula
 
   desc "Sophisticated chroot / build / flash tool to develop and install postmarketOS'"
   homepage "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
-  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", revision: version.to_s
-  version "3.6.0"
-  license "GPL-3.0-or-later"
+  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", tag: "3.6.0", revision: "e847f1a4dac77b17b6d48325006754cd22bdb9a8"
+
+  license "GPL-3.0-only"
 
   livecheck do
     url :stable
@@ -23,6 +23,6 @@ class Pmbootstrap < Formula
   end
 
   test do
-    system "false"
+    assert_match version.to_s, shell_output("#{bin}/pmbootstrap --version")
   end
 end
