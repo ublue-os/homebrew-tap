@@ -38,7 +38,6 @@ cask "1password-gui-linux" do
            target: "#{HOMEBREW_PREFIX}/etc/polkit-1/actions/com.1password.1Password.policy"
 
   preflight do
-    # Replace Exec path in desktop file to point to Homebrew prefix
     desktop_file = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/1password.desktop"
     text = File.read(desktop_file)
     new_contents = text.gsub("Exec=/opt/1Password/1password", "Exec=#{HOMEBREW_PREFIX}/bin/1password")
@@ -69,13 +68,11 @@ cask "1password-gui-linux" do
       as it already exists and is the same as the version to be installed."
     end
 
-    # Script to prompt for sudo password via zenity
     File.write("#{staged_path}/zpass.sh", <<~EOS)
       #!/bin/bash
       zenity --password --title="Homebrew Sudo Password Prompt"
     EOS
 
-    # Uninstall script to remove polkit policy file
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
       #!/bin/bash
       set -e
