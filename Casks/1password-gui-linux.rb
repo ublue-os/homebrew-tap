@@ -38,6 +38,7 @@ cask "1password-gui-linux" do
            target: "#{HOMEBREW_PREFIX}/etc/polkit-1/actions/com.1password.1Password.policy"
 
   preflight do
+    # Replace Exec path in desktop file to point to Homebrew prefix
     desktop_file = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/1password.desktop"
     text = File.read(desktop_file)
     new_contents = text.gsub("Exec=/opt/1Password/1password", "Exec=#{HOMEBREW_PREFIX}/bin/1password")
@@ -47,18 +48,18 @@ cask "1password-gui-linux" do
   postflight do
     system "echo", "Installing polkit policy file to /etc/polkit-1/actions/, you may be prompted for your password."
     if !File.exist?("/etc/polkit-1/actions/com.1password.1Password.policy") ||
-       !FileUtils.identical?(
-         "#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl",
-         "/etc/polkit-1/actions/com.1password.1Password.policy",
-       )
+       !FileUtils.identical?("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl",
+                             "/etc/polkit-1/actions/com.1password.1Password.policy")
 
+      # Get users from /etc/passwd and output first 10 human users (1000 >= UID <= 9999) to the policy file
+      # format: `unix-user:username` space separated
+      # This is used to allow these users to unlock 1Password via polkit.
       human_users = `awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" { print $1 }' /etc/passwd`
                     .split("\n").first(10)
       policy_owners = human_users.map { |user| "unix-user:#{user}" }.join(" ")
       policy_file = File.read("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl")
       replaced_contents = policy_file.gsub("${POLICY_OWNERS}", policy_owners)
-      File.write("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy",
-                 replaced_contents)
+      File.write("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy", replaced_contents)
       system "sudo", "install", "-Dm0644",
              "#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy",
              "/etc/polkit-1/actions/com.1password.1Password.policy"
@@ -68,11 +69,13 @@ cask "1password-gui-linux" do
       as it already exists and is the same as the version to be installed."
     end
 
+    # Script to prompt for sudo password via zenity
     File.write("#{staged_path}/zpass.sh", <<~EOS)
       #!/bin/bash
       zenity --password --title="Homebrew Sudo Password Prompt"
     EOS
 
+    # Uninstall script to remove polkit policy file
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
       #!/bin/bash
       set -e
