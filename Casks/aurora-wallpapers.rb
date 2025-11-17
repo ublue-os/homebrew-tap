@@ -8,8 +8,9 @@ cask "aurora-wallpapers" do
   homepage "https://github.com/projectbluefin/artwork"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/aurora\-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   if File.exist?("/usr/bin/plasmashell")

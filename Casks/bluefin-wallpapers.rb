@@ -1,31 +1,43 @@
 cask "bluefin-wallpapers" do
   version "2025-10-29"
-  sha256 "76915478e38f702c4c01d906116a216c2040c7f3e33bd64a6a6ffa54727795a4"
 
-  url "https://github.com/projectbluefin/artwork/releases/latest/download/bluefin-wallpapers.tar.zstd"
   name "bluefin-wallpapers"
   desc "Wallpapers for Bluefin"
   homepage "https://github.com/projectbluefin/artwork"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/bluefin\-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 
   if File.exist?("/usr/bin/plasmashell")
-    Dir.glob("#{staged_path}/kde/*").each do |file|
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
+    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+
+    Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
-  else
-    Dir.glob("#{staged_path}/gnome/images/*").each do |file|
+  elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
+    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+
+    Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
 
-    Dir.glob("#{staged_path}/gnome/gnome-background-properties/*").each do |file|
+    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
       artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+    end
+  else
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
+    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+
+    Dir.glob("#{staged_path}/*").each do |file|
+      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
 

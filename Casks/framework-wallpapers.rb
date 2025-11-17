@@ -1,31 +1,43 @@
 cask "framework-wallpapers" do
   version "2025-10-29"
-  sha256 "4c5d8742d7b1e6e44a04911a92fc363ca9a39bd7de1bec927a23741793cbe3e4"
 
-  url "https://github.com/projectbluefin/artwork/releases/latest/download/framework-wallpapers.tar.zstd"
   name "framework-wallpapers"
   desc "Extra Wallpapers for Bluefin"
   homepage "https://github.com/projectbluefin/artwork"
 
   livecheck do
-    regex(/v?(\d{4}-\d{2}-\d{2})/)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/framework\-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   destination_dir = "#{Dir.home}/.local/share/backgrounds/framework"
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/framework"
 
   if File.exist?("/usr/bin/plasmashell")
-    Dir.glob("#{staged_path}/kde/*").each do |file|
+    url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-kde.tar.zstd"
+    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+
+    Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
-  else
-    Dir.glob("#{staged_path}/gnome/images/*").each do |file|
+  elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+    url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-gnome.tar.zstd"
+    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+
+    Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
 
-    Dir.glob("#{staged_path}/gnome/gnome-background-properties/*").each do |file|
+    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
       artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+    end
+  else
+    url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-png.tar.zstd"
+    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+
+    Dir.glob("#{staged_path}/*").each do |file|``
+      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
 
