@@ -1,5 +1,5 @@
 cask "framework-wallpapers" do
-  version "2025-10-29"
+  version "2025-11-17"
 
   name "framework-wallpapers"
   desc "Extra Wallpapers for Bluefin"
@@ -7,7 +7,7 @@ cask "framework-wallpapers" do
 
   livecheck do
     url "https://github.com/ublue-os/artwork.git"
-    regex(/framework\-v?(\d{4}-\d{2}-\d{2})/)
+    regex(/framework-v?(\d{4}-\d{2}-\d{2})/)
     strategy :github_releases
   end
 
@@ -16,14 +16,14 @@ cask "framework-wallpapers" do
 
   if File.exist?("/usr/bin/plasmashell")
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-kde.tar.zstd"
-    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+    sha256 "b223987e999906e95ab56d9e8d596e88f0ae2cf871d9b2e76739c3055f087b61"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-gnome.tar.zstd"
-    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+    sha256 "b223987e999906e95ab56d9e8d596e88f0ae2cf871d9b2e76739c3055f087b61"
 
     Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
@@ -34,9 +34,10 @@ cask "framework-wallpapers" do
     end
   else
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-png.tar.zstd"
-    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+    sha256 "b223987e999906e95ab56d9e8d596e88f0ae2cf871d9b2e76739c3055f087b61"
 
-    Dir.glob("#{staged_path}/*").each do |file|``
+    Dir.glob("#{staged_path}/*").each do |file|
+      ``
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
