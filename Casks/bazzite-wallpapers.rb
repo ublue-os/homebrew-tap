@@ -9,7 +9,7 @@ cask "bazzite-wallpapers" do
 
   livecheck do
     url "https://github.com/ublue-os/artwork.git"
-    regex(/bazzite\-v?(\d{4}-\d{2}-\d{2})/)
+    regex(/bazzite-v?(\d{4}-\d{2}-\d{2})/)
     strategy :github_releases
   end
 

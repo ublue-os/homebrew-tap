@@ -7,7 +7,7 @@ cask "bluefin-wallpapers-extra" do
 
   livecheck do
     url "https://github.com/ublue-os/artwork.git"
-    regex(/bluefin\-extra\-v?(\d{4}-\d{2}-\d{2})/)
+    regex(/bluefin-extra-v?(\d{4}-\d{2}-\d{2})/)
     strategy :github_releases
   end
 

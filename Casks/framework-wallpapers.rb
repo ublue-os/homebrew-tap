@@ -7,7 +7,7 @@ cask "framework-wallpapers" do
 
   livecheck do
     url "https://github.com/ublue-os/artwork.git"
-    regex(/framework\-v?(\d{4}-\d{2}-\d{2})/)
+    regex(/framework-v?(\d{4}-\d{2}-\d{2})/)
     strategy :github_releases
   end
 
@@ -36,7 +36,8 @@ cask "framework-wallpapers" do
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-png.tar.zstd"
     sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
 
-    Dir.glob("#{staged_path}/*").each do |file|``
+    Dir.glob("#{staged_path}/*").each do |file|
+      ``
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
