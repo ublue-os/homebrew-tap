@@ -23,7 +23,7 @@ cask "bluefin-wallpapers" do
     end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
-    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+    sha256 "7777250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
 
     Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
@@ -34,7 +34,7 @@ cask "bluefin-wallpapers" do
     end
   else
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
-    sha256 "818b60ad2f7250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
+    sha256 "899999250da854dd8255a46756a79f015f965829dcd436b1acaec02500f"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
