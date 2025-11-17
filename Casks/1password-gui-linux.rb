@@ -1,20 +1,3 @@
-module Utils
-  def self.alternate_arch(arch)
-    case arch
-    when "aarch64"
-      "arm64"
-    when "x86_64"
-      "x64"
-    end
-  end
-
-  def self.replace_path_in_file(file_path, old_text, new_text)
-    text = File.read(file_path)
-    new_contents = text.gsub(old_text, new_text)
-    File.open(file_path, "w") { |file| file.puts new_contents }
-  end
-end
-
 cask "1password-gui-linux" do
   arch intel: "x86_64", arm: "aarch64"
   os linux: "linux"
@@ -23,7 +6,13 @@ cask "1password-gui-linux" do
   sha256 arm64_linux:  "8adca470eb570ad383789ec2b5ab0df0ce00abc0c2576a6e9a9cbae3a3c00e21",
          x86_64_linux: "2d9d15dbde862cb75ea248f79a00f42e74021ea94c1e73303cb1e5c08e5bd4ad"
 
-  url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-#{version}.#{Utils.alternate_arch(arch)}.tar.gz"
+  arch_suffix =
+    case arch
+    when "aarch64" then "arm64"
+    when "x86_64" then "x64"
+    end
+
+  url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-#{version}.#{arch_suffix}.tar.gz"
   name "1Password"
   desc "Password manager that keeps all passwords secure behind one password"
   homepage "https://1password.com/"
@@ -36,59 +25,55 @@ cask "1password-gui-linux" do
     end
   end
 
-  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1password",
-         target: "1password"
-  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/op-ssh-sign",
-         target: "op-ssh-sign"
-  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1Password-BrowserSupport",
-         target: "1Password-BrowserSupport"
-  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1Password-Crash-Handler",
-         target: "1Password-Crash-Handler"
-  binary "1password-#{version}.#{Utils.alternate_arch(arch)}/1Password-LastPass-Exporter",
-         target: "1Password-LastPass-Exporter"
-  artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/resources/1password.desktop",
+  binary "1password-#{version}.#{arch_suffix}/1password", target: "1password"
+  binary "1password-#{version}.#{arch_suffix}/op-ssh-sign", target: "op-ssh-sign"
+  binary "1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", target: "1Password-BrowserSupport"
+  binary "1password-#{version}.#{arch_suffix}/1Password-Crash-Handler", target: "1Password-Crash-Handler"
+  binary "1password-#{version}.#{arch_suffix}/1Password-LastPass-Exporter", target: "1Password-LastPass-Exporter"
+  artifact "1password-#{version}.#{arch_suffix}/resources/1password.desktop",
            target: "#{Dir.home}/.local/share/applications/1password.desktop"
-  artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/resources/icons/hicolor/256x256/apps/1password.png",
+  artifact "1password-#{version}.#{arch_suffix}/resources/icons/hicolor/256x256/apps/1password.png",
            target: "#{Dir.home}/.local/share/icons/1password.png"
-  artifact "1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl",
+  artifact "1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl",
            target: "#{HOMEBREW_PREFIX}/etc/polkit-1/actions/com.1password.1Password.policy"
 
   preflight do
-    Utils.replace_path_in_file("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/resources/1password.desktop",
-                               "Exec=/opt/1Password/1password",
-                               "Exec=#{HOMEBREW_PREFIX}/bin/1password")
+    desktop_file = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/1password.desktop"
+    text = File.read(desktop_file)
+    new_contents = text.gsub("Exec=/opt/1Password/1password", "Exec=#{HOMEBREW_PREFIX}/bin/1password")
+    File.write(desktop_file, new_contents)
   end
 
   postflight do
     system "echo", "Installing polkit policy file to /etc/polkit-1/actions/, you may be prompted for your password."
     if !File.exist?("/etc/polkit-1/actions/com.1password.1Password.policy") ||
-       !FileUtils.identical?("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl", "/etc/polkit-1/actions/com.1password.1Password.policy")
+       !FileUtils.identical?("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl",
+                             "/etc/polkit-1/actions/com.1password.1Password.policy")
 
-      # Get users from /etc/passwd and output first 10 human users ( 1000 >= UID <= 9999) to the policy file in the
-      # format `unix-user:username` and is space separated
+      # Get users from /etc/passwd and output first 10 human users (1000 >= UID <= 9999) to the policy file
+      # format: `unix-user:username` space separated
       # This is used to allow these users to unlock 1Password via polkit.
       human_users = `awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" { print $1 }' /etc/passwd`
                     .split("\n").first(10)
       policy_owners = human_users.map { |user| "unix-user:#{user}" }.join(" ")
-      policy_file = File.read("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy.tpl")
+      policy_file = File.read("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl")
       replaced_contents = policy_file.gsub("${POLICY_OWNERS}", policy_owners)
-      File.write("#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy", replaced_contents)
+      File.write("#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy", replaced_contents)
       system "sudo", "install", "-Dm0644",
-             "#{staged_path}/1password-#{version}.#{Utils.alternate_arch(arch)}/com.1password.1Password.policy",
+             "#{staged_path}/1password-#{version}.#{arch_suffix}/com.1password.1Password.policy",
              "/etc/polkit-1/actions/com.1password.1Password.policy"
       puts "Installed /etc/polkit-1/actions/com.1password.1Password.policy"
     else
-      puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy, as it already exists and is
-            the same as the version to be installed."
+      puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy,
+      as it already exists and is the same as the version to be installed."
     end
 
-    File.write("#{staged_path}/zpass.sh", <<~EOS
+    File.write("#{staged_path}/zpass.sh", <<~EOS)
       #!/bin/bash
       zenity --password --title="Homebrew Sudo Password Prompt"
     EOS
-    )
 
-    File.write("#{staged_path}/1password-uninstall.sh", <<~EOS
+    File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
       #!/bin/bash
       set -e
 
@@ -101,7 +86,6 @@ cask "1password-gui-linux" do
         echo "/etc/polkit-1/actions/com.1password.1Password.policy does not exist, skipping."
       fi
     EOS
-    )
   end
 
   uninstall_preflight do
