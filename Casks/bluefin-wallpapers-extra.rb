@@ -16,14 +16,14 @@ cask "bluefin-wallpapers-extra" do
 
   if File.exist?("/usr/bin/plasmashell")
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
-    sha256 "350dd7dacb4478ffce95bd2711b20e9b950302b0e6da49c05e9b7859c3812312"
+    sha256 "84f714825d61a0518421314b1afb3b7fcb19c7f5c213a06f5f8928a15be54a1c"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
-    sha256 "a852dd636f6424780825d765acb3fcf174f1c84628bb7e51b37cbbadb6f7a1e7"
+    sha256 "b5fdfd634d007ea9bb2f6c8aa8ad783593741814337adbd94039c16d6bc1cf0b"
 
     Dir.glob("#{staged_path}/images/*").each do |file|
       folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
