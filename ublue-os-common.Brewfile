@@ -1,0 +1,1 @@
+cask "1password-gui-linux"
