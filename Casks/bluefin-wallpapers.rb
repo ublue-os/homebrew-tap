@@ -34,7 +34,7 @@ cask "bluefin-wallpapers" do
     end
   else
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
-    sha256 "5f7536d53b6dbc97629ef8f4ab8cca92183d2ffd719490c660383f156e4295a7"
+    sha256 "75e09232bca7d6f50158e990c400a3a6dd6e4e346ba3fda96d42d7dcddfee270"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
