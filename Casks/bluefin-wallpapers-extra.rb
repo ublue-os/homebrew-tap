@@ -1,5 +1,5 @@
 cask "bluefin-wallpapers-extra" do
-  version "2025-11-29"
+  version "2025-11-30"
 
   name "bluefin-wallpapers-extra"
   desc "Extra Wallpapers for Bluefin"
@@ -35,7 +35,7 @@ cask "bluefin-wallpapers-extra" do
     end
   else
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
-    sha256 "da8f98c11cea6f12bd75a13b58cf83f4b7f3d2dc4b620096b4448f9b5b7810de"
+    sha256 "e8c5b8fdfa2d4cc7614a6892ba0809215aa8e6273c501d2e18d2fcbe126b85e8"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
