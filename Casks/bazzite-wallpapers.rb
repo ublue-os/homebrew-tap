@@ -1,6 +1,6 @@
 cask "bazzite-wallpapers" do
-  version "2025-11-17"
-  sha256 "b14feecf13568a2d42754f59fe90f5a2ce590ebe5e2b2596ad4735ca087d6c4a"
+  version "2025-11-30"
+  sha256 "54f14e251ad48efdc52e002113c8df462d45e09916d836001a056f031dc0eb46"
 
   url "https://github.com/ublue-os/artwork/releases/download/bazzite-v#{version}/bazzite-wallpapers.tar.zstd"
   name "bazzite-wallpapers"

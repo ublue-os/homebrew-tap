@@ -1,5 +1,5 @@
 cask "bluefin-wallpapers" do
-  version "2025-11-17"
+  version "2025-11-30"
 
   name "bluefin-wallpapers"
   desc "Wallpapers for Bluefin"
@@ -15,14 +15,14 @@ cask "bluefin-wallpapers" do
   kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 
   if File.exist?("/usr/bin/plasmashell")
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-kde.tar.zstd"
     sha256 "d0c57affa270d6a8846f067341d69073c8469f8f97c2e60fbb7b51153483403e"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-gnome.tar.zstd"
     sha256 "b3aa0df9e6ba7380a797779e14ca58abd6c3d95a7e5e75f6e39a052494f792f1"
 
     Dir.glob("#{staged_path}/images/*").each do |file|
@@ -33,8 +33,8 @@ cask "bluefin-wallpapers" do
       artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
     end
   else
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
-    sha256 "75e09232bca7d6f50158e990c400a3a6dd6e4e346ba3fda96d42d7dcddfee270"
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-png.tar.zstd"
+    sha256 "078c2e259055ea220045e1aea84a13d7a7a68c5ab05dbcfe928501b0a98d625c"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
