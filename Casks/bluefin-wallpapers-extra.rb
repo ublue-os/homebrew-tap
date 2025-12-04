@@ -23,7 +23,7 @@ cask "bluefin-wallpapers-extra" do
     end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
-    sha256 "b5fdfd634d007ea9bb2f6c8aa8ad783593741814337adbd94039c16d6bc1cf0b"
+    sha256 "98b8a10a31f571a791f806a96d5f40287169d6fae223d5ae53dae065d377a4d6"
 
     Dir.glob("#{staged_path}/images/*").each do |file|
       folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")

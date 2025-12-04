@@ -23,7 +23,7 @@ cask "framework-wallpapers" do
     end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-gnome.tar.zstd"
-    sha256 "b6666aeae2f5e2ac3248243d2ed04d823379abd70df39fc3e5550479b586724b"
+    sha256 "cec25556745ec15cbc73eeb356e94479d7daf9cfbcb1a56da408e1e3c917441b"
 
     Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
