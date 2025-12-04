@@ -13,28 +13,44 @@ cask "bazzite-wallpapers" do
     strategy :github_releases
   end
 
-  destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
-  kde_destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
+  postflight do
+    destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
+    kde_destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
 
-  if File.exist?("/usr/bin/plasmashell")
-    Dir.glob("#{staged_path}/*").each do |file|
-      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
-    end
-  else
-    Dir.glob("#{staged_path}/images/*").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
-    end
-
-    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-      artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-    end
-  end
-
-  preflight do
+    # Process XML files first
     Dir.glob("#{staged_path}/**/*.xml").each do |file|
       contents = File.read(file)
       contents.gsub!("~", Dir.home)
       File.write(file, contents)
+    end
+
+    if File.exist?("/usr/bin/plasmashell")
+      FileUtils.mkdir_p(kde_destination_dir)
+      Dir.glob("#{staged_path}/*").each do |file|
+        FileUtils.cp_r(file, "#{kde_destination_dir}/#{File.basename(file)}", remove_destination: true)
+      end
+    else
+      FileUtils.mkdir_p(destination_dir)
+      FileUtils.mkdir_p("#{Dir.home}/.local/share/gnome-background-properties")
+
+      Dir.glob("#{staged_path}/images/*").each do |file|
+        FileUtils.cp(file, "#{destination_dir}/#{File.basename(file)}")
+      end
+
+      Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
+        FileUtils.cp(file, "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}")
+      end
+    end
+  end
+
+  uninstall_postflight do
+    destination_dir = "#{Dir.home}/.local/share/backgrounds/bazzite"
+
+    FileUtils.rm_rf(destination_dir) if File.exist?(destination_dir)
+
+    gnome_props_dir = "#{Dir.home}/.local/share/gnome-background-properties"
+    Dir.glob("#{gnome_props_dir}/bazzite-*.xml").each do |file|
+      FileUtils.rm(file) if File.exist?(file)
     end
   end
 end
