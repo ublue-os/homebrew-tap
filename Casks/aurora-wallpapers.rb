@@ -13,31 +13,48 @@ cask "aurora-wallpapers" do
     strategy :github_releases
   end
 
-  if File.exist?("/usr/bin/plasmashell")
-    Dir.glob("#{staged_path}/kde/*").each do |dir|
-      next if dir.include?("gnome-background-properties")
+  postflight do
+    destination_dir = "#{Dir.home}/.local/share/backgrounds/aurora"
 
-      artifact dir, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
-    end
-  else
-    Dir.glob("#{staged_path}/kde/*").each do |dir|
-      Dir.glob("#{dir}/contents/images/*").each do |file|
-        extension = File.extname(file)
-        File.basename(file, extension)
-        artifact file, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}#{extension}"
-      end
-
-      Dir.glob("#{dir}/gnome-background-properties/*").each do |file|
-        artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-      end
-    end
-  end
-
-  preflight do
+    # Process XML files first
     Dir.glob("#{staged_path}/**/*.xml").each do |file|
       contents = File.read(file)
       contents.gsub!("~", Dir.home)
       File.write(file, contents)
+    end
+
+    if File.exist?("/usr/bin/plasmashell")
+      FileUtils.mkdir_p(destination_dir)
+      Dir.glob("#{staged_path}/kde/*").each do |dir|
+        next if dir.include?("gnome-background-properties")
+
+        FileUtils.cp_r(dir, "#{destination_dir}/#{File.basename(dir)}", remove_destination: true)
+      end
+    else
+      FileUtils.mkdir_p(destination_dir)
+      FileUtils.mkdir_p("#{Dir.home}/.local/share/gnome-background-properties")
+
+      Dir.glob("#{staged_path}/kde/*").each do |dir|
+        Dir.glob("#{dir}/contents/images/*").each do |file|
+          extension = File.extname(file)
+          FileUtils.cp(file, "#{destination_dir}/#{File.basename(dir)}#{extension}")
+        end
+
+        Dir.glob("#{dir}/gnome-background-properties/*").each do |file|
+          FileUtils.cp(file, "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}")
+        end
+      end
+    end
+  end
+
+  uninstall_postflight do
+    destination_dir = "#{Dir.home}/.local/share/backgrounds/aurora"
+
+    FileUtils.rm_rf(destination_dir) if File.exist?(destination_dir)
+
+    gnome_props_dir = "#{Dir.home}/.local/share/gnome-background-properties"
+    Dir.glob("#{gnome_props_dir}/aurora-*.xml").each do |file|
+      FileUtils.rm(file) if File.exist?(file)
     end
   end
 end

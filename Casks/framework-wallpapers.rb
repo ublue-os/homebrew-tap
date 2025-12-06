@@ -17,35 +17,56 @@ cask "framework-wallpapers" do
   if File.exist?("/usr/bin/plasmashell")
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-kde.tar.zstd"
     sha256 "904d5116a7f397733d4e8602e7184bb063f3ab12df241a819187a1c5e8e4eb99"
-
-    Dir.glob("#{staged_path}/*").each do |file|
-      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
-    end
   elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-gnome.tar.zstd"
     sha256 "cec25556745ec15cbc73eeb356e94479d7daf9cfbcb1a56da408e1e3c917441b"
-
-    Dir.glob("#{staged_path}/images/*").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
-    end
-
-    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-      artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-    end
   else
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-png.tar.zstd"
     sha256 "6ac2209a5bb6cd7cc53c4962f7554ac823cbe91c4b7d7a956617debdbe07d9cf"
-
-    Dir.glob("#{staged_path}/*").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
-    end
   end
 
-  preflight do
+  postflight do
+    # Process XML files first
     Dir.glob("#{staged_path}/**/*.xml").each do |file|
       contents = File.read(file)
       contents.gsub!("~", Dir.home)
       File.write(file, contents)
+    end
+
+    if File.exist?("/usr/bin/plasmashell")
+      FileUtils.mkdir_p(kde_destination_dir)
+      Dir.glob("#{staged_path}/*").each do |file|
+        FileUtils.cp_r(file, "#{kde_destination_dir}/#{File.basename(file)}", remove_destination: true)
+      end
+    elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+      FileUtils.mkdir_p(destination_dir)
+      FileUtils.mkdir_p("#{Dir.home}/.local/share/gnome-background-properties")
+
+      Dir.glob("#{staged_path}/images/*").each do |file|
+        FileUtils.cp(file, "#{destination_dir}/#{File.basename(file)}")
+      end
+
+      Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
+        FileUtils.cp(file, "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}")
+      end
+    else
+      FileUtils.mkdir_p(destination_dir)
+      Dir.glob("#{staged_path}/*").each do |file|
+        FileUtils.cp_r(file, "#{destination_dir}/#{File.basename(file)}", remove_destination: true)
+      end
+    end
+  end
+
+  uninstall_postflight do
+    if File.exist?("/usr/bin/plasmashell")
+      FileUtils.rm_rf(kde_destination_dir) if File.exist?(kde_destination_dir)
+    else
+      FileUtils.rm_rf(destination_dir) if File.exist?(destination_dir)
+    end
+
+    gnome_props_dir = "#{Dir.home}/.local/share/gnome-background-properties"
+    Dir.glob("#{gnome_props_dir}/framework-*.xml").each do |file|
+      FileUtils.rm(file) if File.exist?(file)
     end
   end
 end
