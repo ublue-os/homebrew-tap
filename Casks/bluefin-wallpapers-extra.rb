@@ -11,42 +11,68 @@ cask "bluefin-wallpapers-extra" do
     strategy :github_releases
   end
 
-  destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
-  kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
-
-  if File.exist?("/usr/bin/plasmashell")
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
-    sha256 "84f714825d61a0518421314b1afb3b7fcb19c7f5c213a06f5f8928a15be54a1c"
+  on_macos do
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-macos.tar.zstd"
+    sha256 "bce247f55c0971c8b601b63c02a62cd8e66fc502cdd620b188e9306db60123b0"
 
     Dir.glob("#{staged_path}/*").each do |file|
-      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
+      artifact file, target: "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra/#{File.basename(file)}"
     end
-  elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
-    sha256 "98b8a10a31f571a791f806a96d5f40287169d6fae223d5ae53dae065d377a4d6"
+  end
 
-    Dir.glob("#{staged_path}/images/*").each do |file|
-      folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
-      artifact file, target: "#{destination_dir}/#{folder}/#{File.basename(file)}"
-    end
+  on_linux do
+    destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
+    kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
 
-    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-      artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-    end
-  else
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
-    sha256 "1d5201c6cf33f64b7cdc7a11099f79cb311aa67fd6781c4158d614209e05133f"
+    if File.exist?("/usr/bin/plasmashell")
+      url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
+      sha256 "0e78c4772c9f03efa4f6a801081c82dd950ff5dffe69f2c30e9a58e64c4a2a42"
 
-    Dir.glob("#{staged_path}/*").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+      Dir.glob("#{staged_path}/*").each do |file|
+        artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
+      end
+    elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+      url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
+      sha256 "3062c5d0ec576ce896b1fda73959423b1285151c68bca44e8216c3feb14d45ba"
+
+      Dir.glob("#{staged_path}/images/*").each do |file|
+        folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
+        artifact file, target: "#{destination_dir}/#{folder}/#{File.basename(file)}"
+      end
+
+      Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
+        artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+      end
+    else
+      url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
+      sha256 "1d5201c6cf33f64b7cdc7a11099f79cb311aa67fd6781c4158d614209e05133f"
+
+      Dir.glob("#{staged_path}/*").each do |file|
+        artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+      end
     end
   end
 
   preflight do
-    Dir.glob("#{staged_path}/**/*.xml").each do |file|
-      contents = File.read(file)
-      contents.gsub!("~", Dir.home)
-      File.write(file, contents)
+    FileUtils.mkdir_p "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra" if OS.mac?
+
+    if OS.linux?
+      FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/bluefin"
+      FileUtils.mkdir_p "#{Dir.home}/.local/share/wallpapers/bluefin"
+      FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
+
+      Dir.glob("#{staged_path}/**/*.xml").each do |file|
+        contents = File.read(file)
+        contents.gsub!("~", Dir.home)
+        File.write(file, contents)
+      end
+    end
+  end
+
+  postflight do
+    if OS.mac?
+      puts "Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Bluefin-Extra"
+      puts "To use: System Settings > Wallpaper > Add Folder"
     end
   end
 end

@@ -1,0 +1,52 @@
+name: Bump Wallpaper Casks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3,15 * * *" # 30 mins after main bump
+
+jobs:
+  bump-wallpapers:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run bump script
+        run: python3 scripts/bump-wallpapers.py
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet Casks/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="bump-wallpapers-$(date +%Y-%m-%d)"
+          git checkout -b "${BRANCH}"
+          git add Casks/
+          git commit -m "chore: bump wallpaper casks"
+          git push -u origin "${BRANCH}"
+          gh pr create \
+            --title "Bump wallpaper casks" \
+            --body "Automated bump of wallpaper casks with all SHA256 variants." \
+            --base main
