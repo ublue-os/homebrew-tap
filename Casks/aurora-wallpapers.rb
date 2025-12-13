@@ -13,31 +13,47 @@ cask "aurora-wallpapers" do
     strategy :github_releases
   end
 
-  if File.exist?("/usr/bin/plasmashell")
-    Dir.glob("#{staged_path}/kde/*").each do |dir|
-      next if dir.include?("gnome-background-properties")
-
-      artifact dir, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
-    end
-  else
-    Dir.glob("#{staged_path}/kde/*").each do |dir|
-      Dir.glob("#{dir}/contents/images/*").each do |file|
-        extension = File.extname(file)
-        File.basename(file, extension)
-        artifact file, target: "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}#{extension}"
-      end
-
-      Dir.glob("#{dir}/gnome-background-properties/*").each do |file|
-        artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-      end
-    end
-  end
-
   preflight do
+    FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/aurora"
+    FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
+
     Dir.glob("#{staged_path}/**/*.xml").each do |file|
       contents = File.read(file)
       contents.gsub!("~", Dir.home)
       File.write(file, contents)
     end
   end
+
+  postflight do
+    if File.exist?("/usr/bin/plasmashell")
+      Dir.glob("#{staged_path}/kde/*").each do |dir|
+        next if dir.include?("gnome-background-properties")
+
+        target = "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
+        FileUtils.ln_sf(dir, target)
+      end
+    else
+      Dir.glob("#{staged_path}/kde/*").each do |dir|
+        Dir.glob("#{dir}/contents/images/*").each do |file|
+          extension = File.extname(file)
+          target = "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}#{extension}"
+          FileUtils.ln_sf(file, target)
+        end
+
+        Dir.glob("#{dir}/gnome-background-properties/*").each do |file|
+          target = "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+          FileUtils.ln_sf(file, target)
+        end
+      end
+    end
+  end
+
+  uninstall_postflight do
+    FileUtils.rm_r "#{Dir.home}/.local/share/backgrounds/aurora"
+  end
+
+  zap trash: [
+    "#{Dir.home}/.local/share/backgrounds/aurora",
+    "#{Dir.home}/.local/share/gnome-background-properties/aurora-*.xml",
+  ]
 end
