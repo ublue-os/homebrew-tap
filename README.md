@@ -6,7 +6,7 @@ Homebrew has asked us to run this as a tap as opposed to PRing these into indivi
 
 ### Experimental Tap
 
-We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out. Please send pull requests first, this is the production tap! 
+We have some in-progress, but not quite finished formulas and casks in an [experimental tap](https://github.com/ublue-os/experimental-tap). If you wish to experiment or provide feedback, check it out. Please send pull requests first, this is the production tap!
 
 ## This is useful for
 
@@ -14,6 +14,11 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 
 ```shell
 brew tap ublue-os/tap
+
+# Formulas
+brew install heic-to-dynamic-gnome-wallpaper
+
+# Casks
 brew install --cask visual-studio-code-linux
 brew install --cask vscodium-linux
 brew install --cask jetbrains-toolbox-linux
@@ -29,6 +34,12 @@ brew install --cask framework-wallpapers
 ```
 
 ## Includes
+
+### CLI
+
+- heic-to-dynamic-gnome-wallpaper - Convert HEIC dynamic wallpapers to GNOME dynamic wallpapers
+
+### GUI
 
 - 1Password - Password manager
 - JetBrains Toolbox - JetBrains tools manager
@@ -62,3 +73,6 @@ If you are on KDE then [follow these instructions](https://github.com/renner0e/b
 - GUI apps, every effort to use flatpak should be exhausted, or are out of our control (eg. vscode)
 - General requests for common apps. We don't expect users to use this repo directly, the packages are there for us to automate in the background, ideall they never know this tap exists.
 
+## Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/c4eb0b1a3a2baeb3cdb87b3a463a98e21e78eafc.svg "Repobeats analytics image")

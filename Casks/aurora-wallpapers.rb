@@ -1,15 +1,16 @@
 cask "aurora-wallpapers" do
-  version "2025-10-29"
-  sha256 :no_check
+  version "2025-12-10"
+  sha256 "dcf9a202c66b759cdc50780c3087d689365d4b5536603d9a4eb1f8d8924ef00e"
 
-  url "https://github.com/hanthor/artwork/releases/latest/download/aurora-wallpapers.tar.zstd"
+  url "https://github.com/ublue-os/artwork/releases/download/aurora-v#{version}/aurora-wallpapers.tar.zstd"
   name "aurora-wallpapers"
   desc "Wallpapers for Aurora"
   homepage "https://github.com/projectbluefin/artwork"
 
   livecheck do
-    regex(/^aurora-v?(\d{4}-\d{2}-\d{2})$/i)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/aurora-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   on_macos do

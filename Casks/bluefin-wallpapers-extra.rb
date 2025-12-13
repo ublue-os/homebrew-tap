@@ -1,46 +1,34 @@
 cask "bluefin-wallpapers-extra" do
-  version "2025-10-29"
-  sha256 :no_check
-
-  on_macos do
-    url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-extra-macos.tar.zstd"
-  end
-
-  on_linux do
-    # Detect desktop environment to download appropriate format
-    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
-               ENV["DESKTOP_SESSION"]&.include?("gnome") ||
-               (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell`.strip != "")
-
-    is_kde = ENV["XDG_CURRENT_DESKTOP"]&.include?("KDE") ||
-             ENV["DESKTOP_SESSION"]&.include?("kde") ||
-             File.exist?("/usr/bin/plasmashell")
-
-    if is_gnome
-      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-extra-gnome.tar.zstd"
-    elsif is_kde
-      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-extra-kde.tar.zstd"
-    else
-      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-extra-png.tar.zstd"
-    end
-  end
+  version "2025-12-10"
 
   name "bluefin-wallpapers-extra"
-  desc "Extra Wallpapers for Bluefin (Collapse, Prey, Tenacious Pterosaur)"
-  homepage "https://github.com/hanthor/artwork"
+  desc "Extra Wallpapers for Bluefin"
+  homepage "https://github.com/ublue-os/artwork"
 
   livecheck do
-    regex(/^bluefin-extra-v?(\d{4}-\d{2}-\d{2})$/i)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/bluefin-extra-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   on_macos do
     # macOS - install HEIC dynamic wallpapers
     destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra"
 
-    # Install macOS HEIC wallpapers
-    Dir.glob("#{staged_path}/*.heic").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+  if File.exist?("/usr/bin/plasmashell")
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
+    sha256 "84f714825d61a0518421314b1afb3b7fcb19c7f5c213a06f5f8928a15be54a1c"
+
+    Dir.glob("#{staged_path}/*").each do |file|
+      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
+    end
+  elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-gnome.tar.zstd"
+    sha256 "98b8a10a31f571a791f806a96d5f40287169d6fae223d5ae53dae065d377a4d6"
+
+    Dir.glob("#{staged_path}/images/*").each do |file|
+      folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
+      artifact file, target: "#{destination_dir}/#{folder}/#{File.basename(file)}"
     end
   end
 
@@ -55,28 +43,15 @@ cask "bluefin-wallpapers-extra" do
              ENV["DESKTOP_SESSION"]&.include?("kde") ||
              File.exist?("/usr/bin/plasmashell")
 
-    destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin-extra"
-    kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin-extra"
+    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
+      artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+    end
+  else
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
+    sha256 "1d5201c6cf33f64b7cdc7a11099f79cb311aa67fd6781c4158d614209e05133f"
 
-    if is_gnome
-      # GNOME - install SVG wallpapers
-      Dir.glob("#{staged_path}/images/*.svg").each do |file|
-        artifact file, target: "#{destination_dir}/#{File.basename(file)}"
-      end
-
-      Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-        artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-      end
-    elsif is_kde
-      # KDE - install AVIF wallpapers
-      Dir.glob("#{staged_path}/*.avif").each do |file|
-        artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
-      end
-    else
-      # Other desktops - install PNG wallpapers
-      Dir.glob("#{staged_path}/*.png").each do |file|
-        artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
-      end
+    Dir.glob("#{staged_path}/*").each do |file|
+      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
 

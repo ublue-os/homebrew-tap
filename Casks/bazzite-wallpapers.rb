@@ -1,24 +1,25 @@
 cask "bazzite-wallpapers" do
-  version "2025-10-29"
-  sha256 :no_check
+  version "2025-12-10"
+  sha256 "f661c50d689aed1b04c9f0c25a687bbaf7c2ef85121f46bb757e5e881bb2cf06"
 
-  url "https://github.com/hanthor/artwork/releases/latest/download/bazzite-wallpapers.tar.zstd",
-      verified: "github.com/hanthor/artwork/"
+  url "https://github.com/ublue-os/artwork/releases/download/bazzite-v#{version}/bazzite-wallpapers.tar.zstd"
   name "bazzite-wallpapers"
   desc "Wallpapers for Bazzite"
   homepage "https://bazzite.gg/"
 
   livecheck do
-    regex(/^bazzite-v?(\d{4}-\d{2}-\d{2})$/i)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/bazzite-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   on_macos do
     # macOS - install PNG and JPG wallpapers
     destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bazzite"
 
-    Dir.glob("#{staged_path}/images/*.png").each do |file|
-      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
+  if File.exist?("/usr/bin/plasmashell")
+    Dir.glob("#{staged_path}/*").each do |file|
+      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
     end
   end
 

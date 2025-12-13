@@ -1,45 +1,32 @@
 cask "bluefin-wallpapers" do
-  version "2025-10-29"
-  sha256 :no_check
-
-  on_macos do
-    url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-macos.tar.zstd"
-  end
-
-  on_linux do
-    # Detect desktop environment to download appropriate format
-    is_gnome = ENV["XDG_CURRENT_DESKTOP"]&.include?("GNOME") ||
-               ENV["DESKTOP_SESSION"]&.include?("gnome") ||
-               (File.exist?("/usr/bin/gnome-shell") && `pgrep -x gnome-shell`.strip != "")
-
-    is_kde = ENV["XDG_CURRENT_DESKTOP"]&.include?("KDE") ||
-             ENV["DESKTOP_SESSION"]&.include?("kde") ||
-             File.exist?("/usr/bin/plasmashell")
-
-    if is_gnome
-      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-gnome.tar.zstd"
-    elsif is_kde
-      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-kde.tar.zstd"
-    else
-      url "https://github.com/hanthor/artwork/releases/latest/download/bluefin-wallpapers-png.tar.zstd"
-    end
-  end
+  version "2025-12-10"
 
   name "bluefin-wallpapers"
   desc "Wallpapers for Bluefin"
   homepage "https://github.com/hanthor/artwork"
 
   livecheck do
-    regex(/^bluefin-v?(\d{4}-\d{2}-\d{2})$/i)
-    strategy :github_latest
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/bluefin-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   on_macos do
     # macOS - install HEIC dynamic wallpapers
     destination_dir = "#{Dir.home}/Library/Desktop Pictures/Bluefin"
 
-    # Install macOS HEIC wallpapers
-    Dir.glob("#{staged_path}/*.heic").each do |file|
+  if File.exist?("/usr/bin/plasmashell")
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-kde.tar.zstd"
+    sha256 "eb426ce1b7a738d838c1cc0db20d4d37137dff5bcd8911e38f1e6f813ce0d658"
+
+    Dir.glob("#{staged_path}/*").each do |file|
+      artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
+    end
+  elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-gnome.tar.zstd"
+    sha256 "305ae1cef0cc60c498b12f1937fcfde85c81dcf9e979daaf8d843d94297b234c"
+
+    Dir.glob("#{staged_path}/images/*").each do |file|
       artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
@@ -68,19 +55,15 @@ cask "bluefin-wallpapers" do
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
       end
 
-      Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-        artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-      end
-    elsif is_kde
-      # KDE - install AVIF wallpapers
-      Dir.glob("#{staged_path}/*.avif").each do |file|
-        artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
-      end
-    else
-      # Other desktops (Hyprland, Niri, Sway, etc.) - install PNG wallpapers
-      Dir.glob("#{staged_path}/*.png").each do |file|
-        artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
-      end
+    Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
+      artifact file, target: "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+    end
+  else
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-png.tar.zstd"
+    sha256 "411f3997b0a73d991f81e88d495ad70a5a3b15ddcf5d73ffd1b3ef255b39689d"
+
+    Dir.glob("#{staged_path}/*").each do |file|
+      artifact file, target: "#{destination_dir}/#{File.basename(file)}"
     end
   end
 

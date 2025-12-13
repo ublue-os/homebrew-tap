@@ -19,6 +19,22 @@ jobs:
       - name: Configure git
         uses: Homebrew/actions/git-user-config@main
 
+      - name: Bump wallpapers
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ruby .github/scripts/bump-wallpapers.rb
+          
+      - name: Create Pull Request for Wallpapers
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "bump wallpapers"
+          title: "Bump wallpapers"
+          body: "Automated bump for wallpaper casks."
+          branch: "bump-wallpapers"
+          delete-branch: true
+
       - name: Bump packages
         env:
           HOMEBREW_DEVELOPER: 1
