@@ -1,6 +1,6 @@
 cask "aurora-wallpapers" do
-  version "2025-12-10"
-  sha256 "dcf9a202c66b759cdc50780c3087d689365d4b5536603d9a4eb1f8d8924ef00e"
+  version "2025-12-14"
+  sha256 "3268c9e207fff123ddb7ccd71727738ef7fd8d0ee83424affc93a326cad8596e"
 
   url "https://github.com/ublue-os/artwork/releases/download/aurora-v#{version}/aurora-wallpapers.tar.zstd"
   name "aurora-wallpapers"
