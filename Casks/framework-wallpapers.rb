@@ -1,5 +1,5 @@
 cask "framework-wallpapers" do
-  version "2025-12-10"
+  version "2025-12-14"
 
   name "framework-wallpapers"
   desc "Wallpapers for Framework laptops"
@@ -13,19 +13,19 @@ cask "framework-wallpapers" do
 
   on_macos do
     url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-macos.tar.zstd"
-    sha256 "9d69f1d59e0d20d1e91fbb8c7c6e9009cb95b06058d31b407debad77a1c82da4"
+    sha256 "e3afcfdbb919d84e02b0f99c2e450514db347bd4e7dd37e9fa23fdb72d321841"
   end
 
   on_linux do
     if File.exist?("/usr/bin/plasmashell")
       url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-kde.tar.zstd"
-      sha256 "01225c2d24a8d14e4a42953889dcc6263050792a21f87b23346fb9ff6c13adf8"
+      sha256 "2616c84b94bb3e83bf0576bbb260f2a5f98c06674b69e14db335e79d7e3b03a1"
     elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
       url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-gnome.tar.zstd"
-      sha256 "f936e03bd0486bab1ec1fdce30f93ff81fd49f949d8c9b878d51fa58dfa96524"
+      sha256 "8affb9c512d39fc0c665608939815e1eab7062bf1a01c3deab23de367216efc9"
     else
       url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-png.tar.zstd"
-      sha256 "ab55af2ddf076955c6982065e827f4c1fb9864555cb151c7bb10e8187492caf3"
+      sha256 "2da39f34cb2131861da2adca1d03a6b25b0714b2e7d2686b4d14f7ed8c60e8eb"
     end
   end
 
