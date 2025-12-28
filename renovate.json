@@ -2,5 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>ublue-os/renovate-config"
+  ],
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "matchManagers": ["homebrew"],
+      "automerge": true
+    }
   ]
 }
