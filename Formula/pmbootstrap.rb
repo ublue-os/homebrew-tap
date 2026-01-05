@@ -22,7 +22,7 @@ class Pmbootstrap < Formula
   end
 
   depends_on linux: :any
-  depends_on "python@3.14"
+  depends_on "python@3"
 
   def install
     virtualenv_install_with_resources

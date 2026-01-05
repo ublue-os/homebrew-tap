@@ -19,6 +19,12 @@ jobs:
       - name: Configure git
         uses: Homebrew/actions/git-user-config@main
 
+      # - name: Check out homebrew-core
+      #   run: |
+      #     brew tap homebrew/core --force
+      #     brew update-reset
+      #     brew update --force
+
       - name: Bump packages
         env:
           HOMEBREW_DEVELOPER: 1
