@@ -3,7 +3,7 @@ class Pmbootstrap < Formula
 
   desc "Sophisticated chroot / build / flash tool to develop and install postmarketOS"
   homepage "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
-  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", tag: "3.6.0", revision: "e847f1a4dac77b17b6d48325006754cd22bdb9a8"
+  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", tag: "3.6.0-test", revision: "cb0d1520a6b1d48140d1fd3ce9e672ade133e00b"
 
   license "GPL-3.0-only"
 
@@ -22,7 +22,7 @@ class Pmbootstrap < Formula
   end
 
   depends_on linux: :any
-  depends_on "python@3.14"
+  depends_on "python@3.13"
 
   def install
     virtualenv_install_with_resources
