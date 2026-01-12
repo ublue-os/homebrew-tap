@@ -19,6 +19,24 @@ jobs:
       - name: Configure git
         uses: Homebrew/actions/git-user-config@main
 
+      - name: Checkout homebrew-core
+        uses: actions/checkout@v6
+        with:
+          repository: Homebrew/homebrew-core
+          path: homebrew-core
+          fetch-depth: 1
+          sparse-checkout: |
+            Formula/
+
+      - name: Move homebrew-core to tap directory
+        run: |
+          BREW_REPO="$(brew --repo)"
+          CORE_TAP="$BREW_REPO/Library/Taps/homebrew/homebrew-core"
+
+          mkdir -p "$(dirname "$CORE_TAP")"
+          rm -rf "$CORE_TAP"
+          mv homebrew-core "$CORE_TAP"
+
       - name: Bump packages
         env:
           HOMEBREW_DEVELOPER: 1
