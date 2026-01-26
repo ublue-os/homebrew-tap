@@ -15,6 +15,7 @@ class LinuxMcpServer < Formula
   depends_on "rust" => :build
   depends_on "block-goose-cli"
   depends_on "gemini-cli"
+  depends_on "libffi"
   depends_on "libyaml"
   depends_on "openssl@3"
   depends_on "python@3.12"
