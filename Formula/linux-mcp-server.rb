@@ -3,8 +3,8 @@ class LinuxMcpServer < Formula
 
   desc "MCP server for Linux system administration and diagnostics"
   homepage "https://rhel-lightspeed.github.io/linux-mcp-server/"
-  url "https://files.pythonhosted.org/packages/37/00/d48cef635a78e2333f157d7dfa8bb4ec18e2249182f1630bbc37efde6411/linux_mcp_server-1.0.1.tar.gz"
-  sha256 "466554d4c365160ef7518c4feb4bb05f4dc53908288a4c9eceabafafbccccaf5"
+  url "https://files.pythonhosted.org/packages/38/02/7734d6ffcbd5bf9531286c4adec151e392f01f4f582eec6b04c31aa07bbf/linux_mcp_server-1.2.1.tar.gz"
+  sha256 "8b153d8863754bbef65e3ff204514682f592153241d1c8f97b8f639fda7bd05c"
   license "GPL-3.0-only"
 
   livecheck do
@@ -62,8 +62,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "cachetools" do
-    url "https://files.pythonhosted.org/packages/bc/1d/ede8680603f6016887c062a2cf4fc8fdba905866a3ab8831aa8aa651320c/cachetools-6.2.4.tar.gz"
-    sha256 "82c5c05585e70b6ba2d3ae09ea60b79548872185d2f24ae1f2709d37299fd607"
+    url "https://files.pythonhosted.org/packages/86/e7/18ea2907d2ca91e9c0697596b8e60cd485b091152eb4109fad1e468e457d/cachetools-6.2.5.tar.gz"
+    sha256 "6d8bfbba1ba94412fb9d9196c4da7a87e9d4928fffc5e93542965dca4740c77f"
   end
 
   resource "certifi" do
@@ -97,8 +97,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "cyclopts" do
-    url "https://files.pythonhosted.org/packages/43/c4/60b6068e703c78656d07b249919754f8f60e9e7da3325560574ee27b4e39/cyclopts-4.4.4.tar.gz"
-    sha256 "f30c591c971d974ab4f223e099f881668daed72de713713c984ca41479d393dd"
+    url "https://files.pythonhosted.org/packages/d4/93/6085aa89c3fff78a5180987354538d72e43b0db27e66a959302d0c07821a/cyclopts-4.5.1.tar.gz"
+    sha256 "fadc45304763fd9f5d6033727f176898d17a1778e194436964661a005078a3dd"
   end
 
   resource "diskcache" do
@@ -137,8 +137,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "fastmcp" do
-    url "https://files.pythonhosted.org/packages/d1/1e/e3528227688c248283f6d86869b1e900563ffc223eff00f4f923d2750365/fastmcp-2.14.2.tar.gz"
-    sha256 "bd23d1b808b6f446444f10114dac468b11bfb9153ed78628f5619763d0cf573e"
+    url "https://files.pythonhosted.org/packages/fd/a9/a57d5e5629ebd4ef82b495a7f8e346ce29ef80cc86b15c8c40570701b94d/fastmcp-2.14.4.tar.gz"
+    sha256 "c01f19845c2adda0a70d59525c9193be64a6383014c8d40ce63345ac664053ff"
   end
 
   resource "h11" do
@@ -177,13 +177,23 @@ class LinuxMcpServer < Formula
   end
 
   resource "jaraco-context" do
-    url "https://files.pythonhosted.org/packages/8d/7d/41acf8e22d791bde812cb6c2c36128bb932ed8ae066bcb5e39cb198e8253/jaraco_context-6.0.2.tar.gz"
-    sha256 "953ae8dddb57b1d791bf72ea1009b32088840a7dd19b9ba16443f62be919ee57"
+    url "https://files.pythonhosted.org/packages/cb/9c/a788f5bb29c61e456b8ee52ce76dbdd32fd72cd73dd67bc95f42c7a8d13c/jaraco_context-6.1.0.tar.gz"
+    sha256 "129a341b0a85a7db7879e22acd66902fda67882db771754574338898b2d5d86f"
   end
 
   resource "jaraco-functools" do
     url "https://files.pythonhosted.org/packages/0f/27/056e0638a86749374d6f57d0b0db39f29509cce9313cf91bdc0ac4d91084/jaraco_functools-4.4.0.tar.gz"
     sha256 "da21933b0417b89515562656547a77b4931f98176eb173644c0d35032a33d6bb"
+  end
+
+  resource "jeepney" do
+    url "https://files.pythonhosted.org/packages/7b/6f/357efd7602486741aa73ffc0617fb310a29b588ed0fd69c2399acbb85b0c/jeepney-0.9.0.tar.gz"
+    sha256 "cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732"
+  end
+
+  resource "jsonref" do
+    url "https://files.pythonhosted.org/packages/aa/0d/c1f3277e90ccdb50d33ed5ba1ec5b3f0a242ed8c1b1a85d3afeb68464dca/jsonref-1.1.0.tar.gz"
+    sha256 "32fe8e1d85af0fdefbebce950af85590b22b60f9e95443176adbde4e1ecea552"
   end
 
   resource "jsonschema" do
@@ -217,8 +227,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "mcp" do
-    url "https://files.pythonhosted.org/packages/d5/2d/649d80a0ecf6a1f82632ca44bec21c0461a9d9fc8934d38cb5b319f2db5e/mcp-1.25.0.tar.gz"
-    sha256 "56310361ebf0364e2d438e5b45f7668cbb124e158bb358333cd06e49e83a6802"
+    url "https://files.pythonhosted.org/packages/fc/6d/62e76bbb8144d6ed86e202b5edd8a4cb631e7c8130f3f4893c3f90262b10/mcp-1.26.0.tar.gz"
+    sha256 "db6e2ef491eecc1a0d93711a76f28dec2e05999f93afd48795da1c1137142c66"
   end
 
   resource "mdurl" do
@@ -262,8 +272,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz"
-    sha256 "d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"
+    url "https://files.pythonhosted.org/packages/65/ee/299d360cdc32edc7d2cf530f3accf79c4fca01e96ffc950d8a52213bd8e4/packaging-26.0.tar.gz"
+    sha256 "00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"
   end
 
   resource "pathable" do
@@ -282,8 +292,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "prometheus-client" do
-    url "https://files.pythonhosted.org/packages/23/53/3edb5d68ecf6b38fcbcc1ad28391117d2a322d9a1a3eff04bfdb184d8c3b/prometheus_client-0.23.1.tar.gz"
-    sha256 "6ae8f9081eaaaf153a2e959d2e6c4f4fb57b12ef76c8c7980202f1e57b48b2ce"
+    url "https://files.pythonhosted.org/packages/f0/58/a794d23feb6b00fc0c72787d7e87d872a6730dd9ed7c7b3e954637d8f280/prometheus_client-0.24.1.tar.gz"
+    sha256 "7e0ced7fbbd40f7b84962d5d2ab6f17ef88a72504dcf7c0b40737b43b2a461f9"
   end
 
   resource "py-key-value-aio" do
@@ -297,8 +307,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "pycparser" do
-    url "https://files.pythonhosted.org/packages/fe/cf/d2d3b9f5699fb1e4615c8e32ff220203e43b248e1dfcc6736ad9057731ca/pycparser-2.23.tar.gz"
-    sha256 "78816d4f24add8f10a06d6f05b4d424ad9e96cfebf68a4ddc99c65c0720d00c2"
+    url "https://files.pythonhosted.org/packages/1b/7d/92392ff7815c21062bea51aa7b87d45576f649f16458d78b7cf94b9ab2e6/pycparser-3.0.tar.gz"
+    sha256 "600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"
   end
 
   resource "pydantic" do
@@ -347,8 +357,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "python-multipart" do
-    url "https://files.pythonhosted.org/packages/78/96/804520d0850c7db98e5ccb70282e29208723f0964e88ffd9d0da2f52ea09/python_multipart-0.0.21.tar.gz"
-    sha256 "7137ebd4d3bbf70ea1622998f902b97a29434a9e8dc40eb203bbcf7c2a2cba92"
+    url "https://files.pythonhosted.org/packages/94/01/979e98d542a70714b0cb2b6728ed0b7c46792b695e3eaec3e20711271ca3/python_multipart-0.0.22.tar.gz"
+    sha256 "7340bef99a7e0032613f56dc36027b959fd3b30a787ed62d310e951f7c3a3a58"
   end
 
   resource "pyyaml" do
@@ -372,8 +382,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/fb/d2/8920e102050a0de7bfabeb4c4614a49248cf8d5d7a8d01885fbb24dc767a/rich-14.2.0.tar.gz"
-    sha256 "73ff50c7c0c1c77c8243079283f4edb376f0f6442433aecb8ce7e6d0b92d1fe4"
+    url "https://files.pythonhosted.org/packages/a1/84/4831f881aa6ff3c976f6d6809b58cdfa350593ffc0dc3c58f5f6586780fb/rich-14.3.1.tar.gz"
+    sha256 "b8c5f568a3a749f9290ec6bddedf835cec33696bfc1e48bcfecb276c7386e4b8"
   end
 
   resource "rich-rst" do
@@ -384,6 +394,11 @@ class LinuxMcpServer < Formula
   resource "rpds-py" do
     url "https://files.pythonhosted.org/packages/20/af/3f2f423103f1113b36230496629986e0ef7e199d2aa8392452b484b38ced/rpds_py-0.30.0.tar.gz"
     sha256 "dd8ff7cf90014af0c0f787eea34794ebf6415242ee1d6fa91eaba725cc441e84"
+  end
+
+  resource "secretstorage" do
+    url "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz"
+    sha256 "f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be"
   end
 
   resource "shellingham" do
@@ -397,13 +412,13 @@ class LinuxMcpServer < Formula
   end
 
   resource "sse-starlette" do
-    url "https://files.pythonhosted.org/packages/da/34/f5df66cb383efdbf4f2db23cabb27f51b1dcb737efaf8a558f6f1d195134/sse_starlette-3.1.2.tar.gz"
-    sha256 "55eff034207a83a0eb86de9a68099bd0157838f0b8b999a1b742005c71e33618"
+    url "https://files.pythonhosted.org/packages/8b/8d/00d280c03ffd39aaee0e86ec81e2d3b9253036a0f93f51d10503adef0e65/sse_starlette-3.2.0.tar.gz"
+    sha256 "8127594edfb51abe44eac9c49e59b0b01f1039d0c7461c6fd91d4e03b70da422"
   end
 
   resource "starlette" do
-    url "https://files.pythonhosted.org/packages/ba/b8/73a0e6a6e079a9d9cfa64113d771e421640b6f679a52eeb9b32f72d871a1/starlette-0.50.0.tar.gz"
-    sha256 "a2a17b22203254bcbc2e1f926d2d55f3f9497f769416b3190768befe598fa3ca"
+    url "https://files.pythonhosted.org/packages/c4/68/79977123bb7be889ad680d79a40f339082c1978b5cfcf62c2d8d196873ac/starlette-0.52.1.tar.gz"
+    sha256 "834edd1b0a23167694292e94f597773bc3f89f362be6effee198165a35d62933"
   end
 
   resource "typer" do
@@ -432,8 +447,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "websockets" do
-    url "https://files.pythonhosted.org/packages/21/e6/26d09fab466b7ca9c7737474c52be4f76a40301b08362eb2dbc19dcc16c1/websockets-15.0.1.tar.gz"
-    sha256 "82544de02076bafba038ce055ee6412d68da13ab47f0c60cab827346de828dee"
+    url "https://files.pythonhosted.org/packages/04/24/4b2031d72e840ce4c1ccb255f693b15c334757fc50023e4db9537080b8c4/websockets-16.0.tar.gz"
+    sha256 "5f6261a5e56e8d5c42a4497b364ea24d94d9563e8fbd44e78ac40879c60179b5"
   end
 
   resource "wrapt" do
