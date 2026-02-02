@@ -1,6 +1,6 @@
 cask "goose-linux" do
-  version "1.22.1"
-  sha256 "7e251c16ef5924cd0cf4b382493267123b0dc3f1911de1b9ed8348b860dcc0e5"
+  version "1.22.2"
+  sha256 "1013b4d64284dc42e3dfc99062dd549123332f2f797349b1b0b8f1d39edd535f"
 
   url "https://github.com/block/goose/releases/download/v#{version}/Goose-#{version}-1.x86_64.rpm",
       verified: "github.com/block/goose/"
