@@ -23,6 +23,7 @@ cask "antigravity-linux" do
   end
 
   binary "#{staged_path}/Antigravity/bin/antigravity"
+  binary "#{staged_path}/Antigravity/bin/antigravity", target: "agy"
   bash_completion "#{staged_path}/Antigravity/resources/completions/bash/antigravity"
   zsh_completion  "#{staged_path}/Antigravity/resources/completions/zsh/_antigravity"
   artifact "antigravity.desktop",
