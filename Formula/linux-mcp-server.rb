@@ -549,8 +549,8 @@ class LinuxMcpServer < Formula
       For more configuration options, see:
         https://rhel-lightspeed.github.io/linux-mcp-server/clients/
 
-      Feedback:
-        https://example.com/feedback
+      Help us make this better for you! Feedback Appreciated:
+        https://tinyurl.com/linux-mcp-server
     EOS
   end
 
