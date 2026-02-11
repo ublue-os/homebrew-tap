@@ -181,5 +181,6 @@ jobs:
             git config user.name "GitHub Action"
             git add Formula/linux-mcp-server.rb
             git commit -m "chore: add linux-mcp-server bottles for ${{ needs.get-version.outputs.version }}"
+            git pull --rebase origin main
             git push origin main
           fi
