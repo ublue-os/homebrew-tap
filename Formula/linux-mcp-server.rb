@@ -3,8 +3,8 @@ class LinuxMcpServer < Formula
 
   desc "MCP server for Linux system administration and diagnostics"
   homepage "https://rhel-lightspeed.github.io/linux-mcp-server/"
-  url "https://files.pythonhosted.org/packages/2f/fb/4080ceb12cd1dfb81a03e4e33bdc287bdfab81c3d622dc106c4c5fc66edf/linux_mcp_server-1.3.0.tar.gz"
-  sha256 "777abe0297473f5836d94477781e27a1550ae28b4f8a6e86da7b93a3e9f389c9"
+  url "https://files.pythonhosted.org/packages/f2/53/8db20f2b6ca0e7fc35f2bdd150adedaf5ae4f37bbaaf4e637c75b9578df1/linux_mcp_server-1.3.1.tar.gz"
+  sha256 "d8dd25fa1bf53957d6de5fb74227b82b08d864dc190d6481a621f2692c9c1922"
   license "GPL-3.0-only"
 
   livecheck do
@@ -107,8 +107,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "cyclopts" do
-    url "https://files.pythonhosted.org/packages/d4/93/6085aa89c3fff78a5180987354538d72e43b0db27e66a959302d0c07821a/cyclopts-4.5.1.tar.gz"
-    sha256 "fadc45304763fd9f5d6033727f176898d17a1778e194436964661a005078a3dd"
+    url "https://files.pythonhosted.org/packages/50/cd/1fd03921a95113182e6fdf84af5d47f07aa91c00c03ac074c192b0d4672c/cyclopts-4.5.2.tar.gz"
+    sha256 "7fe01b2d184c55c4555e06a0397602b319d87faa5b086b41913eaeaea52fae16"
   end
 
   resource "diskcache" do
@@ -277,8 +277,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "platformdirs" do
-    url "https://files.pythonhosted.org/packages/cf/86/0248f086a84f01b37aaec0fa567b397df1a119f73c16f6c7a9aac73ea309/platformdirs-4.5.1.tar.gz"
-    sha256 "61d5cdcc6065745cdd94f0f878977f8de9437be93de97c1c12f853c9c0cdcbda"
+    url "https://files.pythonhosted.org/packages/71/25/ccd8e88fcd16a4eb6343a8b4b9635e6f3928a7ebcd82822a14d20e3ca29f/platformdirs-4.7.0.tar.gz"
+    sha256 "fd1a5f8599c85d49b9ac7d6e450bc2f1aaf4a23f1fe86d09952fe20ad365cf36"
   end
 
   resource "prometheus-client" do
@@ -317,8 +317,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "pydocket" do
-    url "https://files.pythonhosted.org/packages/c3/55/bd31814996c908e21a8cd11903b1244cdb6af8d5b6ce92e9508952339675/pydocket-0.17.6.tar.gz"
-    sha256 "dbc37a78a2cc747262c71da5e2bc1d39e5833d319d65d5b22f8727fb25e50d8e"
+    url "https://files.pythonhosted.org/packages/cd/b2/5e12dbe2acf59e4499285e8eee66e8e81b6ba2f553696d2f4ccca0a7978c/pydocket-0.17.7.tar.gz"
+    sha256 "5c77ec6731a167cdcb44174abf793fe63e7b6c1c1c8a799cc6ec7502b361ee77"
   end
 
   resource "pygments" do
@@ -427,8 +427,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "typer" do
-    url "https://files.pythonhosted.org/packages/f2/1e/a27cc02a0cd715118c71fa2aef2c687fdefc3c28d90fd0dd789c5118154c/typer-0.21.2.tar.gz"
-    sha256 "1abd95a3b675e17ff61b0838ac637fe9478d446d62ad17fa4bb81ea57cc54028"
+    url "https://files.pythonhosted.org/packages/7e/e6/44e073787aa57cd71c151f44855232feb0f748428fd5242d7366e3c4ae8b/typer-0.23.0.tar.gz"
+    sha256 "d8378833e47ada5d3d093fa20c4c63427cc4e27127f6b349a6c359463087d8cc"
   end
 
   resource "typing-extensions" do
