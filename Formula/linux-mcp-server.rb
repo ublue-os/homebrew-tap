@@ -3,8 +3,8 @@ class LinuxMcpServer < Formula
 
   desc "MCP server for Linux system administration and diagnostics"
   homepage "https://rhel-lightspeed.github.io/linux-mcp-server/"
-  url "https://files.pythonhosted.org/packages/f2/53/8db20f2b6ca0e7fc35f2bdd150adedaf5ae4f37bbaaf4e637c75b9578df1/linux_mcp_server-1.3.1.tar.gz"
-  sha256 "d8dd25fa1bf53957d6de5fb74227b82b08d864dc190d6481a621f2692c9c1922"
+  url "https://files.pythonhosted.org/packages/6f/c6/f317c796d0ac93afdc36a5f779da378047915c4f040f2350915c99394a96/linux_mcp_server-1.3.2.tar.gz"
+  sha256 "ada26c30b050e8441af832579f4f0e3315766f6029de279a0dbcf5cf0b34007d"
   license "GPL-3.0-only"
 
   livecheck do
@@ -52,8 +52,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "authlib" do
-    url "https://files.pythonhosted.org/packages/49/dc/ed1681bf1339dd6ea1ce56136bad4baabc6f7ad466e375810702b0237047/authlib-1.6.7.tar.gz"
-    sha256 "dbf10100011d1e1b34048c9d120e83f13b35d69a826ae762b93d2fb5aafc337b"
+    url "https://files.pythonhosted.org/packages/6b/6c/c88eac87468c607f88bc24df1f3b31445ee6fc9ba123b09e666adf687cd9/authlib-1.6.8.tar.gz"
+    sha256 "41ae180a17cf672bc784e4a518e5c82687f1fe1e98b0cafaeda80c8e4ab2d1cb"
   end
 
   resource "bcrypt" do
@@ -107,8 +107,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "cyclopts" do
-    url "https://files.pythonhosted.org/packages/50/cd/1fd03921a95113182e6fdf84af5d47f07aa91c00c03ac074c192b0d4672c/cyclopts-4.5.2.tar.gz"
-    sha256 "7fe01b2d184c55c4555e06a0397602b319d87faa5b086b41913eaeaea52fae16"
+    url "https://files.pythonhosted.org/packages/3b/d2/f37df900b163f51b4faacdb01bf4895c198906d67c5b2a85c2522de85459/cyclopts-4.5.4.tar.gz"
+    sha256 "eed4d6c76d4391aa796d8fcaabd50e5aad7793261792beb19285f62c5c456c8b"
   end
 
   resource "diskcache" do
@@ -142,8 +142,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "fakeredis" do
-    url "https://files.pythonhosted.org/packages/5f/f9/57464119936414d60697fcbd32f38909bb5688b616ae13de6e98384433e0/fakeredis-2.33.0.tar.gz"
-    sha256 "d7bc9a69d21df108a6451bbffee23b3eba432c21a654afc7ff2d295428ec5770"
+    url "https://files.pythonhosted.org/packages/d8/44/c403963727d707e03f49a417712b0a23e853d33ae50729679040b6cfe281/fakeredis-2.34.0.tar.gz"
+    sha256 "72bc51a7ab39bedf5004f0cf1b5206822619c1be8c2657fd878d1f4250256c57"
   end
 
   resource "fastmcp" do
@@ -277,8 +277,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "platformdirs" do
-    url "https://files.pythonhosted.org/packages/71/25/ccd8e88fcd16a4eb6343a8b4b9635e6f3928a7ebcd82822a14d20e3ca29f/platformdirs-4.7.0.tar.gz"
-    sha256 "fd1a5f8599c85d49b9ac7d6e450bc2f1aaf4a23f1fe86d09952fe20ad365cf36"
+    url "https://files.pythonhosted.org/packages/1b/04/fea538adf7dbbd6d186f551d595961e564a3b6715bdf276b477460858672/platformdirs-4.9.2.tar.gz"
+    sha256 "9a33809944b9db043ad67ca0db94b14bf452cc6aeaac46a88ea55b26e2e9d291"
   end
 
   resource "prometheus-client" do
@@ -312,13 +312,13 @@ class LinuxMcpServer < Formula
   end
 
   resource "pydantic-settings" do
-    url "https://files.pythonhosted.org/packages/43/4b/ac7e0aae12027748076d72a8764ff1c9d82ca75a7a52622e67ed3f765c54/pydantic_settings-2.12.0.tar.gz"
-    sha256 "005538ef951e3c2a68e1c08b292b5f2e71490def8589d4221b95dab00dafcfd0"
+    url "https://files.pythonhosted.org/packages/52/6d/fffca34caecc4a3f97bda81b2098da5e8ab7efc9a66e819074a11955d87e/pydantic_settings-2.13.1.tar.gz"
+    sha256 "b4c11847b15237fb0171e1462bf540e294affb9b86db4d9aa5c01730bdbe4025"
   end
 
   resource "pydocket" do
-    url "https://files.pythonhosted.org/packages/cd/b2/5e12dbe2acf59e4499285e8eee66e8e81b6ba2f553696d2f4ccca0a7978c/pydocket-0.17.7.tar.gz"
-    sha256 "5c77ec6731a167cdcb44174abf793fe63e7b6c1c1c8a799cc6ec7502b361ee77"
+    url "https://files.pythonhosted.org/packages/51/fe/319957bc0744ce6871140c3c1fb5dff89d9b9e645d36145da49e9954142b/pydocket-0.17.8.tar.gz"
+    sha256 "929628c70ee7d3bcae5f142c41f362147510e8f5d04b7030e5c5dd078b8c7f2a"
   end
 
   resource "pygments" do
@@ -367,8 +367,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "redis" do
-    url "https://files.pythonhosted.org/packages/f7/80/2971931d27651affa88a44c0ad7b8c4a19dc29c998abb20b23868d319b59/redis-7.1.1.tar.gz"
-    sha256 "a2814b2bda15b39dad11391cc48edac4697214a8a5a4bd10abe936ab4892eb43"
+    url "https://files.pythonhosted.org/packages/9f/32/6fac13a11e73e1bc67a2ae821a72bfe4c2d8c4c48f0267e4a952be0f1bae/redis-7.2.0.tar.gz"
+    sha256 "4dd5bf4bd4ae80510267f14185a15cba2a38666b941aff68cccf0256b51c1f26"
   end
 
   resource "referencing" do
@@ -382,8 +382,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/74/99/a4cab2acbb884f80e558b0771e97e21e939c5dfb460f488d19df485e8298/rich-14.3.2.tar.gz"
-    sha256 "e712f11c1a562a11843306f5ed999475f09ac31ffb64281f73ab29ffdda8b3b8"
+    url "https://files.pythonhosted.org/packages/b3/c6/f3b320c27991c46f43ee9d856302c70dc2d0fb2dba4842ff739d5f46b393/rich-14.3.3.tar.gz"
+    sha256 "b8daa0b9e4eef54dd8cf7c86c03713f53241884e814f4e2f5fb342fe520f639b"
   end
 
   resource "rich-rst" do
@@ -427,8 +427,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "typer" do
-    url "https://files.pythonhosted.org/packages/7e/e6/44e073787aa57cd71c151f44855232feb0f748428fd5242d7366e3c4ae8b/typer-0.23.0.tar.gz"
-    sha256 "d8378833e47ada5d3d093fa20c4c63427cc4e27127f6b349a6c359463087d8cc"
+    url "https://files.pythonhosted.org/packages/5a/b6/3e681d3b6bb22647509bdbfdd18055d5adc0dce5c5585359fa46ff805fdc/typer-0.24.0.tar.gz"
+    sha256 "f9373dc4eff901350694f519f783c29b6d7a110fc0dcc11b1d7e353b85ca6504"
   end
 
   resource "typing-extensions" do
@@ -447,8 +447,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "uvicorn" do
-    url "https://files.pythonhosted.org/packages/c3/d1/8f3c683c9561a4e6689dd3b1d345c815f10f86acd044ee1fb9a4dcd0b8c5/uvicorn-0.40.0.tar.gz"
-    sha256 "839676675e87e73694518b5574fd0f24c9d97b46bea16df7b8c05ea1a51071ea"
+    url "https://files.pythonhosted.org/packages/32/ce/eeb58ae4ac36fe09e3842eb02e0eb676bf2c53ae062b98f1b2531673efdd/uvicorn-0.41.0.tar.gz"
+    sha256 "09d11cf7008da33113824ee5a1c6422d89fbc2ff476540d69a34c87fab8b571a"
   end
 
   resource "websockets" do
