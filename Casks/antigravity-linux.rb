@@ -28,6 +28,8 @@ cask "antigravity-linux" do
   zsh_completion  "#{staged_path}/Antigravity/resources/completions/zsh/_antigravity"
   artifact "antigravity.desktop",
            target: "#{Dir.home}/.local/share/applications/antigravity.desktop"
+  artifact "antigravity-url-handler.desktop",
+           target: "#{Dir.home}/.local/share/applications/antigravity-url-handler.desktop"
   artifact "antigravity.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
@@ -59,6 +61,21 @@ cask "antigravity-linux" do
       Name=New Empty Window
       Exec=#{HOMEBREW_PREFIX}/bin/antigravity --new-window %F
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
+    EOS
+
+    File.write("#{staged_path}/antigravity-url-handler.desktop", <<~EOS)
+      [Desktop Entry]
+      Name=Antigravity - URL Handler
+      Comment=AI Coding Agent IDE
+      GenericName=Text Editor
+      Exec=#{HOMEBREW_PREFIX}/bin/antigravity --open-url %U
+      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
+      Type=Application
+      NoDisplay=true
+      StartupNotify=true
+      Categories=Utility;TextEditor;Development;IDE;
+      MimeType=x-scheme-handler/antigravity;
+      Keywords=antigravity;
     EOS
 
     # Create a placeholder icon if extraction fails
