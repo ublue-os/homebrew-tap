@@ -16,9 +16,9 @@ class Pmbootstrap < Formula
   end
 
   bottle do
-    root_url "https://github.com/ublue-os/homebrew-tap/releases/download/pmbootstrap-3.6.0"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "dd547a8e53f01290b65b3bbb97ce7f42c100f3be92a68c7cbb22d483372aab38"
+    root_url "https://github.com/ublue-os/homebrew-tap/releases/download/pmbootstrap-3.9.0"
+    rebuild 2
+    sha256 x86_64_linux: "a2f2010a23f49ad2de460eb4391bb57df2e57efce0478baddd23f4f541ef903e"
   end
 
   depends_on linux: :any
