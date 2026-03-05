@@ -212,12 +212,11 @@ cask "1password-gui-linux" do
         echo "removing wrapper script from $nmh_path/1PasswordWrapper.sh"
         sudo rm -f "$nmh_path/1PasswordWrapper.sh"
       done
-
     EOS
+    set_permissions("#{staged_path}/1password-uninstall.sh", "744")
   end
 
   uninstall_preflight do
-    system "chmod", "+x", "#{staged_path}/1password-uninstall.sh"
     system "#{staged_path}/1password-uninstall.sh"
   end
 
