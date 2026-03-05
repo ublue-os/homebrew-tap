@@ -37,7 +37,7 @@ cask "1password-gui-linux" do
   artifact "1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl",
            target: "#{HOMEBREW_PREFIX}/etc/polkit-1/actions/com.1password.1Password.policy"
   artifact "1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
-           target: "/etc/1password/custom_allowed_browsers"
+           target: "#{HOMEBREW_PREFIX}/etc/1password/custom_allowed_browsers"
 
 
   preflight do
@@ -75,6 +75,26 @@ cask "1password-gui-linux" do
     else
       puts "Skipping installation of /etc/polkit-1/actions/com.1password.1Password.policy,
       as it already exists and is the same as the version to be installed."
+    end
+
+    system "echo", "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
+    if !File.exist?("/etc/1password/custom_allowed_browsers") ||
+       !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper$/).any?()
+       if !File.exist?("/etc/1password/custom_allowed_browsers")
+        system "sudo", "install", "-Dm0644",
+              "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
+              "/etc/1password/custom_allowed_browsers"
+              puts "Installed /etc/1password/custom_allowed_browsers"
+       else
+        # append contents of the file to be installed to the existing file
+            File.open(browser_config, "a") do |f|
+              f.write "\nflatpak-session-helper"
+            end
+            puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
+        end
+    else
+      puts "Skipping installation of /etc/1password/custom_allowed_browsers,
+      as it already exists and contains flatpak-session-helper"
     end
 
     File.write("#{staged_path}/zpass.sh", <<~EOS)
