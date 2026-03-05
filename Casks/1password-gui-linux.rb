@@ -116,15 +116,15 @@ cask "1password-gui-linux" do
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
 
     # this list of supported native messaging hosts paths was retrieved by examining the 1Password log file at #{Dir.home}/.config/1Password/logs/1Password_rCURRENT.log
-    native_messaging_hosts_paths = ["#{Dir.home}/.mozilla/native-messaging-hosts/",
-                            "#{Dir.home}/.config/google-chrome/NativeMessagingHosts/",
-                            "#{Dir.home}/.config/google-chrome-beta/NativeMessagingHosts/",
-                            "#{Dir.home}/.config/google-chrome-unstable/NativeMessagingHosts/",
-                            "#{Dir.home}/.config/chromium/NativeMessagingHosts/",
-                            "#{Dir.home}/.config/microsoft-edge-dev/NativeMessagingHosts/",
-                            "#{Dir.home}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/",
-                            "#{Dir.home}/.config/vivaldi/NativeMessagingHosts/", 
-                            "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts/", 
+    native_messaging_hosts_paths = ["#{Dir.home}/.mozilla/native-messaging-hosts",
+                            "#{Dir.home}/.config/google-chrome/NativeMessagingHosts",
+                            "#{Dir.home}/.config/google-chrome-beta/NativeMessagingHosts",
+                            "#{Dir.home}/.config/google-chrome-unstable/NativeMessagingHosts",
+                            "#{Dir.home}/.config/chromium/NativeMessagingHosts",
+                            "#{Dir.home}/.config/microsoft-edge-dev/NativeMessagingHosts",
+                            "#{Dir.home}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts",
+                            "#{Dir.home}/.config/vivaldi/NativeMessagingHosts", 
+                            "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts", 
                           ]
                           
     native_messaging_hosts_paths.each do |nmh_path|         
@@ -192,22 +192,24 @@ cask "1password-gui-linux" do
       fi
 
       native_messaging_hosts_paths=(
-        "~/.mozilla/native-messaging-hosts/"
-        "~/.config/google-chrome/NativeMessagingHosts/"
-        "~/.config/google-chrome-beta/NativeMessagingHosts/"
-        "~/.config/google-chrome-unstable/NativeMessagingHosts/"
-        "~/.config/chromium/NativeMessagingHosts/"
-        "~/.config/microsoft-edge-dev/NativeMessagingHosts/"
-        "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/"
-        "~/.config/vivaldi/NativeMessagingHosts/"
-        "~/.config/vivaldi-snapshot/NativeMessagingHosts/"
+        "~/.mozilla/native-messaging-hosts"
+        "~/.config/google-chrome/NativeMessagingHosts"
+        "~/.config/google-chrome-beta/NativeMessagingHosts"
+        "~/.config/google-chrome-unstable/NativeMessagingHosts"
+        "~/.config/chromium/NativeMessagingHosts"
+        "~/.config/microsoft-edge-dev/NativeMessagingHosts"
+        "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts"
+        "~/.config/vivaldi/NativeMessagingHosts"
+        "~/.config/vivaldi-snapshot/NativeMessagingHosts"
       )
       #set NMH manifests back to read-write so 1Password can clean them up on uninstall
       for nmh_path in "${native_messaging_hosts_paths[@]}"; do
         manifest_file="$nmh_path/com.1password.1Password.json"
         if [ -f "$manifest_file" ]; then
-          chmod 644 "$manifest_file"
+          echo "allowing write access to $manifest_file for 1Password uninstallation"
+          sudo chmod 644 "$manifest_file"
         fi
+        echo "removing wrapper script from $nmh_path/1PasswordWrapper.sh"
         sudo rm -f "$nmh_path/1PasswordWrapper.sh"
       done
 
