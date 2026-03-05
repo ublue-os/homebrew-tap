@@ -36,12 +36,21 @@ cask "1password-gui-linux" do
            target: "#{Dir.home}/.local/share/icons/1password.png"
   artifact "1password-#{version}.#{arch_suffix}/com.1password.1Password.policy.tpl",
            target: "#{HOMEBREW_PREFIX}/etc/polkit-1/actions/com.1password.1Password.policy"
+  artifact "1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
+           target: "/etc/1password/custom_allowed_browsers"
+
 
   preflight do
     desktop_file = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/1password.desktop"
     text = File.read(desktop_file)
     new_contents = text.gsub("Exec=/opt/1Password/1password", "Exec=#{HOMEBREW_PREFIX}/bin/1password")
     File.write(desktop_file, new_contents)
+
+    # set up flatpak browser support
+    browser_config = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers"
+    File.open(browser_config, "a") do |f|
+      f.append "\nflatpak-session-helper"
+    end
   end
 
   postflight do
@@ -73,6 +82,82 @@ cask "1password-gui-linux" do
       zenity --password --title="Homebrew Sudo Password Prompt"
     EOS
 
+    # 1Password browser support binary needs to be owned by group onepassword and have the GID bit set in order to function
+    system <<~EOS
+      #!/bin/bash
+      if [ ! "$(getent group onepassword)" ]; then
+        groupadd onepassword
+      fi
+      EOS
+    set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", "2755")
+    set_ownership(["1password", "1Password-BrowserSupport"], group:"onepassword")
+   # chrome-sandbox requires the setuid bit to be specifically set.
+   # See https://github.com/electron/electron/issues/17972
+    set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
+
+    # this list of supported native messaging hosts paths was retrieved by examining the 1Password log file at #{Dir.home}/.config/1Password/logs/1Password_rCURRENT.log
+    native_messaging_hosts_paths = ["#{Dir.home}/.mozilla/native-messaging-hosts/",
+                            "#{Dir.home}/.config/google-chrome/NativeMessagingHosts/",
+                            "#{Dir.home}/.config/google-chrome-beta/NativeMessagingHosts/",
+                            "#{Dir.home}/.config/google-chrome-unstable/NativeMessagingHosts/",
+                            "#{Dir.home}/.config/chromium/NativeMessagingHosts/",
+                            "#{Dir.home}/.config/microsoft-edge-dev/NativeMessagingHosts/",
+                            "#{Dir.home}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/",
+                            "#{Dir.home}/.config/vivaldi/NativeMessagingHosts/", 
+                            "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts/", 
+                          ]
+                          
+    native_messaging_hosts_paths.each do |nmh_path|         
+      # write out wrapper script to each browser support folder
+      File.open("#{nmh_path}/1PasswordWrapper.sh", "w", 0755) do |f|
+        f.write <<~EOS
+          #!/bin/bash
+          flatpak-spawn --host #{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport "$@"
+          EOS
+      end
+
+      # modify NMH manifests to use the wrapper script
+      manifest_path = "#{nmh_path}/com.1password.1Password.json"
+      if File.exist?(manifest_path)
+        manifest = JSON.parse(File.read(manifest_path))
+        manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
+        File.write(manifest_path, JSON.generate(manifest))
+      elsif nmh_path.include?("mozilla") # Firefox is the only supported browser which has a different manifest
+        File.write(manifest_path, <<~EOS)
+        {
+            "name": "com.1password.1password",
+            "description": "1Password BrowserSupport",
+            "path": "#{nmh_path}/1PasswordWrapper.sh",
+            "type": "stdio",
+            "allowed_extensions": [
+              "{0a75d802-9aed-41e7-8daa-24c067386e82}",
+              "{25fc87fa-4d31-4fee-b5c1-c32a7844c063}",
+              "{d634138d-c276-4fc8-924b-40a0ea21d284}"
+            ]
+        }
+        EOS
+      else
+        File.write(manifest_path, <<~EOS)
+        {
+          "name": "com.1password.1password",
+          "description": "1Password BrowserSupport",
+          "path": "#{nmh_path}/1PasswordWrapper.sh",
+          "type": "stdio",
+          "allowed_origins": [
+            "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/",
+            "chrome-extension://bkpbhnjcbehoklfkljkkbbmipaphipgl/",
+            "chrome-extension://gejiddohjgogedgjnonbofjigllpkmbf/",
+            "chrome-extension://khgocmkkpikpnmmkgmdnfckapcdkgfaf/",
+            "chrome-extension://aeblfdkhhhdcdjpifhhbdiojplfjncoa/",
+            "chrome-extension://dppgmdbiimibapkepcbdbmkaabgiofem/"
+          ]
+        }
+        EOS
+      end
+      # set NMH manifests to read-only or else 1Password will overwrite them on launch
+      set_permissions(manifest_path, "444")
+    end
+
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
       #!/bin/bash
       set -e
@@ -85,6 +170,27 @@ cask "1password-gui-linux" do
       else
         echo "/etc/polkit-1/actions/com.1password.1Password.policy does not exist, skipping."
       fi
+
+      native_messaging_hosts_paths=(
+        "~/.mozilla/native-messaging-hosts/"
+        "~/.config/google-chrome/NativeMessagingHosts/"
+        "~/.config/google-chrome-beta/NativeMessagingHosts/"
+        "~/.config/google-chrome-unstable/NativeMessagingHosts/"
+        "~/.config/chromium/NativeMessagingHosts/"
+        "~/.config/microsoft-edge-dev/NativeMessagingHosts/"
+        "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/"
+        "~/.config/vivaldi/NativeMessagingHosts/"
+        "~/.config/vivaldi-snapshot/NativeMessagingHosts/"
+      )
+      #set NMH manifests back to read-write so 1Password can clean them up on uninstall
+      for nmh_path in "${native_messaging_hosts_paths[@]}"; do
+        manifest_file="$nmh_path/com.1password.1Password.json"
+        if [ -f "$manifest_file" ]; then
+          chmod 644 "$manifest_file"
+        fi
+        sudo rm -f "$nmh_path/1PasswordWrapper.sh"
+      done
+
     EOS
   end
 
@@ -97,5 +203,14 @@ cask "1password-gui-linux" do
     "~/.cache/1password",
     "~/.config/1Password",
     "~/.local/share/keyrings/1password.keyring",
+    "~/.mozilla/native-messaging-hosts/com.1password.1Password.json",
+    "~/.config/google-chrome/NativeMessagingHosts/com.1password.1Password.json",
+    "~/.config/google-chrome-beta/NativeMessagingHosts/com.1password.1Password.json",
+    "~/.config/google-chrome-unstable/NativeMessagingHosts/com.1password.1Password.json",
+    "~/.config/chromium/NativeMessagingHosts/com.1password.1Password.json",
+    "~/.config/microsoft-edge-dev/NativeMessagingHosts/com.1password.1Password.json",
+    "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.1password.1Password.json",
+    "~/.config/vivaldi/NativeMessagingHosts/com.1password.1Password.json", 
+    "~/.config/vivaldi-snapshot/NativeMessagingHosts/com.1password.1Password.json", 
   ]
 end
