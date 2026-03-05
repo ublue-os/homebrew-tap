@@ -106,7 +106,8 @@ cask "1password-gui-linux" do
     system <<~EOS
       #!/bin/bash
       if [ ! "$(getent group onepassword)" ]; then
-        groupadd onepassword
+        echo "Creating group 'onepassword' for 1Password browser support, you may be prompted for your password."
+        sudo groupadd onepassword
       fi
       EOS
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", "2755")
@@ -114,6 +115,13 @@ cask "1password-gui-linux" do
    # chrome-sandbox requires the setuid bit to be specifically set.
    # See https://github.com/electron/electron/issues/17972
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
+
+    File.open("#{staged_path}/1PasswordWrapper.sh", "w", 0755) do |f|
+      f.write <<~EOS
+        #!/bin/bash
+        flatpak-spawn --host #{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport "$@"
+        EOS
+    end
 
     # this list of supported native messaging hosts paths was retrieved by examining the 1Password log file at #{Dir.home}/.config/1Password/logs/1Password_rCURRENT.log
     native_messaging_hosts_paths = ["#{Dir.home}/.mozilla/native-messaging-hosts",
@@ -128,22 +136,29 @@ cask "1password-gui-linux" do
                           ]
                           
     native_messaging_hosts_paths.each do |nmh_path|         
-      # write out wrapper script to each browser support folder
-      File.open("#{nmh_path}/1PasswordWrapper.sh", "w", 0755) do |f|
-        f.write <<~EOS
-          #!/bin/bash
-          flatpak-spawn --host #{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport "$@"
-          EOS
-      end
 
-      # modify NMH manifests to use the wrapper script
-      manifest_path = "#{nmh_path}/com.1password.1password.json"
-      if File.exist?(manifest_path)
-        manifest = JSON.parse(File.read(manifest_path))
-        manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
-        File.write(manifest_path, JSON.generate(manifest))
-      elsif nmh_path.include?("mozilla") # Firefox is the only supported browser which has a different manifest
-        File.write(manifest_path, <<~EOS)
+      # write out wrapper script link to each browser support folder
+      system "ln -sf #{staged_path}/1PasswordWrapper.sh #{nmh_path}/1PasswordWrapper.sh"
+
+      manifest_content=<<~EOS
+      {
+        "name": "com.1password.1password",
+        "description": "1Password BrowserSupport",
+        "path": "#{nmh_path}/1PasswordWrapper.sh",
+        "type": "stdio",
+        "allowed_origins": [
+          "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/",
+          "chrome-extension://bkpbhnjcbehoklfkljkkbbmipaphipgl/",
+          "chrome-extension://gejiddohjgogedgjnonbofjigllpkmbf/",
+          "chrome-extension://khgocmkkpikpnmmkgmdnfckapcdkgfaf/",
+          "chrome-extension://aeblfdkhhhdcdjpifhhbdiojplfjncoa/",
+          "chrome-extension://dppgmdbiimibapkepcbdbmkaabgiofem/"
+        ]
+      }
+      EOS
+
+      # Firefox is the only supported browser which has a different manifest
+      manifest_content_firefox=<<~EOS
         {
             "name": "com.1password.1password",
             "description": "1Password BrowserSupport",
@@ -156,23 +171,14 @@ cask "1password-gui-linux" do
             ]
         }
         EOS
+      system "echo Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
+      manifest_path = "#{nmh_path}/com.1password.1password.json"
+      if File.exist?(manifest_path)
+        manifest = JSON.parse(File.read(manifest_path))
+        manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
+        File.write(manifest_path, JSON.generate(manifest))
       else
-        File.write(manifest_path, <<~EOS)
-        {
-          "name": "com.1password.1password",
-          "description": "1Password BrowserSupport",
-          "path": "#{nmh_path}/1PasswordWrapper.sh",
-          "type": "stdio",
-          "allowed_origins": [
-            "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/",
-            "chrome-extension://bkpbhnjcbehoklfkljkkbbmipaphipgl/",
-            "chrome-extension://gejiddohjgogedgjnonbofjigllpkmbf/",
-            "chrome-extension://khgocmkkpikpnmmkgmdnfckapcdkgfaf/",
-            "chrome-extension://aeblfdkhhhdcdjpifhhbdiojplfjncoa/",
-            "chrome-extension://dppgmdbiimibapkepcbdbmkaabgiofem/"
-          ]
-        }
-        EOS
+        sudo "echo #{nmh_path.include?("mozilla")? manifest_content_firefox: manifest_content} > #{nmh_path}/com.1password.1password.json"
       end
       # set NMH manifests to read-only or else 1Password will overwrite them on launch
       set_permissions(manifest_path, "444")
