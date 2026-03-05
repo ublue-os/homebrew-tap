@@ -224,14 +224,5 @@ cask "1password-gui-linux" do
     "~/.cache/1password",
     "~/.config/1Password",
     "~/.local/share/keyrings/1password.keyring",
-    "~/.mozilla/native-messaging-hosts/com.1password.1password.json",
-    "~/.config/google-chrome/NativeMessagingHosts/com.1password.1password.json",
-    "~/.config/google-chrome-beta/NativeMessagingHosts/com.1password.1password.json",
-    "~/.config/google-chrome-unstable/NativeMessagingHosts/com.1password.1password.json",
-    "~/.config/chromium/NativeMessagingHosts/com.1password.1password.json",
-    "~/.config/microsoft-edge-dev/NativeMessagingHosts/com.1password.1password.json",
-    "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.1password.1password.json",
-    "~/.config/vivaldi/NativeMessagingHosts/com.1password.1password.json", 
-    "~/.config/vivaldi-snapshot/NativeMessagingHosts/com.1password.1password.json", 
   ]
 end
