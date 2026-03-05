@@ -77,10 +77,10 @@ cask "1password-gui-linux" do
       as it already exists and is the same as the version to be installed."
     end
 
-    system "echo", "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
     if !File.exist?("/etc/1password/custom_allowed_browsers") ||
        !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper$/).any?()
        if !File.exist?("/etc/1password/custom_allowed_browsers")
+        system "echo", "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
         system "sudo", "install", "-Dm0644",
               "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
               "/etc/1password/custom_allowed_browsers"
@@ -93,8 +93,7 @@ cask "1password-gui-linux" do
             puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
         end
     else
-      puts "Skipping installation of /etc/1password/custom_allowed_browsers,
-      as it already exists and contains flatpak-session-helper"
+      puts "Skipping installation of /etc/1password/custom_allowed_browsers as it already exists and contains flatpak-session-helper"
     end
 
     File.write("#{staged_path}/zpass.sh", <<~EOS)
@@ -175,7 +174,7 @@ cask "1password-gui-linux" do
       if File.exist?(manifest_path)
         manifest = JSON.parse(File.read(manifest_path))
         if manifest["path"] != "#{nmh_path}/1PasswordWrapper.sh"
-          puts "Updating native messaging host manifest in #{manifest_path} support flatpak browsers you may be prompted for your password."
+          puts "Updating native messaging host manifest in #{manifest_path} to support flatpak browsers you may be prompted for your password."
           manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
           system "sudo echo '#{JSON.generate(manifest)}' > '#{manifest_path}'"
         else
@@ -183,8 +182,8 @@ cask "1password-gui-linux" do
         end
       else
         puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
-        system "sudo touch #{nmh_path}/com.1password.1password.json"
-        system "echo #{nmh_path.include?("mozilla")? manifest_content_firefox: manifest_content} > #{nmh_path}/com.1password.1password.json"
+        system "sudo touch #{manifest_path}"
+        system "echo #{nmh_path.include?("mozilla")? manifest_content_firefox: manifest_content} > #{manifest_path}"
       end
         # set NMH manifests to read-only or else 1Password will overwrite them on launch
         set_permissions(manifest_path, "444")
