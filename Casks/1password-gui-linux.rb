@@ -137,7 +137,7 @@ cask "1password-gui-linux" do
       end
 
       # modify NMH manifests to use the wrapper script
-      manifest_path = "#{nmh_path}/com.1password.1Password.json"
+      manifest_path = "#{nmh_path}/com.1password.1password.json"
       if File.exist?(manifest_path)
         manifest = JSON.parse(File.read(manifest_path))
         manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
@@ -204,7 +204,7 @@ cask "1password-gui-linux" do
       )
       #set NMH manifests back to read-write so 1Password can clean them up on uninstall
       for nmh_path in "${native_messaging_hosts_paths[@]}"; do
-        manifest_file="$nmh_path/com.1password.1Password.json"
+        manifest_file="$nmh_path/com.1password.1password.json"
         if [ -f "$manifest_file" ]; then
           echo "allowing write access to $manifest_file for 1Password uninstallation"
           sudo chmod 644 "$manifest_file"
@@ -225,14 +225,14 @@ cask "1password-gui-linux" do
     "~/.cache/1password",
     "~/.config/1Password",
     "~/.local/share/keyrings/1password.keyring",
-    "~/.mozilla/native-messaging-hosts/com.1password.1Password.json",
-    "~/.config/google-chrome/NativeMessagingHosts/com.1password.1Password.json",
-    "~/.config/google-chrome-beta/NativeMessagingHosts/com.1password.1Password.json",
-    "~/.config/google-chrome-unstable/NativeMessagingHosts/com.1password.1Password.json",
-    "~/.config/chromium/NativeMessagingHosts/com.1password.1Password.json",
-    "~/.config/microsoft-edge-dev/NativeMessagingHosts/com.1password.1Password.json",
-    "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.1password.1Password.json",
-    "~/.config/vivaldi/NativeMessagingHosts/com.1password.1Password.json", 
-    "~/.config/vivaldi-snapshot/NativeMessagingHosts/com.1password.1Password.json", 
+    "~/.mozilla/native-messaging-hosts/com.1password.1password.json",
+    "~/.config/google-chrome/NativeMessagingHosts/com.1password.1password.json",
+    "~/.config/google-chrome-beta/NativeMessagingHosts/com.1password.1password.json",
+    "~/.config/google-chrome-unstable/NativeMessagingHosts/com.1password.1password.json",
+    "~/.config/chromium/NativeMessagingHosts/com.1password.1password.json",
+    "~/.config/microsoft-edge-dev/NativeMessagingHosts/com.1password.1password.json",
+    "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts/com.1password.1password.json",
+    "~/.config/vivaldi/NativeMessagingHosts/com.1password.1password.json", 
+    "~/.config/vivaldi-snapshot/NativeMessagingHosts/com.1password.1password.json", 
   ]
 end
