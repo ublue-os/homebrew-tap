@@ -49,7 +49,7 @@ cask "1password-gui-linux" do
     # set up flatpak browser support
     browser_config = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers"
     File.open(browser_config, "a") do |f|
-      f.append "\nflatpak-session-helper"
+      f.write "\nflatpak-session-helper"
     end
   end
 
