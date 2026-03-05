@@ -136,8 +136,7 @@ cask "1password-gui-linux" do
                           ]
                           
     native_messaging_hosts_paths.each do |nmh_path|         
-
-      # write out wrapper script link to each browser support folder
+      # link wrapper script to each browser support folder so the flatpak filesystem restrictions won't prevent the browser from launching it
       system "ln -sf #{staged_path}/1PasswordWrapper.sh #{nmh_path}/1PasswordWrapper.sh"
 
       manifest_content=<<~EOS
@@ -171,17 +170,24 @@ cask "1password-gui-linux" do
             ]
         }
         EOS
-      system "echo Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
+
       manifest_path = "#{nmh_path}/com.1password.1password.json"
       if File.exist?(manifest_path)
         manifest = JSON.parse(File.read(manifest_path))
-        manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
-        File.write(manifest_path, JSON.generate(manifest))
+        if manifest["path"] != "#{nmh_path}/1PasswordWrapper.sh"
+          puts "Updating native messaging host manifest in #{manifest_path} support flatpak browsers you may be prompted for your password."
+          manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
+          system "sudo echo '#{JSON.generate(manifest)}' > '#{manifest_path}'"
+        else
+          puts "Found native messaging host manifest in #{manifest_path} which already has flatpak browser support, skipping update."
+        end
       else
-        sudo "echo #{nmh_path.include?("mozilla")? manifest_content_firefox: manifest_content} > #{nmh_path}/com.1password.1password.json"
+        puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
+        system "sudo touch #{nmh_path}/com.1password.1password.json"
+        system "echo #{nmh_path.include?("mozilla")? manifest_content_firefox: manifest_content} > #{nmh_path}/com.1password.1password.json"
       end
-      # set NMH manifests to read-only or else 1Password will overwrite them on launch
-      set_permissions(manifest_path, "444")
+        # set NMH manifests to read-only or else 1Password will overwrite them on launch
+        set_permissions(manifest_path, "444")
     end
 
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
