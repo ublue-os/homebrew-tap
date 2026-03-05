@@ -203,15 +203,15 @@ cask "1password-gui-linux" do
       fi
 
       native_messaging_hosts_paths=(
-        "~/.mozilla/native-messaging-hosts"
-        "~/.config/google-chrome/NativeMessagingHosts"
-        "~/.config/google-chrome-beta/NativeMessagingHosts"
-        "~/.config/google-chrome-unstable/NativeMessagingHosts"
-        "~/.config/chromium/NativeMessagingHosts"
-        "~/.config/microsoft-edge-dev/NativeMessagingHosts"
-        "~/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts"
-        "~/.config/vivaldi/NativeMessagingHosts"
-        "~/.config/vivaldi-snapshot/NativeMessagingHosts"
+        "$HOME/.mozilla/native-messaging-hosts"
+        "$HOME/.config/google-chrome/NativeMessagingHosts"
+        "$HOME/.config/google-chrome-beta/NativeMessagingHosts"
+        "$HOME/.config/google-chrome-unstable/NativeMessagingHosts"
+        "$HOME/.config/chromium/NativeMessagingHosts"
+        "$HOME/.config/microsoft-edge-dev/NativeMessagingHosts"
+        "$HOME/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts"
+        "$HOME/.config/vivaldi/NativeMessagingHosts"
+        "$HOME/.config/vivaldi-snapshot/NativeMessagingHosts"
       )
       #set NMH manifests back to read-write so 1Password can clean them up on uninstall
       for nmh_path in "${native_messaging_hosts_paths[@]}"; do
@@ -220,8 +220,8 @@ cask "1password-gui-linux" do
           echo "allowing write access to $manifest_file for 1Password uninstallation"
           sudo chmod 644 "$manifest_file"
         fi
-        echo "removing wrapper script from $nmh_path/1PasswordWrapper.sh"
-        sudo rm -f "$nmh_path/1PasswordWrapper.sh"
+        echo "removing wrapper link from $nmh_path/1PasswordWrapper.sh"
+        sudo unlink "$nmh_path/1PasswordWrapper.sh"
       done
     EOS
     set_permissions("#{staged_path}/1password-uninstall.sh", "744")
