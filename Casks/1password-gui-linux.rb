@@ -79,19 +79,18 @@ cask "1password-gui-linux" do
 
     if !File.exist?("/etc/1password/custom_allowed_browsers") ||
        !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper$/).any?()
-       if !File.exist?("/etc/1password/custom_allowed_browsers")
-        system "echo", "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
+      if !File.exist?("/etc/1password/custom_allowed_browsers")
+        puts"Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
         system "sudo", "install", "-Dm0644",
-              "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
-              "/etc/1password/custom_allowed_browsers"
-              puts "Installed /etc/1password/custom_allowed_browsers"
-       else
-        # append contents of the file to be installed to the existing file
-            File.open(browser_config, "a") do |f|
-              f.write "\nflatpak-session-helper"
-            end
-            puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
+            "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
+            "/etc/1password/custom_allowed_browsers"
+      else
+        # append the flatpak-session-helper to the existing custom_allowed_browsers file
+        File.open(browser_config, "a") do |f|
+          f.write "\nflatpak-session-helper"
         end
+            puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
+      end
     else
       puts "Skipping installation of /etc/1password/custom_allowed_browsers as it already exists and contains flatpak-session-helper"
     end
@@ -110,7 +109,7 @@ cask "1password-gui-linux" do
       fi
       EOS
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", "2755")
-    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", group:"onepassword")
+    set_ownership(["#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", "#{staged_path}/1password-#{version}.#{arch_suffix}/onepassword"], user: root, group:"onepassword")
    # chrome-sandbox requires the setuid bit to be specifically set.
    # See https://github.com/electron/electron/issues/17972
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
@@ -118,7 +117,7 @@ cask "1password-gui-linux" do
     File.open("#{staged_path}/1PasswordWrapper.sh", "w", 0755) do |f|
       f.write <<~EOS
         #!/bin/bash
-        flatpak-spawn --host #{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport "$@"
+        flatpak-spawn --host #{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport "$@"
         EOS
     end
 
@@ -130,19 +129,20 @@ cask "1password-gui-linux" do
                             "#{Dir.home}/.config/chromium/NativeMessagingHosts",
                             "#{Dir.home}/.config/microsoft-edge-dev/NativeMessagingHosts",
                             "#{Dir.home}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts",
-                            "#{Dir.home}/.config/vivaldi/NativeMessagingHosts", 
-                            "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts", 
+                            "#{Dir.home}/.config/vivaldi/NativeMessagingHosts",
+                            "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts",
                           ]
                           
     native_messaging_hosts_paths.each do |nmh_path|         
       # link wrapper script to each browser support folder so the flatpak filesystem restrictions won't prevent the browser from launching it
       system "ln -sf #{staged_path}/1PasswordWrapper.sh #{nmh_path}/1PasswordWrapper.sh"
 
+      script_path = "#{File.expand_path(nmh_path)}/1PasswordWrapper.sh"
       manifest_content=<<~EOS
       {
         "name": "com.1password.1password",
         "description": "1Password BrowserSupport",
-        "path": "#{nmh_path}/1PasswordWrapper.sh",
+        "path": "#{script_path}",
         "type": "stdio",
         "allowed_origins": [
           "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/",
@@ -160,7 +160,7 @@ cask "1password-gui-linux" do
         {
             "name": "com.1password.1password",
             "description": "1Password BrowserSupport",
-            "path": "#{nmh_path}/1PasswordWrapper.sh",
+            "path": "#{script_path}",
             "type": "stdio",
             "allowed_extensions": [
               "{0a75d802-9aed-41e7-8daa-24c067386e82}",
@@ -173,17 +173,17 @@ cask "1password-gui-linux" do
       manifest_path = "#{nmh_path}/com.1password.1password.json"
       if File.exist?(manifest_path)
         manifest = JSON.parse(File.read(manifest_path))
-        if manifest["path"] != "#{nmh_path}/1PasswordWrapper.sh"
+        if manifest["path"] != script_path
           puts "Updating native messaging host manifest in #{manifest_path} to support flatpak browsers you may be prompted for your password."
-          manifest["path"] = "#{nmh_path}/1PasswordWrapper.sh"
-          system "sudo echo '#{JSON.generate(manifest)}' > '#{manifest_path}'"
+          manifest["path"] = script_path
+          system "echo '#{JSON.pretty_generate(manifest)}' | sudo tee '#{manifest_path}'"
         else
           puts "Found native messaging host manifest in #{manifest_path} which already has flatpak browser support, skipping update."
         end
       else
         puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
         system "sudo touch #{manifest_path}"
-        system "echo #{nmh_path.include?("mozilla")? manifest_content_firefox: manifest_content} > #{manifest_path}"
+        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' | sudo tee '#{manifest_path}'"
       end
         # set NMH manifests to read-only or else 1Password will overwrite them on launch
         set_permissions(manifest_path, "444")
@@ -224,7 +224,7 @@ cask "1password-gui-linux" do
         sudo unlink "$nmh_path/1PasswordWrapper.sh"
       done
     EOS
-    set_permissions("#{staged_path}/1password-uninstall.sh", "744")
+    set_permissions("#{staged_path}/1password-uninstall.sh", "740")
   end
 
   uninstall_preflight do
