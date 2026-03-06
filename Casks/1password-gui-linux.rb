@@ -117,7 +117,7 @@ cask "1password-gui-linux" do
     File.open("#{staged_path}/1PasswordWrapper.sh", "w", 0755) do |f|
       f.write <<~EOS
         #!/bin/bash
-        flatpak-spawn --host #{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport "$@"
+        flatpak-spawn --host "#{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport" "$@"
         EOS
     end
 
