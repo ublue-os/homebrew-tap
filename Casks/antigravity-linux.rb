@@ -47,19 +47,19 @@ cask "antigravity-linux" do
       Name=Antigravity
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/antigravity %F
+      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" %F
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
       Type=Application
       StartupNotify=false
       StartupWMClass=Antigravity
       Categories=TextEditor;Development;IDE;
-      MimeType=text/plain;inode/directory;application/x-code-workspace;
+      MimeType=text/plain;inode/directory;application/x-code-workspace;x-scheme-handler/antigravity;
       Actions=new-empty-window;
       Keywords=antigravity;code;editor;ai;
 
       [Desktop Action new-empty-window]
       Name=New Empty Window
-      Exec=#{HOMEBREW_PREFIX}/bin/antigravity --new-window %F
+      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" --new-window %F
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
     EOS
 
@@ -68,11 +68,13 @@ cask "antigravity-linux" do
       Name=Antigravity - URL Handler
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/antigravity --open-url %U
+      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" --open-url "%U"
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
       Type=Application
       NoDisplay=true
+      Terminal=false
       StartupNotify=true
+      StartupWMClass=antigravity
       Categories=Utility;TextEditor;Development;IDE;
       MimeType=x-scheme-handler/antigravity;
       Keywords=antigravity;
@@ -82,8 +84,16 @@ cask "antigravity-linux" do
     FileUtils.touch "#{staged_path}/antigravity.png" unless File.exist?("#{staged_path}/antigravity.png")
   end
 
+
   zap trash: [
     "~/.antigravity",
     "~/.config/Antigravity",
+    "~/.config/antigravity",
   ]
-end
+  end
+
+  caveats <<~EOS
+    If authentication fails or the browser doesn't open Antigravity, try running:
+      xdg-mime default antigravity-url-handler.desktop x-scheme-handler/antigravity
+      update-desktop-database ~/.local/share/applications
+  EOS
