@@ -112,6 +112,9 @@ cask "1password-gui-linux" do
     # can't use set_permissions here because we no longer own the file and brew tries to run chmod without sudo
     system "sudo chmod 2755 #{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
 
+    # the 1Password binary also needs to be owned by root so it can be executed by browser support which runs with elevated permissions
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1password", user:"root", group:"root")
+
    # chrome-sandbox requires the setuid bit to be specifically set.
    # See https://github.com/electron/electron/issues/17972
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
@@ -203,7 +206,6 @@ cask "1password-gui-linux" do
       else
         echo "/etc/polkit-1/actions/com.1password.1Password.policy does not exist, skipping."
       fi
-
       native_messaging_hosts_paths=(
         "$HOME/.mozilla/native-messaging-hosts"
         "$HOME/.config/google-chrome/NativeMessagingHosts"
@@ -227,9 +229,18 @@ cask "1password-gui-linux" do
       done
     EOS
     set_permissions("#{staged_path}/1password-uninstall.sh", "740")
+    # set the folder to be owned by root so browser support has access
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/", user:"root", group:"root")
   end
 
   uninstall_preflight do
+    # re-take ownership of the files we changed
+    set_ownership [
+      "#{staged_path}/1password-#{version}.#{arch_suffix}",
+      "#{staged_path}/1password-#{version}.#{arch_suffix}/1password",
+      "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
+    ]
+
     system "#{staged_path}/1password-uninstall.sh"
   end
 
