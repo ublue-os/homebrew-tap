@@ -224,7 +224,7 @@ cask "1password-gui-linux" do
           echo "allowing write access to $manifest_file for 1Password uninstallation"
           sudo chmod 644 "$manifest_file"
         fi
-        echo "removing wrapper link from $nmh_path/1PasswordWrapper.sh"
+        echo "removing wrapper script from $nmh_path/1PasswordWrapper.sh"
         sudo rm -f "$nmh_path/1PasswordWrapper.sh"
       done
     EOS
@@ -236,7 +236,7 @@ cask "1password-gui-linux" do
   uninstall_preflight do
     # re-take ownership of the files we changed
     set_ownership [
-      "#{staged_path}/1password-#{version}.#{arch_suffix}",
+      "#{staged_path}/1password-#{version}.#{arch_suffix}/",
       "#{staged_path}/1password-#{version}.#{arch_suffix}/1password",
       "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
     ]
