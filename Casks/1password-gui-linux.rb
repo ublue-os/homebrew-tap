@@ -206,6 +206,10 @@ cask "1password-gui-linux" do
       else
         echo "/etc/polkit-1/actions/com.1password.1Password.policy does not exist, skipping."
       fi
+
+      # re-take ownership of the directory and binaries so we can remove them
+      sudo chown -R "$(whoami)":"$(whoami)" "#{staged_path}/1password-#{version}.#{arch_suffix}/" "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
+
       native_messaging_hosts_paths=(
         "$HOME/.mozilla/native-messaging-hosts"
         "$HOME/.config/google-chrome/NativeMessagingHosts"
@@ -234,12 +238,7 @@ cask "1password-gui-linux" do
   end
 
   uninstall_preflight do
-    # re-take ownership of the files we changed
-    set_ownership [
-      "#{staged_path}/1password-#{version}.#{arch_suffix}/",
-      "#{staged_path}/1password-#{version}.#{arch_suffix}/1password",
-      "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
-    ]
+
 
     system "#{staged_path}/1password-uninstall.sh"
   end
