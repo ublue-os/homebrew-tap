@@ -108,8 +108,9 @@ cask "1password-gui-linux" do
         sudo groupadd onepassword
       fi
       EOS
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", user: root, group:"onepassword")
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", "2755")
-    set_ownership(["#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", "#{staged_path}/1password-#{version}.#{arch_suffix}/onepassword"], user: root, group:"onepassword")
+
    # chrome-sandbox requires the setuid bit to be specifically set.
    # See https://github.com/electron/electron/issues/17972
     set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
