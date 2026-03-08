@@ -80,7 +80,7 @@ cask "1password-gui-linux" do
     if !File.exist?("/etc/1password/custom_allowed_browsers") ||
        !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper/).any?()
       if !File.exist?("/etc/1password/custom_allowed_browsers")
-        puts"Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
+        puts "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
         system "sudo", "install", "-Dm0644",
             "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
             "/etc/1password/custom_allowed_browsers"
@@ -110,19 +110,24 @@ cask "1password-gui-linux" do
       EOS
     set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", user:"root", group:"onepassword")
     # can't use set_permissions here because we no longer own the file and brew tries to run chmod without sudo
-    system "sudo chmod 2755 #{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
+    system "sudo", "chmod", "2755", "#{File.expand_path(staged_path)}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
 
     # the 1Password binary also needs to be owned by root so it can be executed by browser support which runs with elevated permissions
     set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1password", user:"root", group:"root")
 
    # chrome-sandbox requires the setuid bit to be specifically set.
    # See https://github.com/electron/electron/issues/17972
-    set_permissions("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", "4755")
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", user:"root", group:"root")
+    system "sudo", "chmod", "4755", "#{File.expand_path(staged_path)}/1password-#{version}.#{arch_suffix}/chrome-sandbox"
 
     File.open("#{staged_path}/1PasswordWrapper.sh", "w", 0755) do |f|
       f.write <<~EOS
         #!/bin/bash
-        flatpak-spawn --host "#{HOMEBREW_PREFIX}/bin/1Password-BrowserSupport" "$@"
+        if [ "${container-}" = flatpak ]; then
+          flatpak-spawn --host "#{File.expand_path(HOMEBREW_PREFIX)}/bin/1Password-BrowserSupport" "$@"
+        else
+          exec "#{File.expand_path(HOMEBREW_PREFIX)}/bin/1Password-BrowserSupport" "$@"
+        fi
         EOS
     end
 
@@ -141,7 +146,7 @@ cask "1password-gui-linux" do
     native_messaging_hosts_paths.each do |nmh_path|     
       script_path = "#{File.expand_path(nmh_path)}/1PasswordWrapper.sh"    
       # copy wrapper script to each browser support folder so the flatpak filesystem restrictions won't prevent the browser from launching it
-      system "cp -f #{staged_path}/1PasswordWrapper.sh #{script_path}"
+      system "cp", "-f", "#{staged_path}/1PasswordWrapper.sh", "#{script_path}"
 
       manifest_content=<<~EOS
       {
@@ -181,14 +186,14 @@ cask "1password-gui-linux" do
         if manifest["path"] != script_path
           puts "Updating native messaging host manifest in #{manifest_path} to support flatpak browsers you may be prompted for your password."
           manifest["path"] = script_path
-          system "echo '#{JSON.pretty_generate(manifest)}' | sudo tee '#{manifest_path}' >/dev/null"
+          system "echo", "#{JSON.pretty_generate(manifest)}", "|", "sudo", "tee", "#{manifest_path}", ">", "/dev/null"
         else
           puts "Found native messaging host manifest in #{manifest_path} which already has flatpak browser support, skipping update."
         end
       else
         puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
-        system "sudo touch #{manifest_path}"
-        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' | sudo tee '#{manifest_path}' >/dev/null"
+        system "sudo", "touch", "#{manifest_path}"
+        system "echo", "#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}", "|", "sudo", "tee", "#{manifest_path}", ">", "/dev/null"
       end
         # set NMH manifests to read-only or else 1Password will overwrite them on launch
         set_permissions(manifest_path, "444")
@@ -208,7 +213,7 @@ cask "1password-gui-linux" do
       fi
 
       # re-take ownership of the directory and binaries so we can remove them
-      sudo chown "$(whoami)":"$(whoami)" "#{staged_path}/1password-#{version}.#{arch_suffix}" "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
+      sudo chown "$(whoami)":"$(whoami)" "#{staged_path}/1password-#{version}.#{arch_suffix}" "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport" "#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox"
 
       native_messaging_hosts_paths=(
         "$HOME/.mozilla/native-messaging-hosts"
@@ -235,12 +240,10 @@ cask "1password-gui-linux" do
     set_permissions("#{staged_path}/1password-uninstall.sh", "740")
 
     # set the folder to be owned by root so browser support has access
-    system "sudo chown root:root '#{staged_path}/1password-#{version}.#{arch_suffix}'"
+    system "sudo", "chown", "root:root", "#{staged_path}/1password-#{version}.#{arch_suffix}"
   end
 
   uninstall_preflight do
-
-
     system "#{staged_path}/1password-uninstall.sh"
   end
 
