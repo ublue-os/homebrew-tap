@@ -78,7 +78,7 @@ cask "1password-gui-linux" do
     end
 
     if !File.exist?("/etc/1password/custom_allowed_browsers") ||
-       !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper$/).any?()
+       !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper/).any?()
       if !File.exist?("/etc/1password/custom_allowed_browsers")
         puts"Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
         system "sudo", "install", "-Dm0644",
@@ -86,7 +86,7 @@ cask "1password-gui-linux" do
             "/etc/1password/custom_allowed_browsers"
       else
         # append the flatpak-session-helper to the existing custom_allowed_browsers file
-        File.open(browser_config, "a") do |f|
+        File.open("/etc/1password/custom_allowed_browsers", "a") do |f|
           f.write "\nflatpak-session-helper"
         end
             puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
