@@ -177,14 +177,14 @@ cask "1password-gui-linux" do
         if manifest["path"] != script_path
           puts "Updating native messaging host manifest in #{manifest_path} to support flatpak browsers you may be prompted for your password."
           manifest["path"] = script_path
-          system "echo '#{JSON.pretty_generate(manifest)}' | sudo tee '#{manifest_path}'"
+          system "echo '#{JSON.pretty_generate(manifest)}' | sudo tee '#{manifest_path}' >/dev/null"
         else
           puts "Found native messaging host manifest in #{manifest_path} which already has flatpak browser support, skipping update."
         end
       else
         puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
         system "sudo touch #{manifest_path}"
-        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' | sudo tee '#{manifest_path}'"
+        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' | sudo tee '#{manifest_path}' >/dev/null"
       end
         # set NMH manifests to read-only or else 1Password will overwrite them on launch
         set_permissions(manifest_path, "444")
