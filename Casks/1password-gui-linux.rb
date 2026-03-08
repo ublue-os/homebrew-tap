@@ -208,7 +208,7 @@ cask "1password-gui-linux" do
       fi
 
       # re-take ownership of the directory and binaries so we can remove them
-      sudo chown -R "$(whoami)":"$(whoami)" "#{staged_path}/1password-#{version}.#{arch_suffix}/" "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
+      sudo chown "$(whoami)":"$(whoami)" "#{staged_path}/1password-#{version}.#{arch_suffix}/" "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
 
       native_messaging_hosts_paths=(
         "$HOME/.mozilla/native-messaging-hosts"
@@ -233,8 +233,9 @@ cask "1password-gui-linux" do
       done
     EOS
     set_permissions("#{staged_path}/1password-uninstall.sh", "740")
+
     # set the folder to be owned by root so browser support has access
-    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/", user:"root", group:"root")
+    system "sudo chown root:root '#{staged_path}/1password-#{version}.#{arch_suffix}/'"
   end
 
   uninstall_preflight do
