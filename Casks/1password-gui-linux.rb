@@ -78,18 +78,18 @@ cask "1password-gui-linux" do
     end
 
     if !File.exist?("/etc/1password/custom_allowed_browsers") ||
-       !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper/).any?()
+       !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper/).any?
       if !File.exist?("/etc/1password/custom_allowed_browsers")
         puts "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
         system "sudo", "install", "-Dm0644",
-            "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
-            "/etc/1password/custom_allowed_browsers"
+          "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
+          "/etc/1password/custom_allowed_browsers"
       else
         # append the flatpak-session-helper to the existing custom_allowed_browsers file
         File.open("/etc/1password/custom_allowed_browsers", "a") do |f|
           f.write "\nflatpak-session-helper"
         end
-            puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
+          puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
       end
     else
       puts "Skipping installation of /etc/1password/custom_allowed_browsers as it already exists and contains flatpak-session-helper"
@@ -186,14 +186,14 @@ cask "1password-gui-linux" do
         if manifest["path"] != script_path
           puts "Updating native messaging host manifest in #{manifest_path} to support flatpak browsers you may be prompted for your password."
           manifest["path"] = script_path
-          system "echo", "#{JSON.pretty_generate(manifest)}", "|", "sudo", "tee", "#{manifest_path}", ">", "/dev/null"
+          system "echo '#{JSON.pretty_generate(manifest)}' | sudo tee #{manifest_path} >/dev/null"
         else
           puts "Found native messaging host manifest in #{manifest_path} which already has flatpak browser support, skipping update."
         end
       else
         puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
         system "sudo", "touch", "#{manifest_path}"
-        system "echo", "#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}", "|", "sudo", "tee", "#{manifest_path}", ">", "/dev/null"
+        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' | sudo tee #{manifest_path} >/dev/null"
       end
         # set NMH manifests to read-only or else 1Password will overwrite them on launch
         set_permissions(manifest_path, "444")
@@ -213,7 +213,11 @@ cask "1password-gui-linux" do
       fi
 
       # re-take ownership of the directory and binaries so we can remove them
-      sudo chown "$(whoami)":"$(whoami)" "#{staged_path}/1password-#{version}.#{arch_suffix}" "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport" "#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox"
+      sudo chown "$(whoami)":"$(whoami)" \
+       "#{staged_path}/1password-#{version}.#{arch_suffix}" \
+       "#{staged_path}/1password-#{version}.#{arch_suffix}/1password" \
+       "#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport" \
+       "#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox"
 
       native_messaging_hosts_paths=(
         "$HOME/.mozilla/native-messaging-hosts"
