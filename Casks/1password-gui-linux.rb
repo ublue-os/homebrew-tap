@@ -134,11 +134,11 @@ cask "1password-gui-linux" do
                             "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts",
                           ]
                           
-    native_messaging_hosts_paths.each do |nmh_path|         
-      # link wrapper script to each browser support folder so the flatpak filesystem restrictions won't prevent the browser from launching it
-      system "ln -sf #{staged_path}/1PasswordWrapper.sh #{nmh_path}/1PasswordWrapper.sh"
+    native_messaging_hosts_paths.each do |nmh_path|     
+      script_path = "#{File.expand_path(nmh_path)}/1PasswordWrapper.sh"    
+      # copy wrapper script to each browser support folder so the flatpak filesystem restrictions won't prevent the browser from launching it
+      system "cp -f #{staged_path}/1PasswordWrapper.sh #{script_path}"
 
-      script_path = "#{File.expand_path(nmh_path)}/1PasswordWrapper.sh"
       manifest_content=<<~EOS
       {
         "name": "com.1password.1password",
@@ -222,7 +222,7 @@ cask "1password-gui-linux" do
           sudo chmod 644 "$manifest_file"
         fi
         echo "removing wrapper link from $nmh_path/1PasswordWrapper.sh"
-        sudo unlink "$nmh_path/1PasswordWrapper.sh"
+        sudo rm -f "$nmh_path/1PasswordWrapper.sh"
       done
     EOS
     set_permissions("#{staged_path}/1password-uninstall.sh", "740")
