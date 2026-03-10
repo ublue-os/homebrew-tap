@@ -84,16 +84,15 @@ cask "antigravity-linux" do
     FileUtils.touch "#{staged_path}/antigravity.png" unless File.exist?("#{staged_path}/antigravity.png")
   end
 
-
   zap trash: [
     "~/.antigravity",
     "~/.config/Antigravity",
     "~/.config/antigravity",
   ]
-  end
 
   caveats <<~EOS
     If authentication fails or the browser doesn't open Antigravity, try running:
       xdg-mime default antigravity-url-handler.desktop x-scheme-handler/antigravity
       update-desktop-database ~/.local/share/applications
   EOS
+end
