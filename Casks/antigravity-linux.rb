@@ -1,9 +1,9 @@
 cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
 
-  version "1.20.6,5891862175809536"
-  sha256 arm64_linux:  "6e17f33d8ccb5622affb3590efccb87c3c4dd505f1d3b0f8506f1c20c39c026a",
-         x86_64_linux: "ad382bf321a6216d07f95af1f613e03f5a07fdf6fc6632b769ce83d81afdd567"
+  version "1.21.6,5723021441368064"
+  sha256 arm64_linux:  "2a71ae157cc2f6cdc492c5eec7d7cee2f2bec2ebf22275cbf99c081f8bab63db",
+         x86_64_linux: "36fb3b270067c9654c0157a8f8b1ccf5986579f7f2f8e367cfb1616515f9eb14"
 
   url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
       verified: "edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/"
