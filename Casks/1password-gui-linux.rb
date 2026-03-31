@@ -39,7 +39,6 @@ cask "1password-gui-linux" do
   artifact "1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
            target: "#{HOMEBREW_PREFIX}/etc/1password/custom_allowed_browsers"
 
-
   preflight do
     desktop_file = "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/1password.desktop"
     text = File.read(desktop_file)
@@ -78,21 +77,22 @@ cask "1password-gui-linux" do
     end
 
     if !File.exist?("/etc/1password/custom_allowed_browsers") ||
-       !File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper/).any?
-      if !File.exist?("/etc/1password/custom_allowed_browsers")
-        puts "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
-        system "sudo", "install", "-Dm0644",
-          "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
-          "/etc/1password/custom_allowed_browsers"
-      else
+       File.readlines("/etc/1password/custom_allowed_browsers").grep(/^flatpak-session-helper/).none?
+      if File.exist?("/etc/1password/custom_allowed_browsers")
         # append the flatpak-session-helper to the existing custom_allowed_browsers file
         File.open("/etc/1password/custom_allowed_browsers", "a") do |f|
           f.write "\nflatpak-session-helper"
         end
-          puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
+        puts "Added flatpak-session-helper to /etc/1password/custom_allowed_browsers"
+      else
+        puts "Installing custom allowed browsers file to /etc/1password/, you may be prompted for your password."
+        system "sudo", "install", "-Dm0644",
+               "#{staged_path}/1password-#{version}.#{arch_suffix}/resources/custom_allowed_browsers",
+               "/etc/1password/custom_allowed_browsers"
       end
     else
-      puts "Skipping installation of /etc/1password/custom_allowed_browsers as it already exists and contains flatpak-session-helper"
+      puts "Skipping installation of /etc/1password/custom_allowed_browsers " \
+           "as it already exists and contains flatpak-session-helper"
     end
 
     File.write("#{staged_path}/zpass.sh", <<~EOS)
@@ -100,24 +100,26 @@ cask "1password-gui-linux" do
       zenity --password --title="Homebrew Sudo Password Prompt"
     EOS
 
-    # 1Password browser support binary needs to be owned by group onepassword and have the GID bit set in order to function
+    # 1Password browser support binary needs to be owned by group onepassword and
+    # have the GID bit set in order to function
     system <<~EOS
       #!/bin/bash
       if [ ! "$(getent group onepassword)" ]; then
         echo "Creating group 'onepassword' for 1Password browser support, you may be prompted for your password."
         sudo groupadd onepassword
       fi
-      EOS
-    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", user:"root", group:"onepassword")
+    EOS
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport", user: "root", group: "onepassword")
     # can't use set_permissions here because we no longer own the file and brew tries to run chmod without sudo
     system "sudo", "chmod", "2755", "#{File.expand_path(staged_path)}/1password-#{version}.#{arch_suffix}/1Password-BrowserSupport"
 
-    # the 1Password binary also needs to be owned by root so it can be executed by browser support which runs with elevated permissions
-    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1password", user:"root", group:"root")
+    # the 1Password binary also needs to be owned by root so it can be executed by
+    # browser support which runs with elevated permissions
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/1password", user: "root", group: "root")
 
-   # chrome-sandbox requires the setuid bit to be specifically set.
-   # See https://github.com/electron/electron/issues/17972
-    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", user:"root", group:"root")
+    # chrome-sandbox requires the setuid bit to be specifically set.
+    # See https://github.com/electron/electron/issues/17972
+    set_ownership("#{staged_path}/1password-#{version}.#{arch_suffix}/chrome-sandbox", user: "root", group: "root")
     system "sudo", "chmod", "4755", "#{File.expand_path(staged_path)}/1password-#{version}.#{arch_suffix}/chrome-sandbox"
 
     File.open("#{staged_path}/1PasswordWrapper.sh", "w", 0755) do |f|
@@ -128,41 +130,42 @@ cask "1password-gui-linux" do
         else
           exec "#{File.expand_path(HOMEBREW_PREFIX)}/bin/1Password-BrowserSupport" "$@"
         fi
-        EOS
+      EOS
     end
 
-    # this list of supported native messaging hosts paths was retrieved by examining the 1Password log file at #{Dir.home}/.config/1Password/logs/1Password_rCURRENT.log
+    # this list of supported native messaging hosts paths was retrieved by examining the 1Password log file at
+    #  #{Dir.home}/.config/1Password/logs/1Password_rCURRENT.log
     native_messaging_hosts_paths = ["#{Dir.home}/.mozilla/native-messaging-hosts",
-                            "#{Dir.home}/.config/google-chrome/NativeMessagingHosts",
-                            "#{Dir.home}/.config/google-chrome-beta/NativeMessagingHosts",
-                            "#{Dir.home}/.config/google-chrome-unstable/NativeMessagingHosts",
-                            "#{Dir.home}/.config/chromium/NativeMessagingHosts",
-                            "#{Dir.home}/.config/microsoft-edge-dev/NativeMessagingHosts",
-                            "#{Dir.home}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts",
-                            "#{Dir.home}/.config/vivaldi/NativeMessagingHosts",
-                            "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts",
-                          ]
-                          
-    native_messaging_hosts_paths.each do |nmh_path|     
-      script_path = "#{File.expand_path(nmh_path)}/1PasswordWrapper.sh"    
-      # copy wrapper script to each browser support folder so the flatpak filesystem restrictions won't prevent the browser from launching it
-      system "cp", "-f", "#{staged_path}/1PasswordWrapper.sh", "#{script_path}"
+                                    "#{Dir.home}/.config/google-chrome/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/google-chrome-beta/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/google-chrome-unstable/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/chromium/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/microsoft-edge-dev/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/vivaldi/NativeMessagingHosts",
+                                    "#{Dir.home}/.config/vivaldi-snapshot/NativeMessagingHosts"]
+
+    native_messaging_hosts_paths.each do |nmh_path|
+      script_path = "#{File.expand_path(nmh_path)}/1PasswordWrapper.sh"
+      # copy wrapper script to each browser support folder so the flatpak filesystem restrictions
+      # won't prevent the browser from launching it
+      system "cp", "-f", "#{staged_path}/1PasswordWrapper.sh", script_path.to_s
 
       manifest_content=<<~EOS
-      {
-        "name": "com.1password.1password",
-        "description": "1Password BrowserSupport",
-        "path": "#{script_path}",
-        "type": "stdio",
-        "allowed_origins": [
-          "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/",
-          "chrome-extension://bkpbhnjcbehoklfkljkkbbmipaphipgl/",
-          "chrome-extension://gejiddohjgogedgjnonbofjigllpkmbf/",
-          "chrome-extension://khgocmkkpikpnmmkgmdnfckapcdkgfaf/",
-          "chrome-extension://aeblfdkhhhdcdjpifhhbdiojplfjncoa/",
-          "chrome-extension://dppgmdbiimibapkepcbdbmkaabgiofem/"
-        ]
-      }
+        {
+          "name": "com.1password.1password",
+          "description": "1Password BrowserSupport",
+          "path": "#{script_path}",
+          "type": "stdio",
+          "allowed_origins": [
+            "chrome-extension://hjlinigoblmkhjejkmbegnoaljkphmgo/",
+            "chrome-extension://bkpbhnjcbehoklfkljkkbbmipaphipgl/",
+            "chrome-extension://gejiddohjgogedgjnonbofjigllpkmbf/",
+            "chrome-extension://khgocmkkpikpnmmkgmdnfckapcdkgfaf/",
+            "chrome-extension://aeblfdkhhhdcdjpifhhbdiojplfjncoa/",
+            "chrome-extension://dppgmdbiimibapkepcbdbmkaabgiofem/"
+          ]
+        }
       EOS
 
       # Firefox is the only supported browser which has a different manifest
@@ -178,25 +181,29 @@ cask "1password-gui-linux" do
               "{d634138d-c276-4fc8-924b-40a0ea21d284}"
             ]
         }
-        EOS
+      EOS
 
       manifest_path = "#{nmh_path}/com.1password.1password.json"
       if File.exist?(manifest_path)
         manifest = JSON.parse(File.read(manifest_path))
-        if manifest["path"] != script_path
-          puts "Updating native messaging host manifest in #{manifest_path} to support flatpak browsers you may be prompted for your password."
+        if manifest["path"] == script_path
+          puts "Found native messaging host manifest in #{manifest_path} " \
+               "which already has flatpak browser support, skipping update."
+        else
+          puts "Updating native messaging host manifest in #{manifest_path} " \
+               "to support flatpak browsers you may be prompted for your password."
           manifest["path"] = script_path
           system "echo '#{JSON.pretty_generate(manifest)}' | sudo tee #{manifest_path} >/dev/null"
-        else
-          puts "Found native messaging host manifest in #{manifest_path} which already has flatpak browser support, skipping update."
         end
       else
-        puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, you may be prompted for your password."
-        system "sudo", "touch", "#{manifest_path}"
-        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' | sudo tee #{manifest_path} >/dev/null"
+        puts "Installing native messaging host manifest with flatpak browser support to #{nmh_path}, " \
+             "you may be prompted for your password."
+        system "sudo", "touch", manifest_path.to_s
+        system "echo '#{nmh_path.include?("mozilla")? manifest_content_firefox : manifest_content}' " \
+               "| sudo tee #{manifest_path} >/dev/null"
       end
-        # set NMH manifests to read-only or else 1Password will overwrite them on launch
-        set_permissions(manifest_path, "444")
+      # set NMH manifests to read-only or else 1Password will overwrite them on launch
+      set_permissions(manifest_path, "444")
     end
 
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
