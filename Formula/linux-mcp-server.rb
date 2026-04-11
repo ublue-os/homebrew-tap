@@ -18,6 +18,8 @@ class LinuxMcpServer < Formula
     sha256 cellar: :any_skip_relocation, x86_64_linux:  "4628bf9e1557e8c23ee2c97d3be948fa9e4c86232f437f2b1c0a52f0a0676580"
   end
 
+  depends_on "cmake" => :build
+  depends_on "pkgconf" => :build
   depends_on "rust" => :build
   depends_on "block-goose-cli"
   depends_on "gemini-cli"
@@ -571,8 +573,19 @@ class LinuxMcpServer < Formula
     ENV["OPENSSL_DIR"] = Formula["openssl@3"].opt_prefix
     ENV["OPENSSL_LIB_DIR"] = Formula["openssl@3"].opt_lib
     ENV["OPENSSL_INCLUDE_DIR"] = Formula["openssl@3"].opt_include
+    # Use CMake builder for aws-lc-sys to avoid jitterentropy -O0 conflict with Homebrew's -Os
+    ENV["AWS_LC_SYS_CMAKE_BUILDER"] = "1"
+    # Ensure PyO3/maturin-based extensions can link on macOS (resolve Python symbols at load time)
+    ENV["CARGO_ENCODED_RUSTFLAGS"] = "-Clink-arg=-undefined\x1f-Clink-arg=dynamic_lookup" if OS.mac?
 
-    virtualenv_install_with_resources
+    venv = virtualenv_create(libexec, "python3.12")
+
+    # Install hf-xet separately: aws-lc-sys's jitterentropy requires -O0 but
+    # Homebrew sets -Os globally which overrides CMake's per-target flags
+    ENV.O0 { venv.pip_install resource("hf-xet") }
+
+    venv.pip_install resources.reject { |r| r.name == "hf-xet" }
+    venv.pip_install_and_link buildpath
 
     # Install the goose configuration setup script
     (bin/"goose-mcp-setup").write <<~BASH

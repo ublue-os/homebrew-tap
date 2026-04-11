@@ -7,10 +7,38 @@ on:
   pull_request:
 
 jobs:
+  syntax:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@59e6b20d96df1a3c9ccb0aa402676e01a4cc6ff3 # main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Homebrew Bundler RubyGems
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ubuntu-24.04-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ubuntu-24.04-rubygems-
+
+      - run: brew test-bot --only-cleanup-before
+
+      - run: brew test-bot --only-setup
+
+      - run: brew test-bot --only-tap-syntax
+
   test-bot:
+    if: github.event_name == 'pull_request'
     strategy:
       matrix:
-        os: [ ubuntu-24.04 ]
+        os: [ ubuntu-24.04, macos-15 ]
     runs-on: ${{ matrix.os }}
     permissions:
       actions: read
@@ -35,12 +63,10 @@ jobs:
 
       - run: brew test-bot --only-setup
 
-      - run: brew test-bot --only-tap-syntax
       - run: brew test-bot --only-formulae
-        if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
-        if: always() && github.event_name == 'pull_request'
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: bottles_${{ matrix.os }}
