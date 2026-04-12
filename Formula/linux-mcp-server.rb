@@ -3,8 +3,8 @@ class LinuxMcpServer < Formula
 
   desc "MCP server for Linux system administration and diagnostics"
   homepage "https://rhel-lightspeed.github.io/linux-mcp-server/"
-  url "https://files.pythonhosted.org/packages/4f/24/2856cc5cd6ac58b7f3c0a14f6f99c156e1930ee20050f9fff4b778c77875/linux_mcp_server-1.4.0.tar.gz"
-  sha256 "055c681235cb78b2bebc8598946b746d391aa07a0477e67821606230a4f4a935"
+  url "https://files.pythonhosted.org/packages/10/47/8000d1f300c1224e0fd5b67b071695562703216ae1ef8c78135c620ada3a/linux_mcp_server-1.4.1.tar.gz"
+  sha256 "7b7c95a47215e3d3540d6a960c50df63783a850f303105f2ff7d9bd8a33e5c07"
   license "GPL-3.0-only"
 
   livecheck do
@@ -165,8 +165,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "fakeredis" do
-    url "https://files.pythonhosted.org/packages/26/b9/c40b92cd49155a8ebbdc983cb50c02fc1c87d3a53f19aa420aefb96b00a3/fakeredis-2.35.0.tar.gz"
-    sha256 "5d1a0192c2c559e55b2d05328d86282ddd2079c1712a91e6d1b3010e0dd45ca6"
+    url "https://files.pythonhosted.org/packages/11/40/fd09efa66205eb32253d2b2ebc63537281384d2040f0a88bcd2289e120e4/fakeredis-2.34.1.tar.gz"
+    sha256 "4ff55606982972eecce3ab410e03d746c11fe5deda6381d913641fbd8865ea9b"
   end
 
   resource "fastmcp" do
@@ -260,8 +260,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "jiter" do
-    url "https://files.pythonhosted.org/packages/0d/5e/4ec91646aee381d01cdb9974e30882c9cd3b8c5d1079d6b5ff4af522439a/jiter-0.13.0.tar.gz"
-    sha256 "f2839f9c2c7e2dffc1bc5929a510e14ce0a946be9365fd1219e7ef342dae14f4"
+    url "https://files.pythonhosted.org/packages/6e/c1/0cddc6eb17d4c53a99840953f95dd3accdc5cfc7a337b0e9b26476276be9/jiter-0.14.0.tar.gz"
+    sha256 "e8a39e66dac7153cf3f964a12aad515afa8d74938ec5cc0018adcdae5367c79e"
   end
 
   resource "jsonref" do
@@ -435,8 +435,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "python-multipart" do
-    url "https://files.pythonhosted.org/packages/8a/45/e23b5dc14ddb9918ae4a625379506b17b6f8fc56ca1d82db62462f59aea6/python_multipart-0.0.24.tar.gz"
-    sha256 "9574c97e1c026e00bc30340ef7c7d76739512ab4dfd428fec8c330fa6a5cc3c8"
+    url "https://files.pythonhosted.org/packages/88/71/b145a380824a960ebd60e1014256dbb7d2253f2316ff2d73dfd8928ec2c3/python_multipart-0.0.26.tar.gz"
+    sha256 "08fadc45918cd615e26846437f50c5d6d23304da32c341f289a617127b081f17"
   end
 
   resource "pyyaml" do
@@ -465,8 +465,8 @@ class LinuxMcpServer < Formula
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/b3/c6/f3b320c27991c46f43ee9d856302c70dc2d0fb2dba4842ff739d5f46b393/rich-14.3.3.tar.gz"
-    sha256 "b8daa0b9e4eef54dd8cf7c86c03713f53241884e814f4e2f5fb342fe520f639b"
+    url "https://files.pythonhosted.org/packages/e9/67/cae617f1351490c25a4b8ac3b8b63a4dda609295d8222bad12242dfdc629/rich-14.3.4.tar.gz"
+    sha256 "817e02727f2b25b40ef56f5aa2217f400c8489f79ca8f46ea2b70dd5e14558a9"
   end
 
   resource "rich-rst" do
