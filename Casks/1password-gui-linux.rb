@@ -204,7 +204,7 @@ cask "1password-gui-linux" do
                "| sudo tee #{manifest_path} >/dev/null"
       end
       # set NMH manifests to read-only or else 1Password will overwrite them on launch
-      system "sudo", "chown", "#{ENV['USER']}:#{ENV['USER']}", manifest_path.to_s
+      system "sudo", "chown", "#{ENV.fetch("USER", nil)}:#{ENV.fetch("USER", nil)}", manifest_path.to_s
       system "sudo", "chmod", "444", manifest_path.to_s
     end
 
