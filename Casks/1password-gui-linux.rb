@@ -99,6 +99,7 @@ cask "1password-gui-linux" do
       #!/bin/bash
       zenity --password --title="Homebrew Sudo Password Prompt"
     EOS
+    set_permissions("#{staged_path}/zpass.sh", "755")
 
     # 1Password browser support binary needs to be owned by group onepassword and
     # have the GID bit set in order to function
