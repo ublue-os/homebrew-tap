@@ -204,7 +204,8 @@ cask "1password-gui-linux" do
                "| sudo tee #{manifest_path} >/dev/null"
       end
       # set NMH manifests to read-only or else 1Password will overwrite them on launch
-      set_permissions(manifest_path, "444")
+      system "sudo", "chown", "#{ENV['USER']}:#{ENV['USER']}", manifest_path.to_s
+      system "sudo", "chmod", "444", manifest_path.to_s
     end
 
     File.write("#{staged_path}/1password-uninstall.sh", <<~EOS)
