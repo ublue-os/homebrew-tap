@@ -1,5 +1,5 @@
 cask "bluefin-wallpapers" do
-  version "2025-12-14"
+  version "2026-04-13"
 
   name "bluefin-wallpapers"
   desc "Wallpapers for Bluefin"
@@ -13,7 +13,7 @@ cask "bluefin-wallpapers" do
 
   on_macos do
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-macos.tar.zstd"
-    sha256 "2d6c6673a21e27e6683ffc1c00b6995c68e9ee2af8700a84a9624f7b655cf9fa"
+    sha256 "7d067bd998717e318aff98732cc3f35e6909d59e8191543962dc72bd8ba9fc80"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{Dir.home}/Library/Desktop Pictures/Bluefin/#{File.basename(file)}"
@@ -44,7 +44,7 @@ cask "bluefin-wallpapers" do
       end
     else
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-png.tar.zstd"
-      sha256 "1a15439aab464b3aa5380370863648e079f3421d96969499eed877077a865727"
+      sha256 "15ea697d0cf97aabe5d9aaac5585104ff0dfea8690c10b37e8f888b771019065"
 
       Dir.glob("#{staged_path}/*").each do |file|
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
