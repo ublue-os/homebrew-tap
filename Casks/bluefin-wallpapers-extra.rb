@@ -99,9 +99,16 @@ cask "bluefin-wallpapers-extra" do
       # not being removed, so they remain valid and are intentionally left alone.
       [bg_dir, kde_dir].each do |dir|
         next unless Dir.exist?(dir)
-        Dir.glob("#{dir}/**/*").sort.reverse.each do |f|
+
+        Dir.glob("#{dir}/**/*").reverse_each do |f|
           File.unlink(f) if File.symlink?(f) && !File.exist?(f)
-          Dir.rmdir(f) rescue nil if File.directory?(f) && Dir.empty?(f)
+          if File.directory?(f) && Dir.empty?(f)
+            begin
+              Dir.rmdir(f)
+            rescue StandardError
+              nil
+            end
+          end
         end
       end
 
