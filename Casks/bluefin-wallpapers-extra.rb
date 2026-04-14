@@ -89,8 +89,27 @@ cask "bluefin-wallpapers-extra" do
     FileUtils.rm_r "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra" if OS.mac?
 
     if OS.linux?
-      FileUtils.rm_r "#{Dir.home}/.local/share/backgrounds/bluefin"
-      FileUtils.rm_r "#{Dir.home}/.local/share/wallpapers/bluefin"
+      bg_dir    = "#{Dir.home}/.local/share/backgrounds/bluefin"
+      kde_dir   = "#{Dir.home}/.local/share/wallpapers/bluefin"
+      props_dir = "#{Dir.home}/.local/share/gnome-background-properties"
+
+      # Remove only the symlinks this cask created via postflight. During upgrade,
+      # these point to the old staged path (now being removed) and become broken.
+      # Symlinks from bluefin-wallpapers point to a separate Caskroom path that is
+      # not being removed, so they remain valid and are intentionally left alone.
+      [bg_dir, kde_dir].each do |dir|
+        next unless Dir.exist?(dir)
+        Dir.glob("#{dir}/**/*").sort.reverse.each do |f|
+          File.unlink(f) if File.symlink?(f) && !File.exist?(f)
+          Dir.rmdir(f) rescue nil if File.directory?(f) && Dir.empty?(f)
+        end
+      end
+
+      if Dir.exist?(props_dir)
+        Dir.glob("#{props_dir}/*.xml").each do |f|
+          File.unlink(f) if File.symlink?(f) && !File.exist?(f)
+        end
+      end
     end
   end
 
