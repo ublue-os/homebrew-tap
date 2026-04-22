@@ -102,12 +102,13 @@ cask "bluefin-wallpapers-extra" do
 
         Dir.glob("#{dir}/**/*").reverse_each do |f|
           File.unlink(f) if File.symlink?(f) && !File.exist?(f)
-          if File.directory?(f) && Dir.empty?(f)
-            begin
-              Dir.rmdir(f)
-            rescue StandardError
-              nil
-            end
+          next unless File.directory?(f)
+          next unless Dir.empty?(f)
+
+          begin
+            Dir.rmdir(f)
+          rescue
+            nil
           end
         end
       end
