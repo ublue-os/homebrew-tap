@@ -35,7 +35,7 @@ cask "bluefin-wallpapers" do
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-gnome.tar.zstd"
       sha256 "87fdc6505da615e5df902df408371d5ab34efef6199144925324a564e6801e00"
 
-      Dir.glob("#{staged_path}/images/*").each do |file|
+      Dir.glob("#{staged_path}/*").select { |f| File.file?(f) }.each do |file|
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
       end
 
