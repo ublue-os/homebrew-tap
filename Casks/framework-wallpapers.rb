@@ -1,4 +1,6 @@
 cask "framework-wallpapers" do
+  os macos: "darwin", linux: "linux"
+
   version "2025-12-14"
 
   name "framework-wallpapers"
