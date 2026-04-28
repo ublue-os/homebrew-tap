@@ -1,4 +1,6 @@
 cask "bluefin-wallpapers" do
+  os macos: "darwin", linux: "linux"
+
   version "2026-04-13"
 
   name "bluefin-wallpapers"
