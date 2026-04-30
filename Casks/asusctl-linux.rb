@@ -210,6 +210,6 @@ cask "asusctl-linux" do
       sudo udevadm trigger
 
     For the GUI and user daemon:
-      brew install --cask ublue-os/experimental-tap/rog-control-center-linux
+      brew install --cask rog-control-center-linux
   EOS
 end
