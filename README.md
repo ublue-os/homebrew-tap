@@ -27,6 +27,7 @@ brew install --cask 1password-gui-linux
 brew install --cask framework-tool
 brew install --cask antigravity-linux
 brew install --cask asusctl-linux
+brew install --cask rog-control-center-linux
 
 brew install --cask bluefin-wallpapers
 brew install --cask bluefin-wallpapers-extra
