@@ -41,6 +41,7 @@ brew install --cask framework-wallpapers
 ### CLI
 
 - heic-to-dynamic-gnome-wallpaper - Convert HEIC dynamic wallpapers to GNOME dynamic wallpapers
+- asusctl - cli for controlling Asus ROG laptops
 
 ### GUI
 
@@ -50,6 +51,7 @@ brew install --cask framework-wallpapers
 - Visual Studio Code - Microsoft's code editor
 - VSCodium - Open-source build of VS Code
 - Framework System Tool - Hardware management for Framework laptops
+- rog control center - GUI frontend for asusctl (for Asus ROG etc laptops)
 
 ### Wallpapers
 
