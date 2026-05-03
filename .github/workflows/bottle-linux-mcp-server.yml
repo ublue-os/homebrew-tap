@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@51347a66bfd5b30903757d0b64ba2ca462e9ab38 # master
+        uses: Homebrew/actions/setup-homebrew@cf31444e770b9919bb21e695d66f56c39cfd3dee # master
 
       - name: Build bottle
         run: |
@@ -156,7 +156,7 @@ jobs:
             --repo "$GITHUB_REPOSITORY"
 
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@51347a66bfd5b30903757d0b64ba2ca462e9ab38 # master
+        uses: Homebrew/actions/setup-homebrew@cf31444e770b9919bb21e695d66f56c39cfd3dee # master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
