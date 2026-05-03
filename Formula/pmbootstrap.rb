@@ -3,7 +3,7 @@ class Pmbootstrap < Formula
 
   desc "Sophisticated chroot / build / flash tool to develop and install postmarketOS"
   homepage "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap"
-  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", tag: "3.10.1", revision: "a72d80ee0101e7fe7b9361b63f3b2f4046ef40a6"
+  url "https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git", tag: "3.10.2", revision: "021ed2f5e15fa70f1543997fc76c7e9f8b8c8e68"
 
   license "GPL-3.0-only"
 
