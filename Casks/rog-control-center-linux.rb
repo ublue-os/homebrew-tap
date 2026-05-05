@@ -163,7 +163,7 @@ cask "rog-control-center-linux" do
       ~/.config/asusd/asusd-user.env
 
     This cask expects the root daemon from:
-      brew install --cask ublue-os/experimental-tap/asusctl-linux
+      brew install --cask ublue-os/tap/asusctl-linux
 
     After the system daemon is installed and running, enable the user daemon:
       systemctl --user daemon-reload
