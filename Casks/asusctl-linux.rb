@@ -1,9 +1,13 @@
 cask "asusctl-linux" do
   arch arm: "arm64", intel: "amd64"
+  os linux: "linux"
 
   version "6.3.7,2"
-  sha256 arm64_linux:  "1f77ef14fc4e24d8a67dbeedcf328cc443e5066854af5939f0f3c070f87af900",
-         x86_64_linux: "95467dfaa2225529773cc5020eb8d4c82392ab55c2dec01458cd4d67289001bd"
+
+  on_linux do
+    sha256 arm64_linux:  "1f77ef14fc4e24d8a67dbeedcf328cc443e5066854af5939f0f3c070f87af900",
+           x86_64_linux: "95467dfaa2225529773cc5020eb8d4c82392ab55c2dec01458cd4d67289001bd"
+  end
 
   release_tag = "asusctl-#{version.csv.first}-#{version.csv.second}"
   release_root = "asusctl-#{version.csv.first}-ubuntu-22.04-#{arch}"
