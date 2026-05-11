@@ -26,7 +26,7 @@ cask "jetbrains-toolbox-linux" do
     # should be, and it will get fixed on first run
     File.write("#{staged_path}/jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop", <<~EOS)
       [Desktop Entry]
-      Icon=#{staged_path}/jetbrains-toolbox-#{version}/bin/toolbox.svg
+      Icon=#{staged_path}/jetbrains-toolbox-#{version}/bin/toolbox-tray-color.png
       Exec=#{HOMEBREW_PREFIX}/bin/jetbrains-toolbox %u
       Version=1.0
       Type=Application
