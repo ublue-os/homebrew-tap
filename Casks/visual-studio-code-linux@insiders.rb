@@ -30,8 +30,6 @@ cask "visual-studio-code-linux@insiders" do
            target: "#{Dir.home}/.local/share/applications/code-insiders.desktop"
   artifact "VSCode-linux-#{arch}/code-insiders-url-handler.desktop",
            target: "#{Dir.home}/.local/share/applications/code-insiders-url-handler.desktop"
-  artifact "VSCode-linux-#{arch}/resources/app/resources/linux/code.png",
-           target: "#{Dir.home}/.local/share/icons/vscode-insiders.png"
 
   preflight do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
@@ -41,7 +39,7 @@ cask "visual-studio-code-linux@insiders" do
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
       Exec=#{HOMEBREW_PREFIX}/bin/code-insiders %F
-      Icon=#{Dir.home}/.local/share/icons/vscode-insiders.png
+      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
       Type=Application
       StartupNotify=false
       StartupWMClass=Code - Insiders
@@ -53,7 +51,7 @@ cask "visual-studio-code-linux@insiders" do
       [Desktop Action new-empty-window]
       Name=New Empty Window
       Exec=#{HOMEBREW_PREFIX}/bin/code-insiders --new-window %F
-      Icon=#{Dir.home}/.local/share/icons/vscode-insiders.png
+      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
     EOS
     File.write("#{staged_path}/VSCode-linux-#{arch}/code-insiders-url-handler.desktop", <<~EOS)
       [Desktop Entry]
@@ -61,7 +59,7 @@ cask "visual-studio-code-linux@insiders" do
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
       Exec=#{HOMEBREW_PREFIX}/bin/code-insiders --open-url %U
-      Icon=#{Dir.home}/.local/share/icons/vscode-insiders.png
+      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
       Type=Application
       NoDisplay=true
       StartupNotify=true
