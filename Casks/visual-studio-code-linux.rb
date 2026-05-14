@@ -30,8 +30,6 @@ cask "visual-studio-code-linux" do
            target: "#{Dir.home}/.local/share/applications/code.desktop"
   artifact "VSCode-linux-#{arch}/code-url-handler.desktop",
            target: "#{Dir.home}/.local/share/applications/code-url-handler.desktop"
-  artifact "VSCode-linux-#{arch}/resources/app/resources/linux/code.png",
-           target: "#{Dir.home}/.local/share/icons/vscode.png"
 
   preflight do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
@@ -41,7 +39,7 @@ cask "visual-studio-code-linux" do
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
       Exec=#{HOMEBREW_PREFIX}/bin/code %F
-      Icon=#{Dir.home}/.local/share/icons/vscode.png
+      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
       Type=Application
       StartupNotify=false
       StartupWMClass=Code
@@ -63,7 +61,7 @@ cask "visual-studio-code-linux" do
       Name[zh_CN]=新建空窗口
       Name[zh_TW]=開新空視窗
       Exec=#{HOMEBREW_PREFIX}/bin/code --new-window %F
-      Icon=#{Dir.home}/.local/share/icons/vscode.png
+      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
     EOS
     File.write("#{staged_path}/VSCode-linux-#{arch}/code-url-handler.desktop", <<~EOS)
       [Desktop Entry]
@@ -71,7 +69,7 @@ cask "visual-studio-code-linux" do
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
       Exec=#{HOMEBREW_PREFIX}/bin/code --open-url %U
-      Icon=#{Dir.home}/.local/share/icons/vscode.png
+      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
       Type=Application
       NoDisplay=true
       StartupNotify=true
