@@ -32,6 +32,12 @@ cask "visual-studio-code-linux" do
            target: "#{Dir.home}/.local/share/applications/code-url-handler.desktop"
 
   preflight do
+    # Disable VS Code's built-in update checks; Homebrew manages this install.
+    product_json = "#{staged_path}/VSCode-linux-#{arch}/resources/app/product.json"
+    product = JSON.parse(File.read(product_json))
+    product.delete("updateUrl")
+    File.write(product_json, JSON.pretty_generate(product))
+
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
     File.write("#{staged_path}/VSCode-linux-#{arch}/code.desktop", <<~EOS)
       [Desktop Entry]
