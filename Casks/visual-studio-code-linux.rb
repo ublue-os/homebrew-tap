@@ -9,14 +9,14 @@ cask "visual-studio-code-linux" do
            x86_64_linux: "1dc648446074cbc53986ec5737d8cdae1303d098e69fe40d514eb410719db97a"
   end
 
-  url "https://update.code.visualstudio.com/#{version}/#{os}-#{arch}/stable"
+  url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/stable"
   name "Microsoft Visual Studio Code"
   name "VS Code"
   desc "Open-source code editor"
   homepage "https://code.visualstudio.com/"
 
   livecheck do
-    url "https://update.code.visualstudio.com/api/update/#{os}-#{arch}/stable/latest"
+    url "https://update.code.visualstudio.com/api/update/linux-#{arch}/stable/latest"
     strategy :json do |json|
       json["productVersion"]
     end
