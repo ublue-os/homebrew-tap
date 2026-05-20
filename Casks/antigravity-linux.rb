@@ -34,7 +34,7 @@ cask "antigravity-linux" do
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
   binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity"
-  binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity", target: "agy"
+  binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity", target: "agy-ide"
 
   preflight do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
