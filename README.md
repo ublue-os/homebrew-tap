@@ -26,6 +26,8 @@ brew install --cask lm-studio-linux
 brew install --cask 1password-gui-linux
 brew install --cask framework-tool
 brew install --cask antigravity-linux
+brew install --cask antigravity-ide-linux
+brew install --cask antigravity-cli-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
 
@@ -42,12 +44,15 @@ brew install --cask framework-wallpapers
 
 - heic-to-dynamic-gnome-wallpaper - Convert HEIC dynamic wallpapers to GNOME dynamic wallpapers
 - asusctl - cli for controlling Asus ROG laptops
+- Antigravity CLI - Terminal interface for Antigravity agents
 
 ### GUI
 
 - 1Password - Password manager
 - JetBrains Toolbox - JetBrains tools manager
 - LM Studio - Local LLM discovery, download, and runtime
+- Google Antigravity - Agent orchestration platform
+- Google Antigravity IDE - AI coding agent IDE
 - Visual Studio Code - Microsoft's code editor
 - VSCodium - Open-source build of VS Code
 - Framework System Tool - Hardware management for Framework laptops

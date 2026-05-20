@@ -31,6 +31,16 @@ cask "vscodium-linux" do
            target: "#{Dir.home}/.local/share/icons/vscodium.png"
 
   preflight do
+    # Disable VSCodium's built-in update checks; Homebrew manages this install.
+    product_json = "#{staged_path}/resources/app/product.json"
+    if File.exist?(product_json)
+      product = JSON.parse(File.read(product_json))
+      product.delete("updateUrl")
+      product["configurationDefaults"] ||= {}
+      product["configurationDefaults"]["update.mode"] = "none"
+      File.write(product_json, JSON.pretty_generate(product))
+    end
+
     FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
     FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
 

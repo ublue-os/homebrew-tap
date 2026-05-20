@@ -36,6 +36,8 @@ cask "visual-studio-code-linux" do
     product_json = "#{staged_path}/VSCode-linux-#{arch}/resources/app/product.json"
     product = JSON.parse(File.read(product_json))
     product.delete("updateUrl")
+    product["configurationDefaults"] ||= {}
+    product["configurationDefaults"]["update.mode"] = "none"
     File.write(product_json, JSON.pretty_generate(product))
 
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
