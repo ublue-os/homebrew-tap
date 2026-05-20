@@ -5,8 +5,8 @@ cask "visual-studio-code-linux" do
   version "1.119.0"
 
   on_linux do
-    sha256 arm64_linux:  "a34255d5573abad4e62641fdb934b2941b183379807e20c88308372d438159bd",
-           x86_64_linux: "1dc648446074cbc53986ec5737d8cdae1303d098e69fe40d514eb410719db97a"
+    sha256 arm64_linux:  "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5",
+           x86_64_linux: "8cf24cc41441453e11e8fe1ae9e58d32970e23dced399835c4b0904263d66820"
   end
 
   url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/stable"
