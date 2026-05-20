@@ -15,7 +15,7 @@ cask "1password-gui-linux" do
     when "x86_64" then "x64"
     end
 
-  url "https://downloads.1password.com/#{os}/tar/stable/#{arch}/1password-#{version}.#{arch_suffix}.tar.gz"
+  url "https://downloads.1password.com/linux/tar/stable/#{arch}/1password-#{version}.#{arch_suffix}.tar.gz"
   name "1Password"
   desc "Password manager that keeps all passwords secure behind one password"
   homepage "https://1password.com/"
