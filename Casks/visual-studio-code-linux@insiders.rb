@@ -2,21 +2,21 @@ cask "visual-studio-code-linux@insiders" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.120.0-insider"
+  version "1.121.0-insider"
 
   on_linux do
-    sha256 arm64_linux:  "ffa98de20b7ba09167c0d428a22b9a45b4d2ded60c07a8392df9f798d428bc6a",
-           x86_64_linux: "c9342d4e33b67b6f4a070c6ca1c8cf2ba77a0f29784a5727c9991429d1599545"
+    sha256 arm64_linux:  "07ce668fe51ace22bfdedd63277c4d32b340d60c9135e1e9a5e12124bd92d7f2",
+           x86_64_linux: "be5d508e6e4ba90f42756b475c651e45b199917ea5e505ecf08b650c876bcd24"
   end
 
-  url "https://update.code.visualstudio.com/#{version}/#{os}-#{arch}/insider"
+  url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/insider"
   name "Microsoft Visual Studio Code Insiders"
   name "VS Code Insiders"
   desc "Open-source code editor (Insiders build)"
   homepage "https://code.visualstudio.com/insiders/"
 
   livecheck do
-    url "https://update.code.visualstudio.com/api/update/#{os}-#{arch}/insider/latest"
+    url "https://update.code.visualstudio.com/api/update/linux-#{arch}/insider/latest"
     strategy :json do |json|
       json["productVersion"]
     end
