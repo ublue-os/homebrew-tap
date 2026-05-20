@@ -16,7 +16,7 @@ cask "antigravity-linux" do
   homepage "https://antigravity.google/"
 
   livecheck do
-    url "https://antigravity-auto-updater-974169037036.us-central1.run.app/api/update/linux-x64/stable/latest"
+    url "https://antigravity-ide-auto-updater-974169037036.us-central1.run.app/api/update/linux-x64/stable/latest"
     regex(%r{/stable/([^/]+)/}i)
     strategy :json do |json, regex|
       match = json["url"]&.match(regex)
@@ -32,6 +32,9 @@ cask "antigravity-linux" do
            target: "#{Dir.home}/.local/share/applications/antigravity-url-handler.desktop"
   artifact "antigravity.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
+
+  binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity"
+  binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity", target: "agy"
 
   preflight do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
@@ -86,8 +89,11 @@ cask "antigravity-linux" do
 
   zap trash: [
     "~/.antigravity",
+    "~/.antigravity-ide",
+    "~/.antigravity-ide-server",
     "~/.config/Antigravity",
     "~/.config/antigravity",
+    "~/.gemini/antigravity-ide",
   ]
 
   caveats <<~EOS
