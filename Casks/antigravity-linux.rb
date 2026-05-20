@@ -2,14 +2,14 @@ cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
   os linux: "linux"
 
-  version "1.23.2,4781536860569600"
+  version "2.0.1,4861014005645312"
 
   on_linux do
-    sha256 arm64_linux:  "64d11085f17edc691adbe8952d59887f257d58448705dc2a19dfa23890d36df1",
-           x86_64_linux: "5232a4048ff4fa15685d9a981ba4fba573e297f3efc9b76f638e794baf775725"
+    sha256 arm64_linux:  "38e9cc0beb7d7782e0e7b2410e50945d56d66391a79989de391b9ba544a2697e",
+           x86_64_linux: "747163aa3a8afba4b316f97c40b4a75ca4736a59768a416cd1e881e73ec31ef9"
   end
 
-  url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
+  url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity%20IDE.tar.gz",
       verified: "edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/"
   name "Google Antigravity"
   desc "AI Coding Agent IDE"
@@ -26,10 +26,6 @@ cask "antigravity-linux" do
     end
   end
 
-  binary "#{staged_path}/Antigravity/bin/antigravity"
-  binary "#{staged_path}/Antigravity/bin/antigravity", target: "agy"
-  bash_completion "#{staged_path}/Antigravity/resources/completions/bash/antigravity"
-  zsh_completion  "#{staged_path}/Antigravity/resources/completions/zsh/_antigravity"
   artifact "antigravity.desktop",
            target: "#{Dir.home}/.local/share/applications/antigravity.desktop"
   artifact "antigravity-url-handler.desktop",
@@ -42,7 +38,7 @@ cask "antigravity-linux" do
     FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
 
     # Copy icon from extracted archive
-    icon_path = "Antigravity/resources/app/out/vs/workbench/contrib/antigravityCustomAppIcon"
+    icon_path = "Antigravity IDE/resources/app/out/vs/workbench/contrib/antigravityCustomAppIcon"
     icon_source = "#{staged_path}/#{icon_path}/browser/media/antigravity/antigravity.png"
     FileUtils.cp icon_source, "#{staged_path}/antigravity.png" if File.exist?(icon_source)
 
