@@ -33,7 +33,6 @@ cask "antigravity-linux" do
   artifact "antigravity.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
-  binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity"
   binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity", target: "antigravity-ide"
   binary "#{staged_path}/Antigravity IDE/resources/app/bin/antigravity", target: "agy-ide"
 
