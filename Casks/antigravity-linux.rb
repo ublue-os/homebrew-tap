@@ -50,7 +50,7 @@ cask "antigravity-linux" do
       Name=Antigravity
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" %F
+      Exec="#{HOMEBREW_PREFIX}/bin/antigravity-ide" %F
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
       Type=Application
       StartupNotify=false
@@ -62,7 +62,7 @@ cask "antigravity-linux" do
 
       [Desktop Action new-empty-window]
       Name=New Empty Window
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" --new-window %F
+      Exec="#{HOMEBREW_PREFIX}/bin/antigravity-ide" --new-window %F
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
     EOS
 
@@ -71,7 +71,7 @@ cask "antigravity-linux" do
       Name=Antigravity - URL Handler
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" --open-url "%U"
+      Exec="#{HOMEBREW_PREFIX}/bin/antigravity-ide" --open-url "%U"
       Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
       Type=Application
       NoDisplay=true
