@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@8eb7f2efa6ab636da09aef605b497fd5b8a7587d # main
+        uses: Homebrew/actions/setup-homebrew@7a2984f77c47b370db00ef04a8531a293b169c9a # main
 
       - name: Configure git
-        uses: Homebrew/actions/git-user-config@8eb7f2efa6ab636da09aef605b497fd5b8a7587d # main
+        uses: Homebrew/actions/git-user-config@7a2984f77c47b370db00ef04a8531a293b169c9a # main
 
       - name: Checkout homebrew-core
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
