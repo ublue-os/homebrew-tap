@@ -2,11 +2,11 @@ cask "visual-studio-code-linux@insiders" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.121.0-insider"
+  version "1.122.0-insider"
 
   on_linux do
-    sha256 arm64_linux:  "07ce668fe51ace22bfdedd63277c4d32b340d60c9135e1e9a5e12124bd92d7f2",
-           x86_64_linux: "be5d508e6e4ba90f42756b475c651e45b199917ea5e505ecf08b650c876bcd24"
+    sha256 arm64_linux:  "ea46705a724c188d0f6b061bcc8744faa9a5543c6b3e774071e1e0f58e772e7c",
+           x86_64_linux: "fdd2b80475dc7176740a46c64309575a317bf9b753326029385121324b0571d2"
   end
 
   url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/insider"
