@@ -63,6 +63,7 @@ jobs:
           restore-keys: ${{ matrix.os }}-rubygems-
 
       - name: Install Bubblewrap
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y bubblewrap
 
       - run: brew test-bot --only-cleanup-before
