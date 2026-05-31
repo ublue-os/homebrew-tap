@@ -27,7 +27,10 @@ jobs:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
           key: ubuntu-24.04-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ubuntu-24.04-rubygems-
-
+      
+      - name: Install Bubblewrap
+        run: sudo apt-get update && sudo apt-get install -y bubblewrap
+      
       - run: brew test-bot --only-cleanup-before
 
       - run: brew test-bot --only-setup
@@ -58,6 +61,9 @@ jobs:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
           key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ matrix.os }}-rubygems-
+
+      - name: Install Bubblewrap
+        run: sudo apt-get update && sudo apt-get install -y bubblewrap
 
       - run: brew test-bot --only-cleanup-before
 
