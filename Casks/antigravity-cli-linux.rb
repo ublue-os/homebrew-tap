@@ -4,11 +4,11 @@ cask "antigravity-cli-linux" do
   livecheck_arch = on_arch_conditional arm: "arm64", intel: "amd64"
   os linux: "linux"
 
-  version "1.0.0,5288553236791296"
+  version "1.0.2,6109799369277440"
 
   on_linux do
-    sha256 arm64_linux:  "f4dc7c96c1836b00768d8a6ec6eacc7851f3424bd6f4ebe4d8b848a652072a85",
-           x86_64_linux: "70096340574fafc4a06c4d3c8057314e22d475ce1c820d0ad51ff07fb7e99eb6"
+    sha256 arm64_linux:  "ca5aa7021ffda694b26f1a792ac965b053dd2ce426ce621b76d938df39675dfc",
+           x86_64_linux: "f6c7ca80d5099333bf229676473bd111e0daa6a0d8db7c532adf6503b0eaadc9"
   end
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-cli/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/cli_linux_#{file_arch}.tar.gz",
