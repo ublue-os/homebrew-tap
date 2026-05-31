@@ -3,11 +3,11 @@ cask "antigravity-ide-linux" do
   livecheck_arch = on_arch_conditional arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "2.0.1,4861014005645312"
+  version "2.0.3,6242596486512640"
 
   on_linux do
-    sha256 arm64_linux:  "38e9cc0beb7d7782e0e7b2410e50945d56d66391a79989de391b9ba544a2697e",
-           x86_64_linux: "747163aa3a8afba4b316f97c40b4a75ca4736a59768a416cd1e881e73ec31ef9"
+    sha256 arm64_linux:  "8ba7073c71f43c625fbfb95bd0b0c5c7d854974d5b4cc90f6e0fff4a109259ba",
+           x86_64_linux: "00b5fd709fef02c9f81ab4edd77e8d5baf8b85842cc654fa016d7d0492cde803"
   end
 
   url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity%20IDE.tar.gz",
