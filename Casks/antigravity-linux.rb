@@ -3,11 +3,11 @@ cask "antigravity-linux" do
   livecheck_arch = on_arch_conditional arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "2.0.1,6566078776737792"
+  version "2.0.10,5119448496078848"
 
   on_linux do
-    sha256 arm64_linux:  "5af56cc9dda954f369a61045b7da2f348bcb0b3507d272b4c0e9aa7cd6175d9b",
-           x86_64_linux: "0727e1f56961b6d2347941f278da69cc6c17de3befe988524848cd167380e9ab"
+    sha256 arm64_linux:  "31c07e3a6cbe968679d3717fa0bf27d70af88685db47ac12d79ce10035b69cab",
+           x86_64_linux: "12da60ba43aea31288b5ec64d89aab70f61fdb2a20c0cb5b610c20e83b646e32"
   end
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
