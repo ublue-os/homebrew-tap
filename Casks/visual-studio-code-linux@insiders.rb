@@ -2,10 +2,9 @@ cask "visual-studio-code-linux@insiders" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.122.0-insider"
-
-  sha256 arm64_linux:  "ea46705a724c188d0f6b061bcc8744faa9a5543c6b3e774071e1e0f58e772e7c",
-         x86_64_linux: "fdd2b80475dc7176740a46c64309575a317bf9b753326029385121324b0571d2"
+  version "1.123.0-insider"
+  sha256 arm64_linux:  "f6b5a9ea4024722a02e87089c729fde95c7f3ca076f33678b18c5cc4ceec8fb7",
+         x86_64_linux: "48d0f6f7cde652312d01adeba5505ae446c83bab21af698adf536ee894d48c01"
 
   url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/insider"
   name "Microsoft Visual Studio Code Insiders"
