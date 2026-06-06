@@ -4,14 +4,9 @@ cask "antigravity-linux" do
   os linux: "linux"
 
   version "2.0.6,5413878570549248"
-  on_linux do
-    on_arm do
-      sha256 "02fc7f47650582ac72b845853b514de6c83ea7a4cd8a8d739e1a8688db2f45a9"
-    end
-    on_intel do
-      sha256 "ad1e04535149b07c27030eb1ead40f4efda388cb39020bcbb9accdfb49e44cc5"
-    end
-  end
+
+  sha256 arch: { arm: "02fc7f47650582ac72b845853b514de6c83ea7a4cd8a8d739e1a8688db2f45a9",
+                 intel: "ad1e04535149b07c27030eb1ead40f4efda388cb39020bcbb9accdfb49e44cc5" }
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
       verified: "storage.googleapis.com/antigravity-public/antigravity-hub/"
