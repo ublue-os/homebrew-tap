@@ -6,6 +6,10 @@ on:
       - main
   pull_request:
 
+env:
+  HOMEBREW_NO_SANDBOX_LINUX: "1"
+  HOMEBREW_NO_REQUIRE_TAP_TRUST: "1"
+
 jobs:
   syntax:
     runs-on: ubuntu-24.04
