@@ -2,11 +2,11 @@ cask "visual-studio-code-linux@insiders" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.126.0-insider"
-  sha256 arm64_linux:  "0cec6147c33c17b3fd4167a9741cf8962d092b61cf843da44d3c9395ba10bf10",
-         x86_64_linux: "9431ee95eb5fbc54bf7816fe89dc00468376003466ce5597b8478199b7373f8e"
+  version "1.126.0-insider,79d34e6e519a89e97d70cc6714337f58accd3ed2"
+  sha256 arm64_linux:  "90d0b5e08cc5abf0e5d0686d66be4145d8b845c1cb2db64e8593ccad366213f3",
+         x86_64_linux: "d7d68506962ac0711176231ffd368015f9db50e97c7ce36dc9c26066a95f6aba"
 
-  url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/insider"
+  url "https://update.code.visualstudio.com/#{version.csv.first}/linux-#{arch}/insider"
   name "Microsoft Visual Studio Code Insiders"
   name "VS Code Insiders"
   desc "Open-source code editor (Insiders build)"
@@ -15,7 +15,11 @@ cask "visual-studio-code-linux@insiders" do
   livecheck do
     url "https://update.code.visualstudio.com/api/update/linux-#{arch}/insider/latest"
     strategy :json do |json|
-      json["productVersion"]
+      version = json["productVersion"]
+      build = json["version"]
+      next if version.blank? || build.blank?
+
+      "#{version},#{build}"
     end
   end
 
