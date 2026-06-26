@@ -17,12 +17,12 @@ jobs:
       pull-requests: write
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@6315ef70a8bfcd2c71104383846591ac113ace33 # main
+        uses: Homebrew/actions/setup-homebrew@841d750a0ed9262d3c3ca31f2173974696bc261a # main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up git
-        uses: Homebrew/actions/git-user-config@6315ef70a8bfcd2c71104383846591ac113ace33 # main
+        uses: Homebrew/actions/git-user-config@841d750a0ed9262d3c3ca31f2173974696bc261a # main
 
       - name: Pull bottles
         env:
@@ -31,7 +31,7 @@ jobs:
         run: brew pr-pull --debug --tap="$GITHUB_REPOSITORY" "$PULL_REQUEST"
 
       - name: Push commits
-        uses: Homebrew/actions/git-try-push@6315ef70a8bfcd2c71104383846591ac113ace33 # main
+        uses: Homebrew/actions/git-try-push@841d750a0ed9262d3c3ca31f2173974696bc261a # main
         with:
           branch: main
 
