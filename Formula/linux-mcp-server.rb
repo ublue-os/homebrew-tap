@@ -570,9 +570,9 @@ class LinuxMcpServer < Formula
 
   def install
     # Set environment for cryptography build to find openssl
-    ENV["OPENSSL_DIR"] = Formula["openssl@3"].opt_prefix
-    ENV["OPENSSL_LIB_DIR"] = Formula["openssl@3"].opt_lib
-    ENV["OPENSSL_INCLUDE_DIR"] = Formula["openssl@3"].opt_include
+    ENV["OPENSSL_DIR"] = formula_opt_prefix("openssl@3")
+    ENV["OPENSSL_LIB_DIR"] = formula_opt_lib("openssl@3")
+    ENV["OPENSSL_INCLUDE_DIR"] = formula_opt_include("openssl@3")
     # Use CMake builder for aws-lc-sys to avoid jitterentropy -O0 conflict with Homebrew's -Os
     ENV["AWS_LC_SYS_CMAKE_BUILDER"] = "1"
     # Ensure PyO3/maturin-based extensions can link on macOS (resolve Python symbols at load time)
