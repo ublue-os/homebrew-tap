@@ -3,7 +3,9 @@ cask "asusctl-linux" do
   os linux: "linux"
 
   version "6.3.8,3"
-  sha256 arm64_linux:  "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
+  sha256 arm:          "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
+         intel:        "f05fbc48e5971649685d9269a4e7d6c835e3163e8946c4a3cebc49a5cc647cc5",
+         arm64_linux:  "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
          x86_64_linux: "f05fbc48e5971649685d9269a4e7d6c835e3163e8946c4a3cebc49a5cc647cc5"
 
   release_tag = "asusctl-#{version.csv.first}-#{version.csv.second}"
