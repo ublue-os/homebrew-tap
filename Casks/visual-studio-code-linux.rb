@@ -3,7 +3,9 @@ cask "visual-studio-code-linux" do
   os linux: "linux"
 
   version "1.125.0"
-  sha256 arm64_linux:  "00e1e6ad5a39436884e95fe71d19e24155df84370bedbcc129d5df7bca1914fd",
+  sha256 arm:          "00e1e6ad5a39436884e95fe71d19e24155df84370bedbcc129d5df7bca1914fd",
+         intel:        "4d3ba51e90a24f679acb6b5beded6e6f5eb8ae0b6d067077e82738255a317f4f",
+         arm64_linux:  "00e1e6ad5a39436884e95fe71d19e24155df84370bedbcc129d5df7bca1914fd",
          x86_64_linux: "4d3ba51e90a24f679acb6b5beded6e6f5eb8ae0b6d067077e82738255a317f4f"
 
   url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/stable"

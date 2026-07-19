@@ -3,7 +3,9 @@ cask "1password-gui-linux" do
   os linux: "linux"
 
   version "8.12.24"
-  sha256 arm64_linux:  "11b75ecefe1d65c4f7d37e617fd3d0b26d5a86724b5e9c5059ce2f55c52f8d18",
+  sha256 arm:          "11b75ecefe1d65c4f7d37e617fd3d0b26d5a86724b5e9c5059ce2f55c52f8d18",
+         intel:        "5f3c52d5f2eea80d60c5d76b313a1ea8efcc235453dace67b5a3d0dedaf189e2",
+         arm64_linux:  "11b75ecefe1d65c4f7d37e617fd3d0b26d5a86724b5e9c5059ce2f55c52f8d18",
          x86_64_linux: "5f3c52d5f2eea80d60c5d76b313a1ea8efcc235453dace67b5a3d0dedaf189e2"
 
   arch_suffix =
