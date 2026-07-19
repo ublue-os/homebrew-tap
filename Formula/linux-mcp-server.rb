@@ -14,8 +14,8 @@ class LinuxMcpServer < Formula
 
   bottle do
     root_url "https://github.com/ublue-os/homebrew-tap/releases/download/linux-mcp-server-1.4.1"
-    sha256 cellar: :any,                 arm64_sequoia: "46012673cfc06259c1a7310741dab23b7e3ad6ba32cb86ac861ff72dbd907433"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c73ad044522b630c65baa595ea948f96718c9de123e8f767120e769cf384f75e"
+    sha256 cellar: :any, arm64_tahoe:  "f42296a009df9c14c8eb6cc9f4bff0b817e117d8833124d4fdacd68234ecc933"
+    sha256 cellar: :any, x86_64_linux: "2a218041c75117ad1f7dcd724ebfc9234ac3d54d6497beae323bed3bed59c633"
   end
 
   depends_on "cmake" => :build
@@ -570,9 +570,9 @@ class LinuxMcpServer < Formula
 
   def install
     # Set environment for cryptography build to find openssl
-    ENV["OPENSSL_DIR"] = Formula["openssl@3"].opt_prefix
-    ENV["OPENSSL_LIB_DIR"] = Formula["openssl@3"].opt_lib
-    ENV["OPENSSL_INCLUDE_DIR"] = Formula["openssl@3"].opt_include
+    ENV["OPENSSL_DIR"] = formula_opt_prefix("openssl@3")
+    ENV["OPENSSL_LIB_DIR"] = formula_opt_lib("openssl@3")
+    ENV["OPENSSL_INCLUDE_DIR"] = formula_opt_include("openssl@3")
     # Use CMake builder for aws-lc-sys to avoid jitterentropy -O0 conflict with Homebrew's -Os
     ENV["AWS_LC_SYS_CMAKE_BUILDER"] = "1"
     # Ensure PyO3/maturin-based extensions can link on macOS (resolve Python symbols at load time)

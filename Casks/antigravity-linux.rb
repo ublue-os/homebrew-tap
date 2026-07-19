@@ -1,11 +1,12 @@
 cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
-  livecheck_arch = on_arch_conditional arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "2.0.6,5413878570549248"
-  sha256 arm64_linux:  "02fc7f47650582ac72b845853b514de6c83ea7a4cd8a8d739e1a8688db2f45a9",
-         x86_64_linux: "ad1e04535149b07c27030eb1ead40f4efda388cb39020bcbb9accdfb49e44cc5"
+  version "2.3.1,5358163105546240"
+  sha256 arm:          "d2801da2b8385395c279298c8acd03bebb9d887e3096784e3c84aa570e292074",
+         intel:        "7a1992149e396ecc12e7a42b155638958701daaa65bed07cdcfe639b8267c745",
+         arm64_linux:  "d2801da2b8385395c279298c8acd03bebb9d887e3096784e3c84aa570e292074",
+         x86_64_linux: "7a1992149e396ecc12e7a42b155638958701daaa65bed07cdcfe639b8267c745"
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
       verified: "storage.googleapis.com/antigravity-public/antigravity-hub/"
@@ -14,13 +15,13 @@ cask "antigravity-linux" do
   homepage "https://antigravity.google/product/antigravity-2"
 
   livecheck do
-    url "https://antigravity-auto-updater-974169037036.us-central1.run.app/api/update/linux-#{livecheck_arch}/stable/latest"
-    regex(%r{/antigravity-hub/([^/]+)/}i)
-    strategy :json do |json, regex|
-      match = json["url"]&.match(regex)
+    url "https://antigravity-hub-auto-updater-974169037036.us-central1.run.app/manifest/latest-#{(arch == "arm") ? "arm64" : "x64"}-linux.yml"
+    regex(%r{/antigravity-hub/(\d+(?:\.\d+)+)-(\d+)/}i)
+    strategy :page_match do |page, regex|
+      match = page.match(regex)
       next if match.blank?
 
-      match[1]&.tr("-", ",").to_s
+      "#{match[1]},#{match[2]}"
     end
   end
 
