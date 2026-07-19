@@ -3,7 +3,9 @@ cask "visual-studio-code-linux@insiders" do
   os linux: "linux"
 
   version "1.126.0-insider,79d34e6e519a89e97d70cc6714337f58accd3ed2"
-  sha256 arm64_linux:  "90d0b5e08cc5abf0e5d0686d66be4145d8b845c1cb2db64e8593ccad366213f3",
+  sha256 arm:          "90d0b5e08cc5abf0e5d0686d66be4145d8b845c1cb2db64e8593ccad366213f3",
+         intel:        "d7d68506962ac0711176231ffd368015f9db50e97c7ce36dc9c26066a95f6aba",
+         arm64_linux:  "90d0b5e08cc5abf0e5d0686d66be4145d8b845c1cb2db64e8593ccad366213f3",
          x86_64_linux: "d7d68506962ac0711176231ffd368015f9db50e97c7ce36dc9c26066a95f6aba"
 
   url "https://update.code.visualstudio.com/#{version.csv.first}/linux-#{arch}/insider"
