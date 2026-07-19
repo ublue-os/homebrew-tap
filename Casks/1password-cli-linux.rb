@@ -3,7 +3,9 @@ cask "1password-cli-linux" do
   os linux: "linux"
 
   version "2.35.0"
-  sha256 arm64_linux:  "28153b3e1b379cc117a2b8478fc29c73e4a391d0a9b7876c360d305e98390a78",
+  sha256 arm:          "28153b3e1b379cc117a2b8478fc29c73e4a391d0a9b7876c360d305e98390a78",
+         intel:        "4457ade59850b852c64c77164235b34dd0b984ef7826eb0ccd32f1fd78a2ceb7",
+         arm64_linux:  "28153b3e1b379cc117a2b8478fc29c73e4a391d0a9b7876c360d305e98390a78",
          x86_64_linux: "4457ade59850b852c64c77164235b34dd0b984ef7826eb0ccd32f1fd78a2ceb7"
 
   url "https://cache.agilebits.com/dist/1P/op2/pkg/v#{version}/op_linux_#{arch}_v#{version}.zip",
