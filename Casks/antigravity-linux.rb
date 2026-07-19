@@ -1,6 +1,5 @@
 cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
-  livecheck_arch = on_arch_conditional arm: "arm64", intel: "x64"
   os linux: "linux"
 
   version "2.0.6,5413878570549248"
@@ -16,13 +15,13 @@ cask "antigravity-linux" do
   homepage "https://antigravity.google/product/antigravity-2"
 
   livecheck do
-    url "https://antigravity-auto-updater-974169037036.us-central1.run.app/api/update/linux-#{livecheck_arch}/stable/latest"
-    regex(%r{/antigravity-hub/([^/]+)/}i)
-    strategy :json do |json, regex|
-      match = json["url"]&.match(regex)
+    url "https://antigravity-hub-auto-updater-974169037036.us-central1.run.app/manifest/latest-#{(arch == "arm") ? "arm64" : "x64"}-linux.yml"
+    regex(%r{/antigravity-hub/(\d+(?:\.\d+)+)-(\d+)/}i)
+    strategy :page_match do |page, regex|
+      match = page.match(regex)
       next if match.blank?
 
-      match[1]&.tr("-", ",").to_s
+      "#{match[1]},#{match[2]}"
     end
   end
 

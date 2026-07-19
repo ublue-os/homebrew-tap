@@ -1,6 +1,5 @@
 cask "antigravity-ide-linux" do
   arch arm: "arm", intel: "x64"
-  livecheck_arch = on_arch_conditional arm: "arm64", intel: "x64"
   os linux: "linux"
 
   version "2.0.4,6381998290370560"
@@ -16,7 +15,7 @@ cask "antigravity-ide-linux" do
   homepage "https://antigravity.google/product/antigravity-ide"
 
   livecheck do
-    url "https://antigravity-ide-auto-updater-974169037036.us-central1.run.app/api/update/linux-#{livecheck_arch}/stable/latest"
+    url "https://antigravity-ide-auto-updater-974169037036.us-central1.run.app/api/update/linux-#{(arch == "arm") ? "arm64" : "x64"}/stable/latest"
     regex(%r{/stable/([^/]+)/}i)
     strategy :json do |json, regex|
       match = json["url"]&.match(regex)
