@@ -48,13 +48,15 @@ cask "antigravity-linux" do
     if File.exist?(asar_path)
       File.open(asar_path, "rb") do |asar|
         asar.seek(8)
-        header_size = asar.read(4).unpack1("V") - 4
+        padded_size = asar.read(4).unpack1("V") - 4
+        asar.seek(12)
+        true_size = asar.read(4).unpack1("V")
         asar.seek(16)
-        header = JSON.parse(asar.read(header_size))
+        header = JSON.parse(asar.read(true_size))
         icon_entry = header.dig("files", "icon.png")
 
         if icon_entry
-          asar.seek(16 + header_size + icon_entry["offset"].to_i)
+          asar.seek(16 + padded_size + icon_entry["offset"].to_i)
           File.binwrite("#{staged_path}/antigravity.png", asar.read(icon_entry["size"]))
         end
       end

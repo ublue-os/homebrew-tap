@@ -8,7 +8,8 @@ cask "vscodium-linux" do
          arm64_linux:  "73d87d46d4dc208fe12c0497dc607aab0a6e2bf332f54a0b6826a3a1aa32bc34",
          x86_64_linux: "adf3548df055d18e476cdee887488ba7486b879ad99a31a546c6b5c5ff296c24"
 
-  url "https://github.com/VSCodium/vscodium/releases/download/#{version}/VSCodium-linux-#{arch}-#{version}.tar.gz"
+  url "https://github.com/VSCodium/vscodium/releases/download/#{version}/VSCodium-linux-#{arch}-#{version}.tar.gz",
+      verified: "github.com/VSCodium/vscodium/"
   name "VSCodium"
   desc "Open-source code editor"
   homepage "https://vscodium.com/"
