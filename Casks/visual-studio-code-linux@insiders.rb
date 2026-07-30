@@ -2,11 +2,11 @@ cask "visual-studio-code-linux@insiders" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.132.0-insider,9b51cf9b8ca8c8ae09c409d9a9f3adf91019fb34"
-  sha256 arm:          "ce23ff9647a94d217c483a44c88b585e12a9d6a852cf9c75d4be673c74e73191",
-         intel:        "9968f60e3196b811c7c5caf279506ed9763cd91957858a20828e26407041ee52",
-         arm64_linux:  "ce23ff9647a94d217c483a44c88b585e12a9d6a852cf9c75d4be673c74e73191",
-         x86_64_linux: "9968f60e3196b811c7c5caf279506ed9763cd91957858a20828e26407041ee52"
+  version "1.132.0-insider,54917b34eaaeeec2b294c43d691fc6c1e4b86c89"
+  sha256 arm:          "4f05ea0e95a9c753062d32d4e6bb0b7d32dd50fdd8105887533a2277ee860bc1",
+         intel:        "c950b106e15a43225d3cf37caa754429123ab29873d18026544508de5027f897",
+         arm64_linux:  "4f05ea0e95a9c753062d32d4e6bb0b7d32dd50fdd8105887533a2277ee860bc1",
+         x86_64_linux: "c950b106e15a43225d3cf37caa754429123ab29873d18026544508de5027f897"
 
   url "https://update.code.visualstudio.com/#{version.csv.first}/linux-#{arch}/insider"
   name "Microsoft Visual Studio Code Insiders"
