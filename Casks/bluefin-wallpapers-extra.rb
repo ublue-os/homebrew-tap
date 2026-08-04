@@ -3,21 +3,11 @@ cask "bluefin-wallpapers-extra" do
 
   version "2026-05-09"
 
-  name "bluefin-wallpapers-extra"
-  desc "Extra Wallpapers for Bluefin"
-  homepage "https://github.com/ublue-os/artwork"
-
-  livecheck do
-    url "https://github.com/ublue-os/artwork.git"
-    regex(/bluefin-extra-v?(\d{4}-\d{2}-\d{2})/)
-    strategy :github_releases
-  end
-
   on_macos do
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-macos.tar.zstd"
     sha256 "619dc6807432318f0ce5316d77f77bd6cd4549a1c9509bdba10074f71b742ff2"
-  end
 
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-macos.tar.zstd"
+  end
   on_linux do
     if File.exist?("/usr/bin/plasmashell")
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-kde.tar.zstd"
@@ -29,6 +19,16 @@ cask "bluefin-wallpapers-extra" do
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-extra-v#{version}/bluefin-wallpapers-extra-png.tar.zstd"
       sha256 "dafdb5e47d0a967b7bcfaeabe4afda0d75575fd7ef28b8120c924fc19c53f02c"
     end
+  end
+
+  name "bluefin-wallpapers-extra"
+  desc "Extra Wallpapers for Bluefin"
+  homepage "https://github.com/ublue-os/artwork"
+
+  livecheck do
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/bluefin-extra-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   preflight do

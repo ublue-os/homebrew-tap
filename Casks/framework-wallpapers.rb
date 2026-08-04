@@ -3,21 +3,11 @@ cask "framework-wallpapers" do
 
   version "2025-12-14"
 
-  name "framework-wallpapers"
-  desc "Wallpapers for Framework laptops"
-  homepage "https://github.com/projectbluefin/artwork"
-
-  livecheck do
-    url "https://github.com/ublue-os/artwork.git"
-    regex(/framework-v?(\d{4}-\d{2}-\d{2})/)
-    strategy :github_releases
-  end
-
   on_macos do
-    url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-macos.tar.zstd"
     sha256 "e3afcfdbb919d84e02b0f99c2e450514db347bd4e7dd37e9fa23fdb72d321841"
-  end
 
+    url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-macos.tar.zstd"
+  end
   on_linux do
     if File.exist?("/usr/bin/plasmashell")
       url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-kde.tar.zstd"
@@ -29,6 +19,16 @@ cask "framework-wallpapers" do
       url "https://github.com/ublue-os/artwork/releases/download/framework-v#{version}/framework-wallpapers-png.tar.zstd"
       sha256 "2da39f34cb2131861da2adca1d03a6b25b0714b2e7d2686b4d14f7ed8c60e8eb"
     end
+  end
+
+  name "framework-wallpapers"
+  desc "Wallpapers for Framework laptops"
+  homepage "https://github.com/projectbluefin/artwork"
+
+  livecheck do
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/framework-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   preflight do

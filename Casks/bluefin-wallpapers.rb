@@ -3,25 +3,15 @@ cask "bluefin-wallpapers" do
 
   version "2026-04-13"
 
-  name "bluefin-wallpapers"
-  desc "Wallpapers for Bluefin"
-  homepage "https://github.com/projectbluefin/artwork"
-
-  livecheck do
-    url "https://github.com/ublue-os/artwork.git"
-    regex(/bluefin-v?(\d{4}-\d{2}-\d{2})/)
-    strategy :github_releases
-  end
-
   on_macos do
-    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-macos.tar.zstd"
     sha256 "7d067bd998717e318aff98732cc3f35e6909d59e8191543962dc72bd8ba9fc80"
+
+    url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-macos.tar.zstd"
 
     Dir.glob("#{staged_path}/*").each do |file|
       artifact file, target: "#{Dir.home}/Library/Desktop Pictures/Bluefin/#{File.basename(file)}"
     end
   end
-
   on_linux do
     destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
     kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
@@ -52,6 +42,16 @@ cask "bluefin-wallpapers" do
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
       end
     end
+  end
+
+  name "bluefin-wallpapers"
+  desc "Wallpapers for Bluefin"
+  homepage "https://github.com/projectbluefin/artwork"
+
+  livecheck do
+    url "https://github.com/ublue-os/artwork.git"
+    regex(/bluefin-v?(\d{4}-\d{2}-\d{2})/)
+    strategy :github_releases
   end
 
   preflight do
