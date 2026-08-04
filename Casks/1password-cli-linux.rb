@@ -2,11 +2,11 @@ cask "1password-cli-linux" do
   arch intel: "amd64", arm: "arm64"
   os linux: "linux"
 
-  version "2.35.0"
-  sha256 arm:          "28153b3e1b379cc117a2b8478fc29c73e4a391d0a9b7876c360d305e98390a78",
-         intel:        "4457ade59850b852c64c77164235b34dd0b984ef7826eb0ccd32f1fd78a2ceb7",
-         arm64_linux:  "28153b3e1b379cc117a2b8478fc29c73e4a391d0a9b7876c360d305e98390a78",
-         x86_64_linux: "4457ade59850b852c64c77164235b34dd0b984ef7826eb0ccd32f1fd78a2ceb7"
+  version "2.38.1"
+  sha256 arm:          "854f92932dcfebc26434e83e426729933a8d0aae447889e439cf01f1b213a7fd",
+         intel:        "7a7b7168f521d31838f0cc59abf172527853308c9b9cceee34895121acb0be0f",
+         arm64_linux:  "854f92932dcfebc26434e83e426729933a8d0aae447889e439cf01f1b213a7fd",
+         x86_64_linux: "7a7b7168f521d31838f0cc59abf172527853308c9b9cceee34895121acb0be0f"
 
   url "https://cache.agilebits.com/dist/1P/op2/pkg/v#{version}/op_linux_#{arch}_v#{version}.zip",
       verified: "cache.agilebits.com/dist/1P/op2/pkg/"
@@ -24,7 +24,6 @@ cask "1password-cli-linux" do
   conflicts_with cask: "1password-cli"
 
   binary "op"
-
   generate_completions_from_executable "op", "completion"
 
   postflight do
