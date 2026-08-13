@@ -2,11 +2,11 @@ cask "antigravity-ide-linux" do
   arch arm: "arm", intel: "x64"
   os linux: "linux"
 
-  version "2.1.1,6123990880747520"
-  sha256 arm:          "c6b6fef97cfc078ae7f92d02f9483a12437b6602c7d322a7d445668c2f0c16a6",
-         intel:        "5b2cebf7d33a68d003fd8f1fa988d1600905ace22504a085e5384214290878bd",
-         arm64_linux:  "c6b6fef97cfc078ae7f92d02f9483a12437b6602c7d322a7d445668c2f0c16a6",
-         x86_64_linux: "5b2cebf7d33a68d003fd8f1fa988d1600905ace22504a085e5384214290878bd"
+  version "2.5.5,4923483625488384"
+  sha256 arm:          "88c167108980c33a223a8d7f0aa6aaf4dec61f0cc3950235a2698e9ffc38a49e",
+         intel:        "0c5233b297d2b3aebb61af49f8944012c2953d361a5ebb16978490636917f831",
+         arm64_linux:  "88c167108980c33a223a8d7f0aa6aaf4dec61f0cc3950235a2698e9ffc38a49e",
+         x86_64_linux: "0c5233b297d2b3aebb61af49f8944012c2953d361a5ebb16978490636917f831"
 
   url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity%20IDE.tar.gz",
       verified: "edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/"
