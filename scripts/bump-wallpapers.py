@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import re
 import sys
 from dataclasses import dataclass, field
@@ -20,7 +21,7 @@ from enum import Enum
 from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -125,7 +126,12 @@ CASK_BY_NAME = {cask.name: cask for cask in CASKS}
 def get_releases() -> list[Release]:
     """Fetch all releases from GitHub API (cached)."""
     logger.debug("Fetching releases from %s", GITHUB_API_URL)
-    with urlopen(GITHUB_API_URL) as response:
+    headers = {"Accept": "application/vnd.github+json"}
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    request = Request(GITHUB_API_URL, headers=headers)
+    with urlopen(request) as response:
         return json.loads(response.read().decode())
 
 
