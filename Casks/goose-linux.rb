@@ -50,7 +50,7 @@ cask "goose-linux" do
       Type=Application
       Categories=Development;
       MimeType=x-scheme-handler/goose;
-      StartupWMClass=Goose
+      StartupWMClass=goose
     EOS
   end
 
