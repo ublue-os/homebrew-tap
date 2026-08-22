@@ -1,7 +1,7 @@
 cask "bluefin-wallpapers" do
   os macos: "darwin", linux: "linux"
 
-  version "2026-04-13"
+  version "2026-08-21"
 
   on_macos do
     sha256 "7d067bd998717e318aff98732cc3f35e6909d59e8191543962dc72bd8ba9fc80"
@@ -18,14 +18,14 @@ cask "bluefin-wallpapers" do
 
     if File.exist?("/usr/bin/plasmashell")
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-kde.tar.zstd"
-      sha256 "efbeeae6b04043a086088f71ec1dad0e63ba1c56fae440d69a9b459b03b5ffc1"
+      sha256 "d1c3b022e5ff0532e2727de76bc9bc8fb2efb74c6201c4d1cda55dbbc3826be9"
 
       Dir.glob("#{staged_path}/*").each do |file|
         artifact file, target: "#{kde_destination_dir}/#{File.basename(file)}"
       end
     elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-gnome.tar.zstd"
-      sha256 "87fdc6505da615e5df902df408371d5ab34efef6199144925324a564e6801e00"
+      sha256 "b3c5332f28c06265aa39284c0e1fad5ec970860d06737ebae24072a17cb52bf4"
 
       Dir.glob("#{staged_path}/*").select { |f| File.file?(f) }.each do |file|
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
@@ -36,7 +36,7 @@ cask "bluefin-wallpapers" do
       end
     else
       url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-png.tar.zstd"
-      sha256 "15ea697d0cf97aabe5d9aaac5585104ff0dfea8690c10b37e8f888b771019065"
+      sha256 "52cce2d24ef1df7978b432c5f248322af27b416efa334e854f57fc9f99decb51"
 
       Dir.glob("#{staged_path}/*").each do |file|
         artifact file, target: "#{destination_dir}/#{File.basename(file)}"
