@@ -1,5 +1,5 @@
 cask "1password-cli-linux" do
-  arch intel: "amd64", arm: "arm64"
+  arch arm: "arm64", intel: "amd64"
   os linux: "linux"
 
   version "2.39.0"
