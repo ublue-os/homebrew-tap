@@ -1,5 +1,5 @@
 cask "1password-gui-linux" do
-  arch arm: "arm64", intel: "amd64"
+  arch arm: "aarch64", intel: "x86_64"
   os linux: "linux"
 
   version "8.12.32"
