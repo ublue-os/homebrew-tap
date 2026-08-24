@@ -30,6 +30,7 @@ brew install --cask antigravity-ide-linux
 brew install --cask antigravity-cli-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
+brew install --cask t3-code-linux
 brew install --cask zed-linux
 
 brew install --cask bluefin-wallpapers
@@ -58,6 +59,7 @@ brew install --cask framework-wallpapers
 - VSCodium - Open-source build of VS Code
 - Framework System Tool - Hardware management for Framework laptops
 - rog control center - GUI frontend for asusctl (for Asus ROG etc laptops)
+- T3 Code - Desktop control surface for local coding agents
 - Zed - High-performance, multiplayer code editor
 
 ### Wallpapers
