@@ -1,6 +1,6 @@
 cask "t3-code-linux" do
-  version "0.0.33"
-  sha256 "415c8648f43c3d22d572f27f2c50fdc8c310ea7fcde9537b903e1e2f1c8775a1"
+  version "0.0.34"
+  sha256 "6077e207cc1e7e65858f73313534abe1da357227f40225854e1abac34dedba04"
 
   url "https://github.com/pingdotgg/t3code/releases/download/v#{version}/T3-Code-#{version}-x86_64.AppImage"
   name "T3 Code"
@@ -14,7 +14,7 @@ cask "t3-code-linux" do
 
   depends_on formula: "squashfs"
 
-  binary "squashfs-root/AppRun", target: "t3code"
+  binary "t3code.wrapper.sh", target: "t3code"
   artifact "squashfs-root/usr/share/icons/hicolor/512x512/apps/t3code.png",
            target: "#{Dir.home}/.local/share/icons/t3code.png"
   artifact "squashfs-root/t3code.desktop",
@@ -25,6 +25,13 @@ cask "t3-code-linux" do
     system "chmod", "+x", appimage_path
     system appimage_path, "--appimage-extract", chdir: staged_path
     FileUtils.rm appimage_path
+
+    File.write("#{staged_path}/t3code.wrapper.sh", <<~EOS)
+      #!/bin/sh
+      export T3CODE_DISABLE_AUTO_UPDATE=1
+      exec "#{staged_path}/squashfs-root/AppRun" "$@"
+    EOS
+    FileUtils.chmod 0755, "#{staged_path}/t3code.wrapper.sh"
 
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
     FileUtils.mkdir_p "#{Dir.home}/.local/share/icons"
