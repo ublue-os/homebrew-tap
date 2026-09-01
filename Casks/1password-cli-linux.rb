@@ -8,8 +8,7 @@ cask "1password-cli-linux" do
          arm64_linux:  "829baeff1c07e055cfa132031b1d9f2282ccdf5076258e482caf2fda70aea5d0",
          x86_64_linux: "6fba7f376b6c6dec49f41b06408930a43ad064cce103c6a2ce5b3d0413a86434"
 
-  url "https://cache.agilebits.com/dist/1P/op2/pkg/v#{version}/op_linux_#{arch}_v#{version}.zip",
-      verified: "cache.agilebits.com/dist/1P/op2/pkg/"
+  url "https://cache.agilebits.com/dist/1P/op2/pkg/v#{version}/op_linux_#{arch}_v#{version}.zip"
   name "1Password CLI"
   desc "Command-line interface for 1Password"
   homepage "https://developer.1password.com/docs/cli"

@@ -2,8 +2,7 @@ cask "goose-linux" do
   version "1.48.0"
   sha256 "e78e486ebbc89f61c65ecf436c48714fe8a984b5cde95bc50ce9fb1319f66c8d"
 
-  url "https://github.com/block/goose/releases/download/v#{version}/Goose-#{version}-1.x86_64.rpm",
-      verified: "github.com/block/goose/"
+  url "https://github.com/block/goose/releases/download/v#{version}/Goose-#{version}-1.x86_64.rpm"
   name "Goose"
   desc "Open source, extensible AI agent that goes beyond code suggestions"
   homepage "https://block.github.io/goose/"

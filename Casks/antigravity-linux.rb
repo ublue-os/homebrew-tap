@@ -8,8 +8,7 @@ cask "antigravity-linux" do
          arm64_linux:  "368113b2bb0bacfcccb5aa6ca8ff2b09986ca4bb542a7b233242fe1bfd7984a5",
          x86_64_linux: "ff899339ae4a8011a7770ae47002b55542635a1c22d569793269a470b5b580d8"
 
-  url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
-      verified: "storage.googleapis.com/antigravity-public/antigravity-hub/"
+  url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz"
   name "Google Antigravity"
   desc "Agent orchestration platform"
   homepage "https://antigravity.google/product/antigravity-2"

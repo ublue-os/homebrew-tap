@@ -8,8 +8,7 @@ cask "antigravity-cli-linux" do
          arm64_linux:  "a68925bc7336eb0b90de1e1aefd44d535f5487b7cf606a76fdb982207aef9a2e",
          x86_64_linux: "1e1a219a86e75d7c6351f96d182ca2105302d5c34d8fa9c31265dc0adf24145f"
 
-  url "https://storage.googleapis.com/antigravity-public/antigravity-cli/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/cli_linux_#{(arch == "arm") ? "arm64" : "x64"}.tar.gz",
-      verified: "storage.googleapis.com/antigravity-public/antigravity-cli/"
+  url "https://storage.googleapis.com/antigravity-public/antigravity-cli/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/cli_linux_#{(arch == "arm") ? "arm64" : "x64"}.tar.gz"
   name "Google Antigravity CLI"
   desc "Terminal interface for Antigravity agents"
   homepage "https://antigravity.google/product/antigravity-cli"
