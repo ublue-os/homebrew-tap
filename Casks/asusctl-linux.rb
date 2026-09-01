@@ -11,8 +11,7 @@ cask "asusctl-linux" do
   release_tag = "asusctl-#{version.csv.first}-#{version.csv.second}"
   release_root = "asusctl-#{version.csv.first}-ubuntu-22.04-#{arch}"
 
-  url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz",
-      verified: "github.com/daegalus/linux-app-builds/"
+  url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz"
   name "asusctl"
   desc "ASUS laptop control CLI and immutable-friendly system daemon payload"
   homepage "https://gitlab.com/asus-linux/asusctl"
