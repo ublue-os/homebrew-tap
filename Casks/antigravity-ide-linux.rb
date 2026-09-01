@@ -8,8 +8,7 @@ cask "antigravity-ide-linux" do
          arm64_linux:  "88c167108980c33a223a8d7f0aa6aaf4dec61f0cc3950235a2698e9ffc38a49e",
          x86_64_linux: "0c5233b297d2b3aebb61af49f8944012c2953d361a5ebb16978490636917f831"
 
-  url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity%20IDE.tar.gz",
-      verified: "edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/"
+  url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity%20IDE.tar.gz"
   name "Google Antigravity IDE"
   desc "AI Coding Agent IDE"
   homepage "https://antigravity.google/product/antigravity-ide"

@@ -11,8 +11,7 @@ cask "rog-control-center-linux" do
   release_tag = "asusctl-#{version.csv.first}-#{version.csv.second}"
   release_root = "asusctl-#{version.csv.first}-ubuntu-22.04-#{arch}"
 
-  url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz",
-      verified: "github.com/daegalus/linux-app-builds/"
+  url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz"
   name "ROG Control Center"
   desc "ASUS ROG Control Center GUI and user daemon with XDG-first installation"
   homepage "https://gitlab.com/asus-linux/asusctl"
