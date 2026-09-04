@@ -1,12 +1,13 @@
 cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
+  arch_dir = on_arch_conditional arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "2.5.0,5471848641724416"
-  sha256 arm:          "368113b2bb0bacfcccb5aa6ca8ff2b09986ca4bb542a7b233242fe1bfd7984a5",
-         intel:        "ff899339ae4a8011a7770ae47002b55542635a1c22d569793269a470b5b580d8",
-         arm64_linux:  "368113b2bb0bacfcccb5aa6ca8ff2b09986ca4bb542a7b233242fe1bfd7984a5",
-         x86_64_linux: "ff899339ae4a8011a7770ae47002b55542635a1c22d569793269a470b5b580d8"
+  version "2.12.2,6298742303883264"
+  sha256 arm:          "72049b207d1c179a8524a4dcf13c4f86d8cbba599d845fdc457de0f7f112e918",
+         intel:        "fc2e2af49a45aefee9558bce56aaa4bbde00d560d354357af1b834a9dd43cd33",
+         arm64_linux:  "72049b207d1c179a8524a4dcf13c4f86d8cbba599d845fdc457de0f7f112e918",
+         x86_64_linux: "fc2e2af49a45aefee9558bce56aaa4bbde00d560d354357af1b834a9dd43cd33"
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz"
   name "Google Antigravity"
@@ -14,7 +15,7 @@ cask "antigravity-linux" do
   homepage "https://antigravity.google/product/antigravity-2"
 
   livecheck do
-    url "https://antigravity-hub-auto-updater-974169037036.us-central1.run.app/manifest/latest-#{(arch == "arm") ? "arm64" : "x64"}-linux.yml"
+    url "https://antigravity-hub-auto-updater-974169037036.us-central1.run.app/manifest/latest-x64-linux.yml"
     regex(%r{/antigravity-hub/(\d+(?:\.\d+)+)-(\d+)/}i)
     strategy :page_match do |page, regex|
       match = page.match(regex)
@@ -24,7 +25,7 @@ cask "antigravity-linux" do
     end
   end
 
-  binary "#{staged_path}/Antigravity-#{arch}/antigravity"
+  binary "#{staged_path}/Antigravity-#{arch_dir}/antigravity"
   artifact "antigravity.desktop",
            target: "#{Dir.home}/.local/share/applications/antigravity.desktop"
   artifact "antigravity-url-handler.desktop",
@@ -33,7 +34,7 @@ cask "antigravity-linux" do
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
   preflight do
-    app_root = "#{staged_path}/Antigravity-#{arch}"
+    app_root = "#{staged_path}/Antigravity-#{arch_dir}"
     app_update_yml = "#{app_root}/resources/app-update.yml"
     asar_path = "#{app_root}/resources/app.asar"
 
