@@ -32,19 +32,18 @@ cask "goose-linux" do
   artifact "usr/share/pixmaps/Goose.png",
            target: "#{Dir.home}/.local/share/icons/Goose.png"
 
-  preflight do
-    system "sh", "-c", "rpm2cpio '#{staged_path}/Goose-#{version}-1.x86_64.rpm' | cpio -idm --quiet",
-           chdir: staged_path
+  preflight_steps do
+    run "sh", args: ["-c", "rpm2cpio Goose-#{version}-1.x86_64.rpm | cpio -idm --quiet"]
 
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons"
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
 
-    File.write("#{staged_path}/Goose.desktop", <<~EOS)
+    write_file "Goose.desktop", <<~EOS
       [Desktop Entry]
       Name=Goose
       Comment=Open source, extensible AI agent that goes beyond code suggestions
-      Exec=#{HOMEBREW_PREFIX}/bin/goose-desktop %U
-      Icon=#{Dir.home}/.local/share/icons/Goose.png
+      Exec={{HOMEBREW_PREFIX}}/bin/goose-desktop %U
+      Icon=Goose
       Terminal=false
       Type=Application
       Categories=Development;
