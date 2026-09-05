@@ -30,11 +30,7 @@ cask "bazzite-wallpapers" do
     end
   end
 
-  preflight do
-    Dir.glob("#{staged_path}/**/*.xml").each do |file|
-      contents = File.read(file)
-      contents.gsub!("~", Dir.home)
-      File.write(file, contents)
-    end
+  preflight_steps do
+    inreplace "**/*.xml", "~", "{{home}}", audit_result: false
   end
 end

@@ -26,17 +26,17 @@ cask "antigravity-cli-linux" do
 
   binary "agy.wrapper.sh", target: "agy"
 
-  preflight do
-    File.write("#{staged_path}/agy.wrapper.sh", <<~EOS)
+  preflight_steps do
+    write_file "agy.wrapper.sh", <<~EOS
       #!/bin/sh
       if [ "$1" = "update" ]; then
         echo "Antigravity CLI is managed by Homebrew. Use 'brew upgrade --cask antigravity-cli-linux' instead." >&2
         exit 1
       fi
 
-      exec "#{staged_path}/antigravity" "$@"
+      exec "{{staged_path}}/antigravity" "$@"
     EOS
-    FileUtils.chmod 0755, "#{staged_path}/agy.wrapper.sh"
+    set_permissions "agy.wrapper.sh", "0755"
   end
 
   zap trash: "~/.gemini/antigravity-cli"

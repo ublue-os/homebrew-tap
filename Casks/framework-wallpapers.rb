@@ -31,66 +31,81 @@ cask "framework-wallpapers" do
     strategy :github_releases
   end
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/Library/Desktop Pictures/Framework" if OS.mac?
+  preflight_steps do
+    on_macos do
+      mkdir_p "Library/Desktop Pictures/Framework", base: :home
+    end
 
-    if OS.linux?
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/framework"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/wallpapers/framework"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
-
-      Dir.glob("#{staged_path}/**/*.xml").each do |file|
-        contents = File.read(file)
-        contents.gsub!("~", Dir.home)
-        File.write(file, contents)
-      end
+    on_linux do
+      mkdir_p ".local/share/backgrounds/framework", base: :home
+      mkdir_p ".local/share/wallpapers/framework", base: :home
+      mkdir_p ".local/share/gnome-background-properties", base: :home
+      inreplace "**/*.xml", "~", "{{home}}", audit_result: false
     end
   end
 
-  postflight do
-    if OS.mac?
-      Dir.glob("#{staged_path}/*").each do |file|
-        target = "#{Dir.home}/Library/Desktop Pictures/Framework/#{File.basename(file)}"
-        FileUtils.ln_sf(file, target)
-      end
-      puts "Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Framework"
-      puts "To use: System Settings > Wallpaper > Add Folder"
+  postflight_steps do
+    on_macos do
+      run "ruby", args: [
+        "-e",
+        <<~RUBY,
+          staged_path = ARGV[0]
+          home = ARGV[1]
+          Dir.glob("\#{staged_path}/*").each do |file|
+            target = "\#{home}/Library/Desktop Pictures/Framework/\#{File.basename(file)}"
+            FileUtils.ln_sf(file, target)
+          end
+        RUBY
+        "{{staged_path}}",
+        "{{home}}",
+      ]
     end
 
-    if OS.linux?
-      destination_dir = "#{Dir.home}/.local/share/backgrounds/framework"
-      kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/framework"
+    on_linux do
+      run "ruby", args: [
+        "-e",
+        <<~RUBY,
+          staged_path = ARGV[0]
+          home = ARGV[1]
+          destination_dir = "\#{home}/.local/share/backgrounds/framework"
+          kde_destination_dir = "\#{home}/.local/share/wallpapers/framework"
 
-      if File.exist?("/usr/bin/plasmashell")
-        Dir.glob("#{staged_path}/*").each do |file|
-          target = "#{kde_destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
-        Dir.glob("#{staged_path}/images/*").each do |file|
-          target = "#{destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
+          if File.exist?("/usr/bin/plasmashell")
+            Dir.glob("\#{staged_path}/*").each do |file|
+              target = "\#{kde_destination_dir}/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+            Dir.glob("\#{staged_path}/images/*").each do |file|
+              target = "\#{destination_dir}/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
 
-        Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-          target = "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      else
-        Dir.glob("#{staged_path}/*").each do |file|
-          target = "#{destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      end
+            Dir.glob("\#{staged_path}/gnome-background-properties/*").each do |file|
+              target = "\#{home}/.local/share/gnome-background-properties/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          else
+            Dir.glob("\#{staged_path}/*").each do |file|
+              target = "\#{destination_dir}/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          end
+        RUBY
+        "{{staged_path}}",
+        "{{home}}",
+      ]
     end
   end
 
-  uninstall_postflight do
-    FileUtils.rm_r "#{Dir.home}/Library/Desktop Pictures/Framework" if OS.mac?
+  uninstall_postflight_steps do
+    on_macos do
+      remove "Library/Desktop Pictures/Framework", base: :home, recursive: true
+    end
 
-    if OS.linux?
-      FileUtils.rm_r "#{Dir.home}/.local/share/backgrounds/framework"
-      FileUtils.rm_r "#{Dir.home}/.local/share/wallpapers/framework"
+    on_linux do
+      remove ".local/share/backgrounds/framework", base: :home, recursive: true
+      remove ".local/share/wallpapers/framework", base: :home, recursive: true
     end
   end
 
@@ -100,4 +115,13 @@ cask "framework-wallpapers" do
     "#{Dir.home}/.local/share/wallpapers/framework",
     "#{Dir.home}/Library/Desktop Pictures/Framework",
   ]
+
+  caveats do
+    on_macos do
+      <<~EOS
+        Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Framework
+        To use: System Settings > Wallpaper > Add Folder
+      EOS
+    end
+  end
 end

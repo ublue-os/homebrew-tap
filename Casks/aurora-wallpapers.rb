@@ -13,43 +13,47 @@ cask "aurora-wallpapers" do
     strategy :github_releases
   end
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/aurora"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
-
-    Dir.glob("#{staged_path}/**/*.xml").each do |file|
-      contents = File.read(file)
-      contents.gsub!("~", Dir.home)
-      File.write(file, contents)
-    end
+  preflight_steps do
+    mkdir_p ".local/share/backgrounds/aurora", base: :home
+    mkdir_p ".local/share/gnome-background-properties", base: :home
+    inreplace "**/*.xml", "~", "{{home}}", audit_result: false
   end
 
-  postflight do
-    if File.exist?("/usr/bin/plasmashell")
-      Dir.glob("#{staged_path}/kde/*").each do |dir|
-        next if dir.include?("gnome-background-properties")
+  postflight_steps do
+    run "ruby", args: [
+      "-e",
+      <<~'RUBY',
+        staged_path = ARGV[0]
+        home = ARGV[1]
+        if File.exist?("/usr/bin/plasmashell")
+          Dir.glob("#{staged_path}/kde/*").each do |dir|
+            next if dir.include?("gnome-background-properties")
 
-        target = "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
-        FileUtils.ln_sf(dir, target)
-      end
-    else
-      Dir.glob("#{staged_path}/kde/*").each do |dir|
-        Dir.glob("#{dir}/contents/images/*").each do |file|
-          extension = File.extname(file)
-          target = "#{Dir.home}/.local/share/backgrounds/aurora/#{File.basename(dir)}#{extension}"
-          FileUtils.ln_sf(file, target)
-        end
+            target = "#{home}/.local/share/backgrounds/aurora/#{File.basename(dir)}"
+            FileUtils.ln_sf(dir, target)
+          end
+        else
+          Dir.glob("#{staged_path}/kde/*").each do |dir|
+            Dir.glob("#{dir}/contents/images/*").each do |file|
+              extension = File.extname(file)
+              target = "#{home}/.local/share/backgrounds/aurora/#{File.basename(dir)}#{extension}"
+              FileUtils.ln_sf(file, target)
+            end
 
-        Dir.glob("#{dir}/gnome-background-properties/*").each do |file|
-          target = "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
+            Dir.glob("#{dir}/gnome-background-properties/*").each do |file|
+              target = "#{home}/.local/share/gnome-background-properties/#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          end
         end
-      end
-    end
+      RUBY
+      "{{staged_path}}",
+      "{{home}}",
+    ]
   end
 
-  uninstall_postflight do
-    FileUtils.rm_r "#{Dir.home}/.local/share/backgrounds/aurora"
+  uninstall_postflight_steps do
+    remove ".local/share/backgrounds/aurora", base: :home, recursive: true
   end
 
   zap trash: [

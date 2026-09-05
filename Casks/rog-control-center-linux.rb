@@ -30,122 +30,144 @@ cask "rog-control-center-linux" do
   binary "#{release_root}/usr/bin/rog-control-center"
   binary "#{release_root}/usr/bin/asusd-user"
 
-  postflight do
-    require "fileutils"
+  postflight_steps do
+    run "ruby", args: [
+      "-e",
+      <<~RUBY,
+        require "fileutils"
 
-    release_dir = "#{staged_path}/#{release_root}"
-    xdg_share = "#{Dir.home}/.local/share"
-    xdg_config = "#{Dir.home}/.config"
-    applications_dir = "#{xdg_share}/applications"
-    icons_dir = "#{xdg_share}/icons/hicolor/512x512/apps"
-    status_icons_dir = "#{xdg_share}/icons/hicolor/scalable/status"
-    asusd_share_dir = "#{xdg_share}/asusd"
-    rog_gui_share_dir = "#{xdg_share}/rog-gui"
-    systemd_user_dir = "#{xdg_config}/systemd/user"
-    asusd_config_dir = "#{xdg_config}/asusd"
-    asusd_user_service_src = "#{release_dir}/usr/lib/systemd/user/asusd-user.service"
+        staged_path = ARGV[0]
+        prefix = ARGV[1]
+        home = ARGV[2]
 
-    icon_cache_cmd = system("which gtk-update-icon-cache > /dev/null 2>&1")
-    desktop_db_cmd = system("which update-desktop-database > /dev/null 2>&1")
+        release_dir = Dir.glob("\#{staged_path}/rog-control-center-*").first || staged_path
+        xdg_share = "\#{home}/.local/share"
+        xdg_config = "\#{home}/.config"
+        applications_dir = "\#{xdg_share}/applications"
+        icons_dir = "\#{xdg_share}/icons/hicolor/512x512/apps"
+        status_icons_dir = "\#{xdg_share}/icons/hicolor/scalable/status"
+        asusd_share_dir = "\#{xdg_share}/asusd"
+        rog_gui_share_dir = "\#{xdg_share}/rog-gui"
+        systemd_user_dir = "\#{xdg_config}/systemd/user"
+        asusd_config_dir = "\#{xdg_config}/asusd"
+        asusd_user_service_src = "\#{release_dir}/usr/lib/systemd/user/asusd-user.service"
 
-    FileUtils.mkdir_p(
-      [
-        applications_dir,
-        icons_dir,
-        status_icons_dir,
-        asusd_share_dir,
-        rog_gui_share_dir,
-        systemd_user_dir,
-        asusd_config_dir,
-      ],
-    )
+        icon_cache_cmd = system("which gtk-update-icon-cache > /dev/null 2>&1")
+        desktop_db_cmd = system("which update-desktop-database > /dev/null 2>&1")
 
-    FileUtils.cp_r("#{release_dir}/usr/share/asusd/.", asusd_share_dir)
-    FileUtils.cp_r("#{release_dir}/usr/share/rog-gui/.", rog_gui_share_dir)
-    Dir.glob("#{release_dir}/usr/share/icons/hicolor/512x512/apps/*.png").each do |icon|
-      FileUtils.cp(icon, icons_dir)
-    end
-    Dir.glob("#{release_dir}/usr/share/icons/hicolor/scalable/status/*.svg").each do |icon|
-      FileUtils.cp(icon, status_icons_dir)
-    end
+        FileUtils.mkdir_p(
+          [
+            applications_dir,
+            icons_dir,
+            status_icons_dir,
+            asusd_share_dir,
+            rog_gui_share_dir,
+            systemd_user_dir,
+            asusd_config_dir,
+          ],
+        )
 
-    desktop_contents = File.read(
-      "#{release_dir}/usr/share/applications/rog-control-center.desktop",
-    )
-    desktop_contents.gsub!(
-      /^Exec=.*/,
-      "Exec=#{HOMEBREW_PREFIX}/bin/rog-control-center",
-    )
-    File.write("#{applications_dir}/rog-control-center.desktop", desktop_contents)
+        FileUtils.cp_r("\#{release_dir}/usr/share/asusd/.", asusd_share_dir)
+        FileUtils.cp_r("\#{release_dir}/usr/share/rog-gui/.", rog_gui_share_dir)
+        Dir.glob("\#{release_dir}/usr/share/icons/hicolor/512x512/apps/*.png").each do |icon|
+          FileUtils.cp(icon, icons_dir)
+        end
+        Dir.glob("\#{release_dir}/usr/share/icons/hicolor/scalable/status/*.svg").each do |icon|
+          FileUtils.cp(icon, status_icons_dir)
+        end
 
-    asusd_user_service = File.read(asusd_user_service_src)
-    asusd_user_service.gsub!("Environment=ASUSD_USER_EXEC=/usr/bin/asusd-user\n", "")
-    asusd_user_service.gsub!(
-      "ExecStart=${ASUSD_USER_EXEC}",
-      "ExecStart=#{HOMEBREW_PREFIX}/bin/asusd-user",
-    )
-    File.write("#{systemd_user_dir}/asusd-user.service", asusd_user_service)
+        desktop_file = "\#{release_dir}/usr/share/applications/rog-control-center.desktop"
+        if File.exist?(desktop_file)
+          desktop_contents = File.read(desktop_file)
+          desktop_contents.gsub!(
+            /^Exec=.*/,
+            "Exec=\#{prefix}/bin/rog-control-center",
+          )
+          File.write("\#{applications_dir}/rog-control-center.desktop", desktop_contents)
+        end
 
-    File.write("#{asusd_config_dir}/asusd-user.env", <<~EOS)
-      ASUSD_DATA_DIR=#{asusd_share_dir}
-      ROG_GUI_DATA_DIR=#{rog_gui_share_dir}
-      ROG_GUI_LAYOUTS_DIR=#{rog_gui_share_dir}/layouts
-      ASUSCTL_AURA_SUPPORT_PATH=#{asusd_share_dir}/aura_support.ron
-      ASUSCTL_DATA_DIRS=#{xdg_share}
-    EOS
+        if File.exist?(asusd_user_service_src)
+          asusd_user_service = File.read(asusd_user_service_src)
+          asusd_user_service.gsub!("Environment=ASUSD_USER_EXEC=/usr/bin/asusd-user\\n", "")
+          asusd_user_service.gsub!(
+            "ExecStart=${ASUSD_USER_EXEC}",
+            "ExecStart=\#{prefix}/bin/asusd-user",
+          )
+          File.write("\#{systemd_user_dir}/asusd-user.service", asusd_user_service)
+        end
 
-    system "gtk-update-icon-cache", "#{xdg_share}/icons/hicolor", "-f", "-t" if icon_cache_cmd
-    system "update-desktop-database", applications_dir if desktop_db_cmd
+        File.write("\#{asusd_config_dir}/asusd-user.env", <<~EOS)
+          ASUSD_DATA_DIR=\#{asusd_share_dir}
+          ROG_GUI_DATA_DIR=\#{rog_gui_share_dir}
+          ROG_GUI_LAYOUTS_DIR=\#{rog_gui_share_dir}/layouts
+          ASUSCTL_AURA_SUPPORT_PATH=\#{asusd_share_dir}/aura_support.ron
+          ASUSCTL_DATA_DIRS=\#{xdg_share}
+        EOS
+
+        system "gtk-update-icon-cache", "\#{xdg_share}/icons/hicolor", "-f", "-t" if icon_cache_cmd
+        system "update-desktop-database", applications_dir if desktop_db_cmd
+      RUBY
+      "{{staged_path}}",
+      "{{HOMEBREW_PREFIX}}",
+      "{{home}}",
+    ]
   end
 
-  uninstall_postflight do
-    require "fileutils"
+  uninstall_postflight_steps do
+    run "ruby", args: [
+      "-e",
+      <<~RUBY,
+        require "fileutils"
 
-    applications_dir = "#{Dir.home}/.local/share/applications"
-    icons_dir = "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
-    status_icons_dir = "#{Dir.home}/.local/share/icons/hicolor/scalable/status"
-    systemd_user_dir = "#{Dir.home}/.config/systemd/user"
-    asusd_config_dir = "#{Dir.home}/.config/asusd"
+        home = ARGV[0]
+        applications_dir = "\#{home}/.local/share/applications"
+        icons_dir = "\#{home}/.local/share/icons/hicolor/512x512/apps"
+        status_icons_dir = "\#{home}/.local/share/icons/hicolor/scalable/status"
+        systemd_user_dir = "\#{home}/.config/systemd/user"
+        asusd_config_dir = "\#{home}/.config/asusd"
 
-    icon_cache_cmd = system("which gtk-update-icon-cache > /dev/null 2>&1")
-    desktop_db_cmd = system("which update-desktop-database > /dev/null 2>&1")
-    systemctl = %w[/usr/bin/systemctl /bin/systemctl].find do |path|
-      File.executable?(path)
-    end
+        icon_cache_cmd = system("which gtk-update-icon-cache > /dev/null 2>&1")
+        desktop_db_cmd = system("which update-desktop-database > /dev/null 2>&1")
+        systemctl = %w[/usr/bin/systemctl /bin/systemctl].find do |path|
+          File.executable?(path)
+        end
 
-    system systemctl, "--user", "disable", "--now", "asusd-user.service" if systemctl
+        system systemctl, "--user", "disable", "--now", "asusd-user.service" if systemctl
 
-    FileUtils.rm("#{systemd_user_dir}/asusd-user.service", force: true)
-    FileUtils.rm("#{applications_dir}/rog-control-center.desktop", force: true)
-    FileUtils.rm("#{asusd_config_dir}/asusd-user.env", force: true)
+        FileUtils.rm("\#{systemd_user_dir}/asusd-user.service", force: true)
+        FileUtils.rm("\#{applications_dir}/rog-control-center.desktop", force: true)
+        FileUtils.rm("\#{asusd_config_dir}/asusd-user.env", force: true)
 
-    %w[
-      asus_notif_blue.png
-      asus_notif_green.png
-      asus_notif_orange.png
-      asus_notif_red.png
-      asus_notif_white.png
-      asus_notif_yellow.png
-      rog-control-center.png
-    ].each do |icon|
-      FileUtils.rm("#{icons_dir}/#{icon}", force: true)
-    end
+        %w[
+          asus_notif_blue.png
+          asus_notif_green.png
+          asus_notif_orange.png
+          asus_notif_red.png
+          asus_notif_white.png
+          asus_notif_yellow.png
+          rog-control-center.png
+        ].each do |icon|
+          FileUtils.rm("\#{icons_dir}/\#{icon}", force: true)
+        end
 
-    %w[
-      gpu-compute.svg
-      gpu-hybrid.svg
-      gpu-integrated.svg
-      gpu-nvidia.svg
-      gpu-vfio.svg
-      notification-reboot.svg
-    ].each do |icon|
-      FileUtils.rm("#{status_icons_dir}/#{icon}", force: true)
-    end
+        %w[
+          gpu-compute.svg
+          gpu-hybrid.svg
+          gpu-integrated.svg
+          gpu-nvidia.svg
+          gpu-vfio.svg
+          notification-reboot.svg
+        ].each do |icon|
+          FileUtils.rm("\#{status_icons_dir}/\#{icon}", force: true)
+        end
 
-    FileUtils.rmdir(asusd_config_dir) if Dir.exist?(asusd_config_dir) && Dir.empty?(asusd_config_dir)
+        FileUtils.rmdir(asusd_config_dir) if Dir.exist?(asusd_config_dir) && Dir.empty?(asusd_config_dir)
 
-    system "gtk-update-icon-cache", "#{Dir.home}/.local/share/icons/hicolor", "-f", "-t" if icon_cache_cmd
-    system "update-desktop-database", applications_dir if desktop_db_cmd
+        system "gtk-update-icon-cache", "\#{home}/.local/share/icons/hicolor", "-f", "-t" if icon_cache_cmd
+        system "update-desktop-database", applications_dir if desktop_db_cmd
+      RUBY
+      "{{home}}",
+    ]
   end
 
   zap trash: [

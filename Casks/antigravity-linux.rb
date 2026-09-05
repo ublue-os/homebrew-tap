@@ -33,42 +33,52 @@ cask "antigravity-linux" do
   artifact "antigravity.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
-  preflight do
-    app_root = "#{staged_path}/Antigravity-#{arch_dir}"
-    app_update_yml = "#{app_root}/resources/app-update.yml"
-    asar_path = "#{app_root}/resources/app.asar"
+  preflight_steps do
+    run "ruby", args: [
+      "-e",
+      <<~RUBY,
+        require "json"
+        require "fileutils"
+        staged = ARGV[0]
+        app_root = Dir.glob("\#{staged}/Antigravity-*").first
+        if app_root
+          app_update_yml = "\#{app_root}/resources/app-update.yml"
+          FileUtils.rm_f(app_update_yml)
 
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
+          asar_path = "\#{app_root}/resources/app.asar"
+          if File.exist?(asar_path)
+            File.open(asar_path, "rb") do |asar|
+              asar.seek(8)
+              padded_size = asar.read(4).unpack1("V") - 4
+              asar.seek(12)
+              true_size = asar.read(4).unpack1("V")
+              asar.seek(16)
+              header = JSON.parse(asar.read(true_size))
+              icon_entry = header.dig("files", "icon.png")
 
-    # Disable Electron auto-update checks; Homebrew manages this install.
-    FileUtils.rm app_update_yml
-
-    # Extract the app icon from the ASAR package without requiring external tools.
-    if File.exist?(asar_path)
-      File.open(asar_path, "rb") do |asar|
-        asar.seek(8)
-        padded_size = asar.read(4).unpack1("V") - 4
-        asar.seek(12)
-        true_size = asar.read(4).unpack1("V")
-        asar.seek(16)
-        header = JSON.parse(asar.read(true_size))
-        icon_entry = header.dig("files", "icon.png")
-
-        if icon_entry
-          asar.seek(16 + padded_size + icon_entry["offset"].to_i)
-          File.binwrite("#{staged_path}/antigravity.png", asar.read(icon_entry["size"]))
+              if icon_entry
+                asar.seek(16 + padded_size + icon_entry["offset"].to_i)
+                File.binwrite("\#{staged}/antigravity.png", asar.read(icon_entry["size"]))
+              end
+            end
+          end
         end
-      end
-    end
 
-    File.write("#{staged_path}/antigravity.desktop", <<~EOS)
+        FileUtils.touch("\#{staged}/antigravity.png") unless File.exist?("\#{staged}/antigravity.png")
+      RUBY
+      "{{staged_path}}",
+    ]
+
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
+
+    write_file "antigravity.desktop", <<~EOS
       [Desktop Entry]
       Name=Antigravity
       Comment=Agent orchestration platform
       GenericName=AI Agent Platform
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
+      Exec="{{HOMEBREW_PREFIX}}/bin/antigravity" %F
+      Icon={{home}}/.local/share/icons/hicolor/512x512/apps/antigravity.png
       Type=Application
       StartupNotify=false
       StartupWMClass=Antigravity
@@ -76,13 +86,13 @@ cask "antigravity-linux" do
       Keywords=antigravity;agent;ai;
     EOS
 
-    File.write("#{staged_path}/antigravity-url-handler.desktop", <<~EOS)
+    write_file "antigravity-url-handler.desktop", <<~EOS
       [Desktop Entry]
       Name=Antigravity - URL Handler
       Comment=Agent orchestration platform
       GenericName=AI Agent Platform
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity" "%U"
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
+      Exec="{{HOMEBREW_PREFIX}}/bin/antigravity" "%U"
+      Icon={{home}}/.local/share/icons/hicolor/512x512/apps/antigravity.png
       Type=Application
       NoDisplay=true
       Terminal=false
@@ -92,9 +102,6 @@ cask "antigravity-linux" do
       MimeType=x-scheme-handler/antigravity;
       Keywords=antigravity;
     EOS
-
-    # Create a placeholder icon if extraction fails
-    FileUtils.touch "#{staged_path}/antigravity.png" unless File.exist?("#{staged_path}/antigravity.png")
   end
 
   zap trash: [

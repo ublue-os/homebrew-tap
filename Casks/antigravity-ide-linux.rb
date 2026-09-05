@@ -35,26 +35,33 @@ cask "antigravity-ide-linux" do
   artifact "Antigravity IDE/resources/app/resources/linux/code.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png"
 
-  preflight do
-    product_json = "#{staged_path}/Antigravity IDE/resources/app/product.json"
-    if File.exist?(product_json)
-      product = JSON.parse(File.read(product_json))
-      product.delete("updateUrl")
-      product["configurationDefaults"] ||= {}
-      product["configurationDefaults"]["update.mode"] = "none"
-      File.write(product_json, JSON.pretty_generate(product))
-    end
+  preflight_steps do
+    run "ruby", args: [
+      "-e",
+      <<~RUBY,
+        require "json"
+        product_json = ARGV[0]
+        if File.exist?(product_json)
+          product = JSON.parse(File.read(product_json))
+          product.delete("updateUrl")
+          product["configurationDefaults"] ||= {}
+          product["configurationDefaults"]["update.mode"] = "none"
+          File.write(product_json, JSON.pretty_generate(product))
+        end
+      RUBY
+      "{{staged_path}}/Antigravity IDE/resources/app/product.json",
+    ]
 
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
 
-    File.write("#{staged_path}/antigravity-ide.desktop", <<~EOS)
+    write_file "antigravity-ide.desktop", <<~EOS
       [Desktop Entry]
       Name=Antigravity IDE
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity-ide" %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png
+      Exec="{{HOMEBREW_PREFIX}}/bin/antigravity-ide" %F
+      Icon={{home}}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png
       Type=Application
       StartupNotify=false
       StartupWMClass=Antigravity IDE
@@ -65,17 +72,17 @@ cask "antigravity-ide-linux" do
 
       [Desktop Action new-empty-window]
       Name=New Empty Window
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity-ide" --new-window %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png
+      Exec="{{HOMEBREW_PREFIX}}/bin/antigravity-ide" --new-window %F
+      Icon={{home}}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png
     EOS
 
-    File.write("#{staged_path}/antigravity-ide-url-handler.desktop", <<~EOS)
+    write_file "antigravity-ide-url-handler.desktop", <<~EOS
       [Desktop Entry]
       Name=Antigravity IDE - URL Handler
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec="#{HOMEBREW_PREFIX}/bin/antigravity-ide" --open-url "%U"
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png
+      Exec="{{HOMEBREW_PREFIX}}/bin/antigravity-ide" --open-url "%U"
+      Icon={{home}}/.local/share/icons/hicolor/512x512/apps/antigravity-ide.png
       Type=Application
       NoDisplay=true
       Terminal=false

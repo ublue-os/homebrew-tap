@@ -25,29 +25,30 @@ cask "1password-cli-linux" do
   binary "op"
   generate_completions_from_executable "op", "completion"
 
-  postflight do
+  postflight_steps do
     # For the 1Password desktop app integration to trust the CLI, the op
     # binary must be owned by root:onepassword-cli with the setgid bit set.
     # The deb/rpm packages set this up in their post-install scripts; since
     # this cask installs from the zip, it has to do the same. Running this
     # in postflight also re-applies the permissions on every upgrade.
     # https://developer.1password.com/docs/cli/app-integration/
-    system <<~EOS
-      #!/bin/bash
-      if [ ! "$(getent group onepassword-cli)" ]; then
-        echo "Creating group 'onepassword-cli' for the 1Password desktop app integration, you may be prompted for your password."
-        sudo groupadd onepassword-cli
-      fi
-    EOS
-    set_ownership("#{staged_path}/op", user: "root", group: "onepassword-cli")
+    run "bash", args: [
+      "-c",
+      <<~BASH,
+        if [ ! "$(getent group onepassword-cli)" ]; then
+          echo "Creating group 'onepassword-cli' for the 1Password desktop app integration, you may be prompted for your password."
+          sudo groupadd onepassword-cli
+        fi
+      BASH
+    ]
+    set_ownership "op", user: "root", group: "onepassword-cli"
     # can't use set_permissions here because we no longer own the file and brew tries to run chmod without sudo
-    system "sudo", "chmod", "2755", "#{File.expand_path(staged_path)}/op"
+    run "chmod", args: ["2755", "{{staged_path}}/op"], sudo: true
   end
 
-  uninstall_preflight do
+  uninstall_preflight_steps do
     # re-take ownership of the binary so brew can remove it without sudo
-    system "sudo", "chown", "#{ENV.fetch("USER", nil)}:#{ENV.fetch("USER", nil)}",
-           "#{File.expand_path(staged_path)}/op"
+    run "chown", args: ["{{user}}:{{user}}", "{{staged_path}}/op"], sudo: true
   end
 
   zap trash: "~/.config/op"

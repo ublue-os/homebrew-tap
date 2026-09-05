@@ -54,26 +54,25 @@ cask "bluefin-wallpapers" do
     strategy :github_releases
   end
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/Library/Desktop Pictures/Bluefin" if OS.mac?
+  preflight_steps do
+    on_macos do
+      mkdir_p "Library/Desktop Pictures/Bluefin", base: :home
+    end
 
-    if OS.linux?
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/bluefin"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/wallpapers/bluefin"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
-
-      Dir.glob("#{staged_path}/**/*.xml").each do |file|
-        contents = File.read(file)
-        contents.gsub!("~", Dir.home)
-        File.write(file, contents)
-      end
+    on_linux do
+      mkdir_p ".local/share/backgrounds/bluefin", base: :home
+      mkdir_p ".local/share/wallpapers/bluefin", base: :home
+      mkdir_p ".local/share/gnome-background-properties", base: :home
+      inreplace "**/*.xml", "~", "{{home}}", audit_result: false
     end
   end
 
-  postflight do
-    if OS.mac?
-      puts "Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Bluefin"
-      puts "To use: System Settings > Wallpaper > Add Folder"
+  caveats do
+    on_macos do
+      <<~EOS
+        Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Bluefin
+        To use: System Settings > Wallpaper > Add Folder
+      EOS
     end
   end
 end

@@ -31,95 +31,117 @@ cask "bluefin-wallpapers-extra" do
     strategy :github_releases
   end
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra" if OS.mac?
+  preflight_steps do
+    on_macos do
+      mkdir_p "Library/Desktop Pictures/Bluefin-Extra", base: :home
+    end
 
-    if OS.linux?
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/bluefin"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/wallpapers/bluefin"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
-
-      Dir.glob("#{staged_path}/**/*.xml").each do |file|
-        contents = File.read(file)
-        contents.gsub!("~", Dir.home)
-        File.write(file, contents)
-      end
+    on_linux do
+      mkdir_p ".local/share/backgrounds/bluefin", base: :home
+      mkdir_p ".local/share/wallpapers/bluefin", base: :home
+      mkdir_p ".local/share/gnome-background-properties", base: :home
+      inreplace "**/*.xml", "~", "{{home}}", audit_result: false
     end
   end
 
-  postflight do
-    if OS.mac?
-      Dir.glob("#{staged_path}/*").each do |file|
-        target = "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra/#{File.basename(file)}"
-        FileUtils.ln_sf(file, target)
-      end
-      puts "Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Bluefin-Extra"
-      puts "To use: System Settings > Wallpaper > Add Folder"
-    end
-
-    if OS.linux?
-      destination_dir = "#{Dir.home}/.local/share/backgrounds/bluefin"
-      kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/bluefin"
-
-      if File.exist?("/usr/bin/plasmashell")
-        Dir.glob("#{staged_path}/*").each do |file|
-          target = "#{kde_destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
-        Dir.glob("#{staged_path}/images/*").each do |file|
-          folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
-          FileUtils.mkdir_p "#{destination_dir}/#{folder}"
-          target = "#{destination_dir}/#{folder}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-
-        Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-          target = "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      else
-        Dir.glob("#{staged_path}/*").each do |file|
-          target = "#{destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      end
-    end
-  end
-
-  uninstall_postflight do
-    FileUtils.rm_r "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra" if OS.mac?
-
-    if OS.linux?
-      bg_dir    = "#{Dir.home}/.local/share/backgrounds/bluefin"
-      kde_dir   = "#{Dir.home}/.local/share/wallpapers/bluefin"
-      props_dir = "#{Dir.home}/.local/share/gnome-background-properties"
-
-      # Remove only the symlinks this cask created via postflight. During upgrade,
-      # these point to the old staged path (now being removed) and become broken.
-      # Symlinks from bluefin-wallpapers point to a separate Caskroom path that is
-      # not being removed, so they remain valid and are intentionally left alone.
-      [bg_dir, kde_dir].each do |dir|
-        next unless Dir.exist?(dir)
-
-        Dir.glob("#{dir}/**/*").reverse_each do |f|
-          File.unlink(f) if File.symlink?(f) && !File.exist?(f)
-          next unless File.directory?(f)
-          next unless Dir.empty?(f)
-
-          begin
-            Dir.rmdir(f)
-          rescue
-            nil
+  postflight_steps do
+    on_macos do
+      run "ruby", args: [
+        "-e",
+        <<~RUBY,
+          staged_path = ARGV[0]
+          home = ARGV[1]
+          Dir.glob("\#{staged_path}/*").each do |file|
+            target = "\#{home}/Library/Desktop Pictures/Bluefin-Extra/\#{File.basename(file)}"
+            FileUtils.ln_sf(file, target)
           end
-        end
-      end
+        RUBY
+        "{{staged_path}}",
+        "{{home}}",
+      ]
+    end
 
-      if Dir.exist?(props_dir)
-        Dir.glob("#{props_dir}/*.xml").each do |f|
-          File.unlink(f) if File.symlink?(f) && !File.exist?(f)
-        end
-      end
+    on_linux do
+      run "ruby", args: [
+        "-e",
+        <<~RUBY,
+          staged_path = ARGV[0]
+          home = ARGV[1]
+          destination_dir = "\#{home}/.local/share/backgrounds/bluefin"
+          kde_destination_dir = "\#{home}/.local/share/wallpapers/bluefin"
+
+          if File.exist?("/usr/bin/plasmashell")
+            Dir.glob("\#{staged_path}/*").each do |file|
+              target = "\#{kde_destination_dir}/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
+            Dir.glob("\#{staged_path}/images/*").each do |file|
+              folder = File.basename(file, File.extname(file)).gsub(/-night|-day/, "")
+              FileUtils.mkdir_p "\#{destination_dir}/\#{folder}"
+              target = "\#{destination_dir}/\#{folder}/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+
+            Dir.glob("\#{staged_path}/gnome-background-properties/*").each do |file|
+              target = "\#{home}/.local/share/gnome-background-properties/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          else
+            Dir.glob("\#{staged_path}/*").each do |file|
+              target = "\#{destination_dir}/\#{File.basename(file)}"
+              FileUtils.ln_sf(file, target)
+            end
+          end
+        RUBY
+        "{{staged_path}}",
+        "{{home}}",
+      ]
+    end
+  end
+
+  uninstall_postflight_steps do
+    on_macos do
+      remove "Library/Desktop Pictures/Bluefin-Extra", base: :home, recursive: true
+    end
+
+    on_linux do
+      run "ruby", args: [
+        "-e",
+        <<~RUBY,
+          home = ARGV[0]
+          bg_dir    = "\#{home}/.local/share/backgrounds/bluefin"
+          kde_dir   = "\#{home}/.local/share/wallpapers/bluefin"
+          props_dir = "\#{home}/.local/share/gnome-background-properties"
+
+          # Remove only the symlinks this cask created via postflight. During upgrade,
+          # these point to the old staged path (now being removed) and become broken.
+          # Symlinks from bluefin-wallpapers point to a separate Caskroom path that is
+          # not being removed, so they remain valid and are intentionally left alone.
+          [bg_dir, kde_dir].each do |dir|
+            next unless Dir.exist?(dir)
+
+            Dir.glob("\#{dir}/**/*").reverse_each do |f|
+              File.unlink(f) if File.symlink?(f) && !File.exist?(f)
+              next unless File.directory?(f)
+              next unless Dir.empty?(f)
+
+              begin
+                Dir.rmdir(f)
+              rescue
+                nil
+              end
+            end
+          end
+
+          if Dir.exist?(props_dir)
+            Dir.glob("\#{props_dir}/*.xml").each do |f|
+              File.unlink(f) if File.symlink?(f) && !File.exist?(f)
+            end
+          end
+        RUBY
+        "{{home}}",
+      ]
     end
   end
 
@@ -129,4 +151,13 @@ cask "bluefin-wallpapers-extra" do
     "#{Dir.home}/.local/share/wallpapers/bluefin",
     "#{Dir.home}/Library/Desktop Pictures/Bluefin-Extra",
   ]
+
+  caveats do
+    on_macos do
+      <<~EOS
+        Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Bluefin-Extra
+        To use: System Settings > Wallpaper > Add Folder
+      EOS
+    end
+  end
 end
