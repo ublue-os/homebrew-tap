@@ -117,7 +117,7 @@ cask "framework-wallpapers" do
   ]
 
   caveats do
-    on_macos do
+    if OS.mac?
       <<~EOS
         Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Framework
         To use: System Settings > Wallpaper > Add Folder

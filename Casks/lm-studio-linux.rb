@@ -29,7 +29,7 @@ cask "lm-studio-linux" do
   preflight_steps do
     # Extract AppImage contents
     set_permissions "LM-Studio-{{version}}-x64.AppImage", "+x"
-    run "./LM-Studio-{{version}}-x64.AppImage", args: ["--appimage-extract"], chdir: :staged_path
+    run "./LM-Studio-{{version}}-x64.AppImage", args: ["--appimage-extract"]
 
     # Remove the original AppImage to save space
     remove "LM-Studio-{{version}}-x64.AppImage"

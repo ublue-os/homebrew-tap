@@ -257,7 +257,7 @@ cask "1password-gui-linux" do
   end
 
   uninstall_preflight_steps do
-    run "./1password-uninstall.sh", chdir: :staged_path
+    run "./1password-uninstall.sh"
   end
 
   zap trash: [

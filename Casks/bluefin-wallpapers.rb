@@ -68,7 +68,7 @@ cask "bluefin-wallpapers" do
   end
 
   caveats do
-    on_macos do
+    if OS.mac?
       <<~EOS
         Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Bluefin
         To use: System Settings > Wallpaper > Add Folder
