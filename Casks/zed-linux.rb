@@ -14,27 +14,24 @@ cask "zed-linux" do
 
   binary "zed.app/bin/zed"
 
-  preflight do
-    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    FileUtils.mkdir_p "#{xdg_data}/applications"
-    FileUtils.mkdir_p "#{xdg_data}/icons"
+  postflight_steps do
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
+    copy "zed.app/share/applications/dev.zed.Zed.desktop", ".local/share/applications/dev.zed.Zed.desktop",
+         target_base: :home
+    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^TryExec=.*/, "TryExec={{HOMEBREW_PREFIX}}/bin/zed",
+              base: :home
+    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^Exec=zed/, "Exec={{HOMEBREW_PREFIX}}/bin/zed",
+              base: :home
+    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^Icon=.*/, "Icon=zed",
+              base: :home
+    copy "zed.app/share/icons/hicolor/512x512/apps/zed.png", ".local/share/icons/zed.png",
+         target_base: :home
   end
 
-  postflight do
-    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    desktop_content = File.read("#{staged_path}/zed.app/share/applications/dev.zed.Zed.desktop")
-    desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/zed")
-    desktop_content.gsub!(/^Exec=zed/, "Exec=#{HOMEBREW_PREFIX}/bin/zed")
-    desktop_content.gsub!(/^Icon=.*/, "Icon=zed")
-    File.write("#{xdg_data}/applications/dev.zed.Zed.desktop", desktop_content)
-    FileUtils.cp("#{staged_path}/zed.app/share/icons/hicolor/512x512/apps/zed.png",
-                 "#{xdg_data}/icons/zed.png")
-  end
-
-  uninstall_postflight do
-    xdg_data = ENV.fetch("XDG_DATA_HOME", "#{Dir.home}/.local/share")
-    FileUtils.rm("#{xdg_data}/applications/dev.zed.Zed.desktop")
-    FileUtils.rm("#{xdg_data}/icons/zed.png")
+  uninstall_postflight_steps do
+    remove ".local/share/applications/dev.zed.Zed.desktop", base: :home
+    remove ".local/share/icons/zed.png", base: :home
   end
 
   zap trash: [
