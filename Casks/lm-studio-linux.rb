@@ -26,21 +26,14 @@ cask "lm-studio-linux" do
   artifact "squashfs-root/ai.elementlabs.lmstudio.desktop",
            target: "#{Dir.home}/.local/share/applications/lm-studio.desktop"
 
-  preflight do
-    # Extract AppImage contents
-    appimage_path = "#{staged_path}/LM-Studio-#{version}-x64.AppImage"
-    system "chmod", "+x", appimage_path
-    system appimage_path, "--appimage-extract", chdir: staged_path
-
-    # Remove the original AppImage to save space
-    FileUtils.rm appimage_path
-
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons"
-
-    desktop_content = File.read("#{staged_path}/squashfs-root/ai.elementlabs.lmstudio.desktop")
-    desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/lm-studio")
-    File.write("#{staged_path}/squashfs-root/ai.elementlabs.lmstudio.desktop", desktop_content)
+  preflight_steps do
+    set_permissions "LM-Studio-{{version}}-x64.AppImage", "+x", recursive: false
+    run "LM-Studio-{{version}}-x64.AppImage", args: ["--appimage-extract"],
+                                           base: :staged_path, chdir: "{{staged_path}}"
+    remove "LM-Studio-{{version}}-x64.AppImage"
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
+    inreplace "squashfs-root/ai.elementlabs.lmstudio.desktop", /^Exec=.*/, "Exec={{HOMEBREW_PREFIX}}/bin/lm-studio"
   end
 
   zap trash: "~/.config/LMStudio"

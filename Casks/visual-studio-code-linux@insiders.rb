@@ -25,32 +25,33 @@ cask "visual-studio-code-linux@insiders" do
     end
   end
 
-  binary "VSCode-linux-#{arch}/bin/code-insiders"
-  binary "VSCode-linux-#{arch}/bin/code-tunnel-insiders"
-  bash_completion "#{staged_path}/VSCode-linux-#{arch}/resources/completions/bash/code-insiders"
-  zsh_completion  "#{staged_path}/VSCode-linux-#{arch}/resources/completions/zsh/_code-insiders"
-  artifact "VSCode-linux-#{arch}/code-insiders.desktop",
+  depends_on formula: "jq"
+
+  binary "vscode-insiders/bin/code-insiders"
+  binary "vscode-insiders/bin/code-tunnel-insiders"
+  bash_completion "vscode-insiders/resources/completions/bash/code-insiders"
+  zsh_completion  "vscode-insiders/resources/completions/zsh/_code-insiders"
+  artifact "vscode-insiders/code-insiders.desktop",
            target: "#{Dir.home}/.local/share/applications/code-insiders.desktop"
-  artifact "VSCode-linux-#{arch}/code-insiders-url-handler.desktop",
+  artifact "vscode-insiders/code-insiders-url-handler.desktop",
            target: "#{Dir.home}/.local/share/applications/code-insiders-url-handler.desktop"
 
-  preflight do
-    # Disable VS Code's built-in update checks; Homebrew manages this install.
-    product_json = "#{staged_path}/VSCode-linux-#{arch}/resources/app/product.json"
-    product = JSON.parse(File.read(product_json))
-    product.delete("updateUrl")
-    product["configurationDefaults"] ||= {}
-    product["configurationDefaults"]["update.mode"] = "none"
-    File.write(product_json, JSON.pretty_generate(product))
+  preflight_steps do
+    move "VSCode-linux-*", "vscode-insiders", source_glob: true
+    run "{{HOMEBREW_PREFIX}}/bin/jq",
+        args:        ["del(.updateUrl) | .configurationDefaults[\"update.mode\"] = \"none\"",
+                      "{{staged_path}}/vscode-insiders/resources/app/product.json"],
+        stdout_path: "product.json"
+    move "product.json", "vscode-insiders/resources/app/product.json"
 
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    File.write("#{staged_path}/VSCode-linux-#{arch}/code-insiders.desktop", <<~EOS)
+    mkdir_p ".local/share/applications", base: :home
+    write_file "vscode-insiders/code-insiders.desktop", <<~EOS
       [Desktop Entry]
       Name=Visual Studio Code - Insiders
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/code-insiders %F
-      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
+      Exec={{HOMEBREW_PREFIX}}/bin/code-insiders %F
+      Icon={{staged_path}}/vscode-insiders/resources/app/resources/linux/code.png
       Type=Application
       StartupNotify=false
       StartupWMClass=Code - Insiders
@@ -61,16 +62,16 @@ cask "visual-studio-code-linux@insiders" do
 
       [Desktop Action new-empty-window]
       Name=New Empty Window
-      Exec=#{HOMEBREW_PREFIX}/bin/code-insiders --new-window %F
-      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
+      Exec={{HOMEBREW_PREFIX}}/bin/code-insiders --new-window %F
+      Icon={{staged_path}}/vscode-insiders/resources/app/resources/linux/code.png
     EOS
-    File.write("#{staged_path}/VSCode-linux-#{arch}/code-insiders-url-handler.desktop", <<~EOS)
+    write_file "vscode-insiders/code-insiders-url-handler.desktop", <<~EOS
       [Desktop Entry]
       Name=Visual Studio Code Insiders - URL Handler
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/code-insiders --open-url %U
-      Icon=#{staged_path}/VSCode-linux-#{arch}/resources/app/resources/linux/code.png
+      Exec={{HOMEBREW_PREFIX}}/bin/code-insiders --open-url %U
+      Icon={{staged_path}}/vscode-insiders/resources/app/resources/linux/code.png
       Type=Application
       NoDisplay=true
       StartupNotify=true

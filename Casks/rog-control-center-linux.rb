@@ -27,125 +27,73 @@ cask "rog-control-center-linux" do
     end
   end
 
-  binary "#{release_root}/usr/bin/rog-control-center"
-  binary "#{release_root}/usr/bin/asusd-user"
+  binary "asusctl/usr/bin/rog-control-center"
+  binary "asusctl/usr/bin/asusd-user"
 
-  postflight do
-    require "fileutils"
-
-    release_dir = "#{staged_path}/#{release_root}"
-    xdg_share = "#{Dir.home}/.local/share"
-    xdg_config = "#{Dir.home}/.config"
-    applications_dir = "#{xdg_share}/applications"
-    icons_dir = "#{xdg_share}/icons/hicolor/512x512/apps"
-    status_icons_dir = "#{xdg_share}/icons/hicolor/scalable/status"
-    asusd_share_dir = "#{xdg_share}/asusd"
-    rog_gui_share_dir = "#{xdg_share}/rog-gui"
-    systemd_user_dir = "#{xdg_config}/systemd/user"
-    asusd_config_dir = "#{xdg_config}/asusd"
-    asusd_user_service_src = "#{release_dir}/usr/lib/systemd/user/asusd-user.service"
-
-    icon_cache_cmd = system("which gtk-update-icon-cache > /dev/null 2>&1")
-    desktop_db_cmd = system("which update-desktop-database > /dev/null 2>&1")
-
-    FileUtils.mkdir_p(
-      [
-        applications_dir,
-        icons_dir,
-        status_icons_dir,
-        asusd_share_dir,
-        rog_gui_share_dir,
-        systemd_user_dir,
-        asusd_config_dir,
-      ],
-    )
-
-    FileUtils.cp_r("#{release_dir}/usr/share/asusd/.", asusd_share_dir)
-    FileUtils.cp_r("#{release_dir}/usr/share/rog-gui/.", rog_gui_share_dir)
-    Dir.glob("#{release_dir}/usr/share/icons/hicolor/512x512/apps/*.png").each do |icon|
-      FileUtils.cp(icon, icons_dir)
-    end
-    Dir.glob("#{release_dir}/usr/share/icons/hicolor/scalable/status/*.svg").each do |icon|
-      FileUtils.cp(icon, status_icons_dir)
-    end
-
-    desktop_contents = File.read(
-      "#{release_dir}/usr/share/applications/rog-control-center.desktop",
-    )
-    desktop_contents.gsub!(
-      /^Exec=.*/,
-      "Exec=#{HOMEBREW_PREFIX}/bin/rog-control-center",
-    )
-    File.write("#{applications_dir}/rog-control-center.desktop", desktop_contents)
-
-    asusd_user_service = File.read(asusd_user_service_src)
-    asusd_user_service.gsub!("Environment=ASUSD_USER_EXEC=/usr/bin/asusd-user\n", "")
-    asusd_user_service.gsub!(
-      "ExecStart=${ASUSD_USER_EXEC}",
-      "ExecStart=#{HOMEBREW_PREFIX}/bin/asusd-user",
-    )
-    File.write("#{systemd_user_dir}/asusd-user.service", asusd_user_service)
-
-    File.write("#{asusd_config_dir}/asusd-user.env", <<~EOS)
-      ASUSD_DATA_DIR=#{asusd_share_dir}
-      ROG_GUI_DATA_DIR=#{rog_gui_share_dir}
-      ROG_GUI_LAYOUTS_DIR=#{rog_gui_share_dir}/layouts
-      ASUSCTL_AURA_SUPPORT_PATH=#{asusd_share_dir}/aura_support.ron
-      ASUSCTL_DATA_DIRS=#{xdg_share}
-    EOS
-
-    system "gtk-update-icon-cache", "#{xdg_share}/icons/hicolor", "-f", "-t" if icon_cache_cmd
-    system "update-desktop-database", applications_dir if desktop_db_cmd
+  preflight_steps do
+    move "asusctl-*-ubuntu-22.04-*", "asusctl", source_glob: true
   end
 
-  uninstall_postflight do
-    require "fileutils"
+  postflight_steps do
+    symlink ".", ".user-home", source_base: :home, overwrite: true
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
+    mkdir_p ".local/share/icons/hicolor/scalable/status", base: :home
+    mkdir_p ".local/share/asusd", base: :home
+    mkdir_p ".local/share/rog-gui", base: :home
+    mkdir_p ".config/systemd/user", base: :home
+    mkdir_p ".config/asusd", base: :home
+    copy "asusctl/usr/share/asusd/.", ".local/share/asusd", target_base: :home, recursive: true
+    copy "asusctl/usr/share/rog-gui/.", ".local/share/rog-gui", target_base: :home, recursive: true
+    copy "asusctl/usr/share/icons/hicolor/512x512/apps/*.png", ".local/share/icons/hicolor/512x512/apps",
+         target_base: :home, source_glob: true
+    copy "asusctl/usr/share/icons/hicolor/scalable/status/*.svg", ".local/share/icons/hicolor/scalable/status",
+         target_base: :home, source_glob: true
+    copy "asusctl/usr/share/applications/rog-control-center.desktop",
+         ".local/share/applications/rog-control-center.desktop", target_base: :home
+    inreplace ".local/share/applications/rog-control-center.desktop", /^Exec=.*/,
+              "Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center", base: :home
+    copy "asusctl/usr/lib/systemd/user/asusd-user.service", ".config/systemd/user/asusd-user.service",
+         target_base: :home
+    inreplace ".config/systemd/user/asusd-user.service", "Environment=ASUSD_USER_EXEC=/usr/bin/asusd-user\n", "",
+              base: :home, audit_result: false
+    inreplace ".config/systemd/user/asusd-user.service", "ExecStart=${ASUSD_USER_EXEC}",
+              "ExecStart={{HOMEBREW_PREFIX}}/bin/asusd-user", base: :home
+    run "/bin/sh", chdir: "{{staged_path}}", writable_paths: [".config/asusd"], writable_base: :home,
+                   args: ["-eu", "-c", <<~SH]
+                     user_home=$(readlink .user-home)
+                     printf '%s\\n' "ASUSD_DATA_DIR=$user_home/.local/share/asusd" \
+                       "ROG_GUI_DATA_DIR=$user_home/.local/share/rog-gui" \
+                       "ROG_GUI_LAYOUTS_DIR=$user_home/.local/share/rog-gui/layouts" \
+                       "ASUSCTL_AURA_SUPPORT_PATH=$user_home/.local/share/asusd/aura_support.ron" \
+                       "ASUSCTL_DATA_DIRS=$user_home/.local/share" > .user-home/.config/asusd/asusd-user.env
+                   SH
+    run "gtk-update-icon-cache", args: ["{{staged_path}}/.user-home/.local/share/icons/hicolor", "-f", "-t"],
+                                 must_succeed: false,
+                                 writable_paths: [".local/share/icons/hicolor"], writable_base: :home
+    run "update-desktop-database", args: ["{{staged_path}}/.user-home/.local/share/applications"],
+                                   must_succeed: false,
+                                   writable_paths: [".local/share/applications"], writable_base: :home
+  end
 
-    applications_dir = "#{Dir.home}/.local/share/applications"
-    icons_dir = "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
-    status_icons_dir = "#{Dir.home}/.local/share/icons/hicolor/scalable/status"
-    systemd_user_dir = "#{Dir.home}/.config/systemd/user"
-    asusd_config_dir = "#{Dir.home}/.config/asusd"
-
-    icon_cache_cmd = system("which gtk-update-icon-cache > /dev/null 2>&1")
-    desktop_db_cmd = system("which update-desktop-database > /dev/null 2>&1")
-    systemctl = %w[/usr/bin/systemctl /bin/systemctl].find do |path|
-      File.executable?(path)
-    end
-
-    system systemctl, "--user", "disable", "--now", "asusd-user.service" if systemctl
-
-    FileUtils.rm("#{systemd_user_dir}/asusd-user.service", force: true)
-    FileUtils.rm("#{applications_dir}/rog-control-center.desktop", force: true)
-    FileUtils.rm("#{asusd_config_dir}/asusd-user.env", force: true)
-
-    %w[
-      asus_notif_blue.png
-      asus_notif_green.png
-      asus_notif_orange.png
-      asus_notif_red.png
-      asus_notif_white.png
-      asus_notif_yellow.png
-      rog-control-center.png
-    ].each do |icon|
-      FileUtils.rm("#{icons_dir}/#{icon}", force: true)
-    end
-
-    %w[
-      gpu-compute.svg
-      gpu-hybrid.svg
-      gpu-integrated.svg
-      gpu-nvidia.svg
-      gpu-vfio.svg
-      notification-reboot.svg
-    ].each do |icon|
-      FileUtils.rm("#{status_icons_dir}/#{icon}", force: true)
-    end
-
-    FileUtils.rmdir(asusd_config_dir) if Dir.exist?(asusd_config_dir) && Dir.empty?(asusd_config_dir)
-
-    system "gtk-update-icon-cache", "#{Dir.home}/.local/share/icons/hicolor", "-f", "-t" if icon_cache_cmd
-    system "update-desktop-database", applications_dir if desktop_db_cmd
+  uninstall_postflight_steps do
+    symlink ".", ".user-home", source_base: :home, overwrite: true
+    run "systemctl", args: ["--user", "disable", "--now", "asusd-user.service"], must_succeed: false,
+                     writable_paths: [".config/systemd/user"], writable_base: :home
+    remove [".config/systemd/user/asusd-user.service", ".local/share/applications/rog-control-center.desktop",
+            ".config/asusd/asusd-user.env"], base: :home
+    remove [".local/share/icons/hicolor/512x512/apps/asus_notif_{blue,green,orange,red,white,yellow}.png",
+            ".local/share/icons/hicolor/512x512/apps/rog-control-center.png",
+            ".local/share/icons/hicolor/scalable/status/gpu-{compute,hybrid,integrated,nvidia,vfio}.svg",
+            ".local/share/icons/hicolor/scalable/status/notification-reboot.svg"], base: :home
+    run "/bin/rmdir", args: ["{{staged_path}}/.user-home/.config/asusd"], must_succeed: false, print_stderr: false,
+                      writable_paths: [".config/asusd"], writable_base: :home
+    run "gtk-update-icon-cache", args: ["{{staged_path}}/.user-home/.local/share/icons/hicolor", "-f", "-t"],
+                                 must_succeed: false,
+                                 writable_paths: [".local/share/icons/hicolor"], writable_base: :home
+    run "update-desktop-database", args: ["{{staged_path}}/.user-home/.local/share/applications"],
+                                   must_succeed: false,
+                                   writable_paths: [".local/share/applications"], writable_base: :home
   end
 
   zap trash: [

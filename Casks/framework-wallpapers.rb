@@ -31,66 +31,57 @@ cask "framework-wallpapers" do
     strategy :github_releases
   end
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/Library/Desktop Pictures/Framework" if OS.mac?
-
-    if OS.linux?
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/backgrounds/framework"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/wallpapers/framework"
-      FileUtils.mkdir_p "#{Dir.home}/.local/share/gnome-background-properties"
-
-      Dir.glob("#{staged_path}/**/*.xml").each do |file|
-        contents = File.read(file)
-        contents.gsub!("~", Dir.home)
-        File.write(file, contents)
-      end
+  preflight_steps do
+    on_linux do
+      symlink ".", ".user-home", source_base: :home, overwrite: true
+      run "/bin/sh", args: ["-eu", "-c", <<~'SH'], chdir: "{{staged_path}}"
+        WALLPAPER_HOME=$(readlink .user-home)
+        replacement=$(printf '%s' "$WALLPAPER_HOME" | sed 's/[\\&|]/\\&/g')
+        find . -type f -name '*.xml' -exec sed -i.brew-home-backup "s|~|$replacement|g" {} +
+        find . -type f -name '*.xml.brew-home-backup' -delete
+      SH
     end
   end
 
-  postflight do
-    if OS.mac?
-      Dir.glob("#{staged_path}/*").each do |file|
-        target = "#{Dir.home}/Library/Desktop Pictures/Framework/#{File.basename(file)}"
-        FileUtils.ln_sf(file, target)
-      end
-      puts "Wallpapers installed to: #{Dir.home}/Library/Desktop Pictures/Framework"
-      puts "To use: System Settings > Wallpaper > Add Folder"
+  postflight_steps do
+    on_macos do
+      mkdir_p "Library/Desktop Pictures/Framework", base: :home
+      symlink "*", "Library/Desktop Pictures/Framework", target_base: :home, source_glob: true, overwrite: true
     end
-
-    if OS.linux?
-      destination_dir = "#{Dir.home}/.local/share/backgrounds/framework"
-      kde_destination_dir = "#{Dir.home}/.local/share/wallpapers/framework"
-
-      if File.exist?("/usr/bin/plasmashell")
-        Dir.glob("#{staged_path}/*").each do |file|
-          target = "#{kde_destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      elsif File.exist?("/usr/bin/gnome-shell") || File.exist?("/usr/bin/mutter")
-        Dir.glob("#{staged_path}/images/*").each do |file|
-          target = "#{destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-
-        Dir.glob("#{staged_path}/gnome-background-properties/*").each do |file|
-          target = "#{Dir.home}/.local/share/gnome-background-properties/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      else
-        Dir.glob("#{staged_path}/*").each do |file|
-          target = "#{destination_dir}/#{File.basename(file)}"
-          FileUtils.ln_sf(file, target)
-        end
-      end
+    on_linux do
+      mkdir_p ".local/share/backgrounds/framework", base: :home
+      mkdir_p ".local/share/wallpapers/framework", base: :home
+      mkdir_p ".local/share/gnome-background-properties", base: :home
+      run "/bin/bash", chdir: "{{staged_path}}",
+                       env: { "WALLPAPER_HOME" => "{{staged_path}}/.user-home" },
+                       writable_paths: [".local/share/backgrounds/framework", ".local/share/wallpapers/framework",
+                                        ".local/share/gnome-background-properties"], writable_base: :home,
+                       args: ["-eu", "-c", <<~SH]
+                         shopt -s nullglob
+                         destination="$WALLPAPER_HOME/.local/share/backgrounds/framework"
+                         if [ -e /usr/bin/plasmashell ]; then
+                           destination="$WALLPAPER_HOME/.local/share/wallpapers/framework"
+                           for file in "$PWD"/*; do ln -sfn "$file" "$destination/$(basename "$file")"; done
+                         elif [ -e /usr/bin/gnome-shell ] || [ -e /usr/bin/mutter ]; then
+                           for file in "$PWD"/images/*; do ln -sfn "$file" "$destination/$(basename "$file")"; done
+                           for file in "$PWD"/gnome-background-properties/*; do
+                             ln -sfn "$file" "$WALLPAPER_HOME/.local/share/gnome-background-properties/$(basename "$file")"
+                           done
+                         else
+                           for file in "$PWD"/*; do ln -sfn "$file" "$destination/$(basename "$file")"; done
+                         fi
+                       SH
     end
   end
 
-  uninstall_postflight do
-    FileUtils.rm_r "#{Dir.home}/Library/Desktop Pictures/Framework" if OS.mac?
-
-    if OS.linux?
-      FileUtils.rm_r "#{Dir.home}/.local/share/backgrounds/framework"
-      FileUtils.rm_r "#{Dir.home}/.local/share/wallpapers/framework"
+  uninstall_postflight_steps do
+    on_macos do
+      remove "Library/Desktop Pictures/Framework/*", base: :home, symlink_target_contains: "/framework-wallpapers/"
+    end
+    on_linux do
+      remove [".local/share/backgrounds/framework/**/*", ".local/share/wallpapers/framework/**/*",
+              ".local/share/gnome-background-properties/*.xml"],
+             base: :home, symlink_target_contains: "/framework-wallpapers/"
     end
   end
 

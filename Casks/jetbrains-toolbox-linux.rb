@@ -19,15 +19,15 @@ cask "jetbrains-toolbox-linux" do
   artifact "jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop",
            target: "#{Dir.home}/.local/share/applications/jetbrains-toolbox.desktop"
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
+  preflight_steps do
+    mkdir_p ".local/share/applications", base: :home
     # We need this file to start, but Jetbrains Toolbox will overwrite it on its first run with a proper one
     # It will also extract the icon from somewhere, but it doesn't exist until first run, so we just point to where it
     # should be, and it will get fixed on first run
-    File.write("#{staged_path}/jetbrains-toolbox-#{version}/jetbrains-toolbox.desktop", <<~EOS)
+    write_file "jetbrains-toolbox-{{version}}/jetbrains-toolbox.desktop", <<~EOS
       [Desktop Entry]
-      Icon=#{staged_path}/jetbrains-toolbox-#{version}/bin/toolbox-tray-color.png
-      Exec=#{HOMEBREW_PREFIX}/bin/jetbrains-toolbox %u
+      Icon={{staged_path}}/jetbrains-toolbox-{{version}}/bin/toolbox-tray-color.png
+      Exec={{HOMEBREW_PREFIX}}/bin/jetbrains-toolbox %u
       Version=1.0
       Type=Application
       Categories=Development

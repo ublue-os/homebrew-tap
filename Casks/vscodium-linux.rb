@@ -18,6 +18,8 @@ cask "vscodium-linux" do
     strategy :github_latest
   end
 
+  depends_on formula: "jq"
+
   binary "bin/codium"
   binary "bin/codium-tunnel"
   bash_completion "resources/completions/bash/codium"
@@ -29,26 +31,24 @@ cask "vscodium-linux" do
   artifact "resources/app/resources/linux/code.png",
            target: "#{Dir.home}/.local/share/icons/vscodium.png"
 
-  preflight do
-    # Disable VSCodium's built-in update checks; Homebrew manages this install.
-    product_json = "#{staged_path}/resources/app/product.json"
-    if File.exist?(product_json)
-      product = JSON.parse(File.read(product_json))
-      product.delete("updateUrl")
-      product["configurationDefaults"] ||= {}
-      product["configurationDefaults"]["update.mode"] = "none"
-      File.write(product_json, JSON.pretty_generate(product))
+  preflight_steps do
+    if_path_exists "resources/app/product.json" do
+      run "{{HOMEBREW_PREFIX}}/bin/jq",
+          args:        ["del(.updateUrl) | .configurationDefaults[\"update.mode\"] = \"none\"",
+                        "{{staged_path}}/resources/app/product.json"],
+          stdout_path: "product.json"
+      move "product.json", "resources/app/product.json"
     end
 
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
 
-    File.write("#{staged_path}/codium.desktop", <<~EOS)
+    write_file "codium.desktop", <<~EOS
       [Desktop Entry]
       Name=VSCodium
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/codium %F
+      Exec={{HOMEBREW_PREFIX}}/bin/codium %F
       Icon=vscodium
       Type=Application
       StartupNotify=false
@@ -69,15 +69,15 @@ cask "vscodium-linux" do
       Name[ru]=Новое пустое окно
       Name[zh_CN]=新建空窗口
       Name[zh_TW]=開新空視窗
-      Exec=#{HOMEBREW_PREFIX}/bin/codium --new-window %F
+      Exec={{HOMEBREW_PREFIX}}/bin/codium --new-window %F
       Icon=vscodium
     EOS
-    File.write("#{staged_path}/codium-url-handler.desktop", <<~EOS)
+    write_file "codium-url-handler.desktop", <<~EOS
       [Desktop Entry]
       Name=VSCodium - URL Handler
       Comment=Code Editing. Redefined.
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/codium --open-url %U
+      Exec={{HOMEBREW_PREFIX}}/bin/codium --open-url %U
       Icon=vscodium
       Type=Application
       NoDisplay=true
