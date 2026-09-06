@@ -405,12 +405,7 @@ class LinuxMcpServer < Formula
 
     venv = virtualenv_create(libexec, "python3.12")
 
-    # Install hf-xet and litellm separately: their aws-lc-sys builds require -O0
-    # (jitterentropy) but Homebrew sets -Os globally which overrides CMake's per-target flags
-    ENV.O0 { venv.pip_install resource("hf-xet") }
-    ENV.O0 { venv.pip_install resource("litellm") }
-
-    venv.pip_install resources.reject { |r| %w[hf-xet litellm].include?(r.name) }
+    venv.pip_install resources
     venv.pip_install_and_link buildpath
 
     # Install the goose configuration setup script
@@ -501,5 +496,6 @@ class LinuxMcpServer < Formula
   test do
     assert_path_exists bin/"linux-mcp-server"
     assert_path_exists bin/"goose-mcp-setup"
+    assert_equal version.to_s, shell_output("#{bin}/linux-mcp-server --version").strip
   end
 end
