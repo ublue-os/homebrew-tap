@@ -33,7 +33,9 @@ cask "lm-studio-linux" do
     remove "LM-Studio-{{version}}-x64.AppImage"
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons", base: :home
-    inreplace "squashfs-root/ai.elementlabs.lmstudio.desktop", /^Exec=.*/, "Exec={{HOMEBREW_PREFIX}}/bin/lm-studio"
+    # The desktop file does not exist until the AppImage has been extracted.
+    run "/bin/sed", args: ["-i", "s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/lm-studio|",
+                           "{{staged_path}}/squashfs-root/ai.elementlabs.lmstudio.desktop"]
   end
 
   zap trash: "~/.config/LMStudio"

@@ -45,20 +45,30 @@ cask "rog-control-center-linux" do
     mkdir_p ".config/asusd", base: :home
     copy "asusctl/usr/share/asusd/.", ".local/share/asusd", target_base: :home, recursive: true
     copy "asusctl/usr/share/rog-gui/.", ".local/share/rog-gui", target_base: :home, recursive: true
-    copy "asusctl/usr/share/icons/hicolor/512x512/apps/*.png", ".local/share/icons/hicolor/512x512/apps",
-         target_base: :home, source_glob: true
-    copy "asusctl/usr/share/icons/hicolor/scalable/status/*.svg", ".local/share/icons/hicolor/scalable/status",
-         target_base: :home, source_glob: true
-    copy "asusctl/usr/share/applications/rog-control-center.desktop",
-         ".local/share/applications/rog-control-center.desktop", target_base: :home
-    inreplace ".local/share/applications/rog-control-center.desktop", /^Exec=.*/,
-              "Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center", base: :home
-    copy "asusctl/usr/lib/systemd/user/asusd-user.service", ".config/systemd/user/asusd-user.service",
-         target_base: :home
-    inreplace ".config/systemd/user/asusd-user.service", "Environment=ASUSD_USER_EXEC=/usr/bin/asusd-user\n", "",
-              base: :home, audit_result: false
-    inreplace ".config/systemd/user/asusd-user.service", "ExecStart=${ASUSD_USER_EXEC}",
-              "ExecStart={{HOMEBREW_PREFIX}}/bin/asusd-user", base: :home
+    # Declarative source_glob only accepts one match; these icon sets contain several.
+    run "/bin/sh", chdir: "{{staged_path}}",
+                   writable_paths: [".local/share/icons/hicolor"], writable_base: :home,
+                   args: ["-eu", "-c", <<~SH]
+                     for icon in asusctl/usr/share/icons/hicolor/512x512/apps/*.png; do
+                       [ -f "$icon" ] || continue
+                       cp "$icon" .user-home/.local/share/icons/hicolor/512x512/apps/
+                     done
+                     for icon in asusctl/usr/share/icons/hicolor/scalable/status/*.svg; do
+                       [ -f "$icon" ] || continue
+                       cp "$icon" .user-home/.local/share/icons/hicolor/scalable/status/
+                     done
+                   SH
+    # Prepare files in the readable stage, then only write to the user's home.
+    run "/bin/sed", args:        ["s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center|",
+                                  "{{staged_path}}/asusctl/usr/share/applications/rog-control-center.desktop"],
+                    stdout_path: "rog-control-center.desktop"
+    copy "rog-control-center.desktop", ".local/share/applications/rog-control-center.desktop", target_base: :home
+    run "/bin/sed", args:        ["-e", "/^Environment=ASUSD_USER_EXEC=/d",
+                                  "-e",
+                                  "s|ExecStart=${ASUSD_USER_EXEC}|ExecStart={{HOMEBREW_PREFIX}}/bin/asusd-user|",
+                                  "{{staged_path}}/asusctl/usr/lib/systemd/user/asusd-user.service"],
+                    stdout_path: "asusd-user.service"
+    copy "asusd-user.service", ".config/systemd/user/asusd-user.service", target_base: :home
     run "/bin/sh", chdir: "{{staged_path}}", writable_paths: [".config/asusd"], writable_base: :home,
                    args: ["-eu", "-c", <<~SH]
                      user_home=$(readlink .user-home)
@@ -68,12 +78,6 @@ cask "rog-control-center-linux" do
                        "ASUSCTL_AURA_SUPPORT_PATH=$user_home/.local/share/asusd/aura_support.ron" \
                        "ASUSCTL_DATA_DIRS=$user_home/.local/share" > .user-home/.config/asusd/asusd-user.env
                    SH
-    run "gtk-update-icon-cache", args: ["{{staged_path}}/.user-home/.local/share/icons/hicolor", "-f", "-t"],
-                                 must_succeed: false,
-                                 writable_paths: [".local/share/icons/hicolor"], writable_base: :home
-    run "update-desktop-database", args: ["{{staged_path}}/.user-home/.local/share/applications"],
-                                   must_succeed: false,
-                                   writable_paths: [".local/share/applications"], writable_base: :home
   end
 
   uninstall_postflight_steps do
@@ -88,12 +92,6 @@ cask "rog-control-center-linux" do
             ".local/share/icons/hicolor/scalable/status/notification-reboot.svg"], base: :home
     run "/bin/rmdir", args: ["{{staged_path}}/.user-home/.config/asusd"], must_succeed: false, print_stderr: false,
                       writable_paths: [".config/asusd"], writable_base: :home
-    run "gtk-update-icon-cache", args: ["{{staged_path}}/.user-home/.local/share/icons/hicolor", "-f", "-t"],
-                                 must_succeed: false,
-                                 writable_paths: [".local/share/icons/hicolor"], writable_base: :home
-    run "update-desktop-database", args: ["{{staged_path}}/.user-home/.local/share/applications"],
-                                   must_succeed: false,
-                                   writable_paths: [".local/share/applications"], writable_base: :home
   end
 
   zap trash: [
@@ -118,5 +116,10 @@ cask "rog-control-center-linux" do
     After the system daemon is installed and running, enable the user daemon:
       systemctl --user daemon-reload
       systemctl --user enable --now asusd-user.service
+
+    Shared desktop caches cannot be read inside the cask sandbox. If the launcher
+    or icons need refreshing after installation or removal, run:
+      gtk-update-icon-cache ~/.local/share/icons/hicolor -f -t
+      update-desktop-database ~/.local/share/applications
   EOS
 end

@@ -47,8 +47,9 @@ cask "1password-gui-linux" do
     symlink ".", ".user-home", source_base: :home, overwrite: true
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons", base: :home
-    inreplace "1password/resources/1password.desktop", "Exec=/opt/1Password/1password",
-              "Exec={{HOMEBREW_PREFIX}}/bin/1password"
+    # Do not declare the renamed file as a writable path before the move runs.
+    run "/bin/sed", args: ["-i", "s|Exec=/opt/1Password/1password|Exec={{HOMEBREW_PREFIX}}/bin/1password|g",
+                           "{{staged_path}}/1password/resources/1password.desktop"]
     run "/bin/sh", args: ["-eu", "-c", <<~'SH'], chdir: "{{staged_path}}"
       printf '\nflatpak-session-helper\n' >> 1password/resources/custom_allowed_browsers
       owners=$(awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" && count++ < 10 {printf "unix-user:%s ", $1}' /etc/passwd)

@@ -8,7 +8,7 @@ cask "visual-studio-code-linux@insiders" do
          arm64_linux:  "0bd989f051f0faed32baede6014387fe5a8a5cf711beea39c0b4d55ad62bc053",
          x86_64_linux: "dace879714aa1be6e722de574bb1ab4b43505fd1c373d39e8cc116c9f83a2f82"
 
-  url "https://update.code.visualstudio.com/#{version.csv.first}/linux-#{arch}/insider"
+  url "https://update.code.visualstudio.com/commit:#{version.csv.second}/linux-#{arch}/insider"
   name "Microsoft Visual Studio Code Insiders"
   name "VS Code Insiders"
   desc "Open-source code editor (Insiders build)"
@@ -42,10 +42,12 @@ cask "visual-studio-code-linux@insiders" do
         args:        ["del(.updateUrl) | .configurationDefaults[\"update.mode\"] = \"none\"",
                       "{{staged_path}}/vscode-insiders/resources/app/product.json"],
         stdout_path: "product.json"
-    move "product.json", "vscode-insiders/resources/app/product.json"
+    # Keep sandbox write declarations out of the not-yet-renamed directory.
+    run "/bin/mv",
+        args: ["{{staged_path}}/product.json", "{{staged_path}}/vscode-insiders/resources/app/product.json"]
 
     mkdir_p ".local/share/applications", base: :home
-    write_file "vscode-insiders/code-insiders.desktop", <<~EOS
+    write_file "code-insiders.desktop", <<~EOS
       [Desktop Entry]
       Name=Visual Studio Code - Insiders
       Comment=Code Editing. Redefined.
@@ -65,7 +67,7 @@ cask "visual-studio-code-linux@insiders" do
       Exec={{HOMEBREW_PREFIX}}/bin/code-insiders --new-window %F
       Icon={{staged_path}}/vscode-insiders/resources/app/resources/linux/code.png
     EOS
-    write_file "vscode-insiders/code-insiders-url-handler.desktop", <<~EOS
+    write_file "code-insiders-url-handler.desktop", <<~EOS
       [Desktop Entry]
       Name=Visual Studio Code Insiders - URL Handler
       Comment=Code Editing. Redefined.
@@ -79,6 +81,9 @@ cask "visual-studio-code-linux@insiders" do
       MimeType=x-scheme-handler/vscode-insiders;
       Keywords=vscode;
     EOS
+    run "/bin/mv",
+        args: ["{{staged_path}}/code-insiders.desktop", "{{staged_path}}/code-insiders-url-handler.desktop",
+               "{{staged_path}}/vscode-insiders/"]
   end
 
   zap trash: [

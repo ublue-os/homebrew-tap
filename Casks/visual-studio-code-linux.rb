@@ -39,10 +39,11 @@ cask "visual-studio-code-linux" do
         args:        ["del(.updateUrl) | .configurationDefaults[\"update.mode\"] = \"none\"",
                       "{{staged_path}}/vscode/resources/app/product.json"],
         stdout_path: "product.json"
-    move "product.json", "vscode/resources/app/product.json"
+    # Keep sandbox write declarations out of the not-yet-renamed directory.
+    run "/bin/mv", args: ["{{staged_path}}/product.json", "{{staged_path}}/vscode/resources/app/product.json"]
 
     mkdir_p ".local/share/applications", base: :home
-    write_file "vscode/code.desktop", <<~EOS
+    write_file "code.desktop", <<~EOS
       [Desktop Entry]
       Name=Visual Studio Code
       Comment=Code Editing. Redefined.
@@ -72,7 +73,7 @@ cask "visual-studio-code-linux" do
       Exec={{HOMEBREW_PREFIX}}/bin/code --new-window %F
       Icon={{staged_path}}/vscode/resources/app/resources/linux/code.png
     EOS
-    write_file "vscode/code-url-handler.desktop", <<~EOS
+    write_file "code-url-handler.desktop", <<~EOS
       [Desktop Entry]
       Name=Visual Studio Code - URL Handler
       Comment=Code Editing. Redefined.
@@ -86,6 +87,8 @@ cask "visual-studio-code-linux" do
       MimeType=x-scheme-handler/vscode;
       Keywords=vscode;
     EOS
+    run "/bin/mv", args: ["{{staged_path}}/code.desktop", "{{staged_path}}/code-url-handler.desktop",
+                          "{{staged_path}}/vscode/"]
   end
 
   zap trash: [

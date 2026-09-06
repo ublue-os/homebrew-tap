@@ -36,14 +36,16 @@ cask "asusctl-linux" do
   end
 
   postflight_steps do
-    copy "asusctl/usr/lib/systemd/system/asusd.service", "asusd.service"
-    inreplace "asusd.service", "Environment=ASUSD_EXEC=/usr/bin/asusd\n", "", audit_result: false
-    inreplace "asusd.service", "ExecStart=${ASUSD_EXEC}", "ExecStart=/opt/ublue-asusctl/bin/asusd"
-    copy "asusctl/usr/lib/systemd/system/asus-shutdown.service", "asus-shutdown.service"
-    inreplace "asus-shutdown.service", "Environment=ASUS_SHUTDOWN_EXEC=/usr/bin/asus-shutdown\n", "",
-              audit_result: false
-    inreplace "asus-shutdown.service", "ExecStart=${ASUS_SHUTDOWN_EXEC}",
-              "ExecStart=/opt/ublue-asusctl/bin/asus-shutdown"
+    # Generate files in the existing stage without predeclaring them as directories.
+    run "/bin/sed", args:        ["-e", "/^Environment=ASUSD_EXEC=/d",
+                                  "-e", "s|ExecStart=${ASUSD_EXEC}|ExecStart=/opt/ublue-asusctl/bin/asusd|",
+                                  "{{staged_path}}/asusctl/usr/lib/systemd/system/asusd.service"],
+                    stdout_path: "asusd.service"
+    run "/bin/sed", args:        ["-e", "/^Environment=ASUS_SHUTDOWN_EXEC=/d",
+                                  "-e",
+                                  "s|ExecStart=${ASUS_SHUTDOWN_EXEC}|ExecStart=/opt/ublue-asusctl/bin/asus-shutdown|",
+                                  "{{staged_path}}/asusctl/usr/lib/systemd/system/asus-shutdown.service"],
+                    stdout_path: "asus-shutdown.service"
     write_file "asusd.env", <<~EOS
       ASUSD_DATA_DIR=/opt/ublue-asusctl/share/asusd
       ASUSCTL_AURA_SUPPORT_PATH=/opt/ublue-asusctl/share/asusd/aura_support.ron
