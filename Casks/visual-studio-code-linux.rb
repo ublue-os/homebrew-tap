@@ -2,13 +2,13 @@ cask "visual-studio-code-linux" do
   arch arm: "arm64", intel: "x64"
   os linux: "linux"
 
-  version "1.136.1"
+  version "1.136.1,a44adf7f53e00964ab890f9f8758a334f1fc15bc"
   sha256 arm:          "2aac154ec452817e88c7b452b110f2cdbaad00af7bcf05ef7343891364e10c44",
          intel:        "9b4a54f0d49beaa413eda137d00c6541a639300d479efcac566ad13419409218",
          arm64_linux:  "2aac154ec452817e88c7b452b110f2cdbaad00af7bcf05ef7343891364e10c44",
          x86_64_linux: "9b4a54f0d49beaa413eda137d00c6541a639300d479efcac566ad13419409218"
 
-  url "https://update.code.visualstudio.com/#{version}/linux-#{arch}/stable"
+  url "https://update.code.visualstudio.com/commit:#{version.csv.second}/linux-#{arch}/stable"
   name "Microsoft Visual Studio Code"
   name "VS Code"
   desc "Open-source code editor"
@@ -17,7 +17,11 @@ cask "visual-studio-code-linux" do
   livecheck do
     url "https://update.code.visualstudio.com/api/update/linux-#{arch}/stable/latest"
     strategy :json do |json|
-      json["productVersion"]
+      version = json["productVersion"]
+      build = json["version"]
+      next if version.blank? || build.blank?
+
+      "#{version},#{build}"
     end
   end
 
