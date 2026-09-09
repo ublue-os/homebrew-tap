@@ -1,16 +1,16 @@
 cask "chairlift" do
   arch arm: "arm64", intel: "amd64"
 
-  version "0.11.1"
-  sha256 arm:          "7c3d4461bad3a3ff438709d6ee98c98d680ef3f92ddbb3d204e953de538fccd2",
-         intel:        "dc153fe97661bb4a8db2e20353a5cb60290a45d99017df0dc83e58d075713360",
-         arm64_linux:  "7c3d4461bad3a3ff438709d6ee98c98d680ef3f92ddbb3d204e953de538fccd2",
-         x86_64_linux: "dc153fe97661bb4a8db2e20353a5cb60290a45d99017df0dc83e58d075713360"
+  version "0.12.2"
+  sha256 arm:          "e7072e772f951ebf18f654a688ac3c733dacb29c2fd7187ed636afba32167e45",
+         intel:        "c032d3e3b7b87034bf64bbd0ef5cc270f521513a1836116d0633068a0d79a1d6",
+         arm64_linux:  "e7072e772f951ebf18f654a688ac3c733dacb29c2fd7187ed636afba32167e45",
+         x86_64_linux: "c032d3e3b7b87034bf64bbd0ef5cc270f521513a1836116d0633068a0d79a1d6"
 
-  url "https://github.com/frostyard/chairlift/releases/download/v#{version}/chairlift_#{version}_linux_#{arch}.tar.gz"
+  url "https://github.com/projectbluefin/chairlift/releases/download/v#{version}/chairlift_#{version}_linux_#{arch}.tar.gz"
   name "ChairLift"
   desc "System management tool for bootc-based installations"
-  homepage "https://github.com/frostyard/chairlift"
+  homepage "https://github.com/projectbluefin/chairlift"
 
   livecheck do
     url :url
@@ -27,7 +27,7 @@ cask "chairlift" do
     inreplace "data/chairlift-wrapper.sh", "/home/linuxbrew/.linuxbrew/bin/brew", "{{HOMEBREW_PREFIX}}/bin/brew"
     inreplace "data/chairlift-wrapper.sh", "$BREW_PATH shellenv", "\"$BREW_PATH\" shellenv bash"
     inreplace "data/chairlift-wrapper.sh", "exec chairlift", "exec \"{{HOMEBREW_PREFIX}}/bin/chairlift\""
-    inreplace "data/org.frostyard.ChairLift.desktop", "Exec=chairlift-wrapper",
+    inreplace "data/io.projectbluefin.chairlift.desktop", "Exec=chairlift-wrapper",
               "Exec=\"{{HOMEBREW_PREFIX}}/bin/chairlift-wrapper\""
   end
 
@@ -35,31 +35,31 @@ cask "chairlift" do
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons/hicolor/scalable/apps", base: :home
     mkdir_p ".local/share/icons/hicolor/symbolic/apps", base: :home
-    copy "data/org.frostyard.ChairLift.desktop", ".local/share/applications/org.frostyard.ChairLift.desktop",
+    copy "data/io.projectbluefin.chairlift.desktop", ".local/share/applications/io.projectbluefin.chairlift.desktop",
          target_base: :home
-    copy "data/icons/hicolor/scalable/apps/org.frostyard.ChairLift.svg",
-         ".local/share/icons/hicolor/scalable/apps/org.frostyard.ChairLift.svg", target_base: :home
-    copy "data/icons/hicolor/scalable/apps/org.frostyard.ChairLift-flower.svg",
-         ".local/share/icons/hicolor/scalable/apps/org.frostyard.ChairLift-flower.svg", target_base: :home
-    copy "data/icons/hicolor/symbolic/apps/org.frostyard.ChairLift-symbolic.svg",
-         ".local/share/icons/hicolor/symbolic/apps/org.frostyard.ChairLift-symbolic.svg", target_base: :home
+    copy "data/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg",
+         ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg", target_base: :home
+    copy "data/icons/hicolor/scalable/apps/io.projectbluefin.chairlift-flower.svg",
+         ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift-flower.svg", target_base: :home
+    copy "data/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg",
+         ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg", target_base: :home
   end
 
   uninstall_postflight_steps do
-    remove [".local/share/applications/org.frostyard.ChairLift.desktop",
-            ".local/share/icons/hicolor/scalable/apps/org.frostyard.ChairLift.svg",
-            ".local/share/icons/hicolor/scalable/apps/org.frostyard.ChairLift-flower.svg",
-            ".local/share/icons/hicolor/symbolic/apps/org.frostyard.ChairLift-symbolic.svg"], base: :home
+    remove [".local/share/applications/io.projectbluefin.chairlift.desktop",
+            ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg",
+            ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift-flower.svg",
+            ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg"], base: :home
   end
 
-  # Never link the privileged helper or install PolicyKit policies from a user-writable cask.
+  # Never link privileged helpers or install PolicyKit policies from a user-writable cask.
   caveats <<~EOS
     ChairLift requires GTK 4 and libadwaita 1 shared libraries from your OS.
 
-    Privileged features require the matching frostyard-chairlift-system-integration
-    package from https://github.com/frostyard/chairlift/releases installed by your
+    Privileged features require the matching projectbluefin-chairlift-system-integration
+    package from https://github.com/projectbluefin/chairlift/releases installed by your
     OS administrator or included in your OS image. This cask installs only the GUI
-    and desktop assets, not the root-owned helper or PolicyKit policies.
+    and desktop assets, not the root-owned helpers or PolicyKit policies.
     Bootc staging additionally requires /usr/libexec/bootc-update-stage from your OS.
 
     Distribution configuration belongs in /etc/chairlift/config.yml; this cask
