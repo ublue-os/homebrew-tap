@@ -31,6 +31,7 @@ brew install --cask antigravity-cli-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
 brew install --cask zed-linux
+brew install --cask ublue-os/tap/chairlift
 
 brew install --cask bluefin-wallpapers
 brew install --cask bluefin-wallpapers-extra
@@ -59,6 +60,27 @@ brew install --cask framework-wallpapers
 - Framework System Tool - Hardware management for Framework laptops
 - rog control center - GUI frontend for asusctl (for Asus ROG etc laptops)
 - Zed - High-performance, multiplayer code editor
+- ChairLift - System management and package updates for bootc-based Linux systems
+
+#### ChairLift
+
+ChairLift supports x86_64 and ARM64 Linux and requires GTK 4 and libadwaita 1
+from the host OS. The cask installs the GUI and user-local desktop assets only.
+Privileged features need the matching `frostyard-chairlift-system-integration`
+package from [upstream releases](https://github.com/frostyard/chairlift/releases)
+provided by the OS image or installed by an administrator. Bootc staging also
+needs the OS-provided `/usr/libexec/bootc-update-stage` helper.
+
+The bundled configuration targets Snow Linux. Distributions can override it in
+`/etc/chairlift/config.yml`, which this cask leaves untouched.
+
+If migrating from the Frostyard tap, uninstall its cask first to avoid conflicting
+binaries and desktop files, then install the fully qualified cask from this tap:
+
+```shell
+brew uninstall --cask frostyard/tap/chairlift
+brew install --cask ublue-os/tap/chairlift
+```
 
 ### Wallpapers
 
