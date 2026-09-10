@@ -1,49 +1,25 @@
 class BluefinReview < Formula
   desc "Distroless review appliance for Project Bluefin"
   homepage "https://github.com/projectbluefin/review"
+  url "https://github.com/projectbluefin/review/archive/315bc5364633d4482b493aefb9d24f177a29d6ff.tar.gz"
+  version "26.08.3"
+  sha256 "b071afdf7f00a32a2e313ffd40ad1e1aa349d219aeefee5e4644f461077f1ee3"
   license "Apache-2.0"
 
-  on_macos do
-    on_arm do
-      url "https://github.com/projectbluefin/review/releases/download/v26.08.3/bluefin-review-darwin-arm64.tar.gz"
-      sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    end
-    on_intel do
-      url "https://github.com/projectbluefin/review/releases/download/v26.08.3/bluefin-review-darwin-x64.tar.gz"
-      sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    end
-  end
-
   on_linux do
-    on_arm do
-      url "https://github.com/projectbluefin/review/releases/download/v26.08.3/bluefin-review-aarch64.sif"
-      sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    end
-    on_intel do
-      url "https://github.com/projectbluefin/review/releases/download/v26.08.3/bluefin-review-x86_64.sif"
-      sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    end
-
     depends_on "apptainer"
   end
 
   def install
     if OS.linux?
-      arch_sif = Hardware::CPU.intel? ? "bluefin-review-x86_64.sif" : "bluefin-review-aarch64.sif"
-      libexec.install arch_sif => "bluefin-review.sif"
-
       (bin/"bluefin-review").write <<~SHELL
         #!/usr/bin/env bash
         set -euo pipefail
 
-        SIF="#{libexec}/bluefin-review.sif"
-        if [[ ! -f "$SIF" ]]; then
-          echo "Error: Bluefin review appliance image not found at $SIF" >&2
-          exit 1
-        fi
-
         STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/bluefin-review"
         mkdir -p "$STATE_DIR"
+
+        IMAGE="${BLUEFIN_REVIEW_IMAGE:-ghcr.io/projectbluefin/review:stable}"
 
         APPTAINER_ARGS=(
           run
@@ -71,18 +47,18 @@ class BluefinReview < Formula
           APPTAINER_ARGS+=(--env "BLUEFIN_SANDBOX=gvisor")
         fi
 
-        exec apptainer "${APPTAINER_ARGS[@]}" "$SIF" "$@"
+        exec apptainer "${APPTAINER_ARGS[@]}" "docker://${IMAGE}" "$@"
       SHELL
     else
-      # macOS native binary + extension payload
-      libexec.install Dir["*"]
+      # macOS native wrapper
       (bin/"bluefin-review").write <<~SHELL
         #!/usr/bin/env bash
         set -euo pipefail
-        exec "#{libexec}/bin/omp" --profile review --extension "#{libexec}/extension" "$@"
+        exec omp --profile review --extension "#{opt_prefix}/image/extension/bluefin-review" "$@"
       SHELL
     end
 
+    prefix.install "image"
     chmod 0755, bin/"bluefin-review"
   end
 
