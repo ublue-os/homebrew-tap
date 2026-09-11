@@ -43,15 +43,24 @@ cask "1password-gui-linux" do
            target: "#{HOMEBREW_PREFIX}/etc/1password/custom_allowed_browsers"
 
   preflight_steps do
-    move "1password-*", "1password", source_glob: true
+    # Rollback reuses the already-normalized payload directory.
+    unless_path_exists "1password" do
+      move "1password-*", "1password", source_glob: true
+    end
     symlink ".", ".user-home", source_base: :home, overwrite: true
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons", base: :home
-    # Do not declare the renamed file as a writable path before the move runs.
-    run "/bin/sed", args: ["-i", "s|Exec=/opt/1Password/1password|Exec={{HOMEBREW_PREFIX}}/bin/1password|g",
-                           "{{staged_path}}/1password/resources/1password.desktop"]
+    # Keep file preparation inside run: sandbox path setup must not create the
+    # destination directory before the payload move runs.
     run "/bin/sh", args: ["-eu", "-c", <<~'SH'], chdir: "{{staged_path}}"
-      printf '\nflatpak-session-helper\n' >> 1password/resources/custom_allowed_browsers
+      # 8.12.36 renamed the desktop file; retain the existing artifact/launcher path.
+      if [ -f 1password/resources/com.onepassword.OnePassword.desktop ]; then
+        mv 1password/resources/com.onepassword.OnePassword.desktop 1password/resources/1password.desktop
+      fi
+      sed -i 's|Exec=/opt/1Password/1password|Exec={{HOMEBREW_PREFIX}}/bin/1password|g' 1password/resources/1password.desktop
+      if ! grep -qxF flatpak-session-helper 1password/resources/custom_allowed_browsers; then
+        printf '\nflatpak-session-helper\n' >> 1password/resources/custom_allowed_browsers
+      fi
       owners=$(awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" && count++ < 10 {printf "unix-user:%s ", $1}' /etc/passwd)
       sed "s/\${POLICY_OWNERS}/$owners/g" 1password/com.1password.1Password.policy.tpl > 1password/com.1password.1Password.policy
     SH
