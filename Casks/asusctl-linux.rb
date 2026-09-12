@@ -66,11 +66,10 @@ cask "asusctl-linux" do
       install -Dm0644 "$stage/asusd.env" /etc/asusd/asusd.env
 
       if command -v getenforce >/dev/null && [ "$(getenforce)" != Disabled ]; then
-        resolved_bin=$(readlink -f "$root/bin")
         if command -v semanage >/dev/null; then
-          semanage fcontext -a -t bin_t "$resolved_bin(/.*)?" || semanage fcontext -m -t bin_t "$resolved_bin(/.*)?"
+          semanage fcontext -a -t bin_t "$root/bin(/.*)?" || semanage fcontext -m -t bin_t "$root/bin(/.*)?"
         elif command -v chcon >/dev/null; then
-          chcon -R -t bin_t "$resolved_bin"
+          chcon -R -t bin_t "$root/bin"
         fi
         if command -v restorecon >/dev/null; then
           restorecon -RFv "$root" /etc/systemd/system /etc/udev/rules.d /etc/dbus-1/system.d /etc/asusd
@@ -91,8 +90,7 @@ cask "asusctl-linux" do
       selinux=Disabled
       if command -v getenforce >/dev/null; then selinux=$(getenforce); fi
       if [ "$selinux" != Disabled ] && command -v semanage >/dev/null; then
-        resolved_bin=$(readlink -f /opt/ublue-asusctl/bin || printf /opt/ublue-asusctl/bin)
-        semanage fcontext -d "$resolved_bin(/.*)?" || true
+        semanage fcontext -d /opt/ublue-asusctl/bin(/.*)? || true
       fi
       rm -f /etc/systemd/system/asusd.service /etc/systemd/system/asus-shutdown.service \
         /etc/udev/rules.d/99-asusd.rules /etc/dbus-1/system.d/asusd.conf /etc/asusd/asusd.env
