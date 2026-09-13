@@ -30,6 +30,38 @@ class BluefinReview < Formula
           fi
         fi
 
+        # Fallback to host omp auth credentials
+        if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v python3 >/dev/null 2>&1; then
+          resolved_omp="$(python3 -c '
+import sqlite3, os, json
+db_path = os.path.expanduser("~/.omp/agent/agent.db")
+if os.path.exists(db_path):
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        for prov in ("github-copilot", "github"):
+            row = cur.execute("SELECT data FROM auth_credentials WHERE provider = ?", (prov,)).fetchone()
+            if row:
+                d = json.loads(row[0])
+                tok = d.get("access") or d.get("token") or d.get("access_token")
+                if tok:
+                    print(tok)
+                    break
+    except Exception:
+        pass
+' 2>/dev/null || true)"
+          if [[ -n "$resolved_omp" ]]; then
+            export GH_TOKEN="$resolved_omp"
+            export GITHUB_TOKEN="$resolved_omp"
+            export COPILOT_GITHUB_TOKEN="$resolved_omp"
+            export GITHUB_COPILOT_TOKEN="$resolved_omp"
+          fi
+        fi
+
+        export GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+        export GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+        export COPILOT_GITHUB_TOKEN="${COPILOT_GITHUB_TOKEN:-${GH_TOKEN:-}}"
+
         APPTAINER_ARGS=(
           run
           --containall
@@ -45,11 +77,13 @@ class BluefinReview < Formula
         # GitHub token credentials
         [[ -n "${GH_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GH_TOKEN=${GH_TOKEN}")
         [[ -n "${GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_TOKEN=${GITHUB_TOKEN}")
+        [[ -n "${COPILOT_GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}")
 
-        # Bind host git and hive configs if they exist
+        # Bind host configs into container
         for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
                    "${HOME}/.config/hive:/home/bluefin/.config/hive:ro" \
-                   "${HOME}/.config/gh:/home/bluefin/.config/gh:ro"; do
+                   "${HOME}/.config/gh:/home/bluefin/.config/gh:ro" \
+                   "${HOME}/.omp:/home/bluefin/.omp:rw"; do
           src="${cfg%%:*}"
           if [[ -e "$src" ]]; then
             APPTAINER_ARGS+=(--bind "$cfg")
