@@ -13,26 +13,26 @@ class BluefinReview < Formula
   def install
     if OS.linux?
       (bin/"bluefin-review").write <<~SHELL
-                #!/usr/bin/env bash
-                set -euo pipefail
+        #!/usr/bin/env bash
+        set -euo pipefail
 
-                STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/bluefin-review"
-                mkdir -p "$STATE_DIR"
+        STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/bluefin-review"
+        mkdir -p "$STATE_DIR"
 
-                IMAGE="${BLUEFIN_REVIEW_IMAGE:-ghcr.io/projectbluefin/review:stable}"
+        IMAGE="${BLUEFIN_REVIEW_IMAGE:-ghcr.io/projectbluefin/review:stable}"
 
-                # Resolve GitHub tokens if not explicitly set
-                if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v gh >/dev/null 2>&1; then
-                  resolved_gh="$(gh auth token 2>/dev/null || true)"
-                  if [[ -n "$resolved_gh" ]]; then
-                    export GH_TOKEN="$resolved_gh"
-                    export GITHUB_TOKEN="$resolved_gh"
-                  fi
-                fi
+        # Resolve GitHub tokens if not explicitly set
+        if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v gh >/dev/null 2>&1; then
+          resolved_gh="$(gh auth token 2>/dev/null || true)"
+          if [[ -n "$resolved_gh" ]]; then
+            export GH_TOKEN="$resolved_gh"
+            export GITHUB_TOKEN="$resolved_gh"
+          fi
+        fi
 
-                # Fallback to host omp auth credentials
-                if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v python3 >/dev/null 2>&1; then
-                  resolved_omp="$(python3 -c '
+        # Fallback to host omp auth credentials
+        if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v python3 >/dev/null 2>&1; then
+          resolved_omp="$(python3 -c '
         import sqlite3, os, json
         db_path = os.path.expanduser("~/.omp/agent/agent.db")
         if os.path.exists(db_path):
@@ -50,81 +50,81 @@ class BluefinReview < Formula
             except Exception:
                 pass
         ' 2>/dev/null || true)"
-                  if [[ -n "$resolved_omp" ]]; then
-                    export GH_TOKEN="$resolved_omp"
-                    export GITHUB_TOKEN="$resolved_omp"
-                    export COPILOT_GITHUB_TOKEN="$resolved_omp"
-                    export GITHUB_COPILOT_TOKEN="$resolved_omp"
-                  fi
-                fi
+          if [[ -n "$resolved_omp" ]]; then
+            export GH_TOKEN="$resolved_omp"
+            export GITHUB_TOKEN="$resolved_omp"
+            export COPILOT_GITHUB_TOKEN="$resolved_omp"
+            export GITHUB_COPILOT_TOKEN="$resolved_omp"
+          fi
+        fi
 
-                export GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
-                export GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
-                export COPILOT_GITHUB_TOKEN="${COPILOT_GITHUB_TOKEN:-${GH_TOKEN:-}}"
+        export GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+        export GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+        export COPILOT_GITHUB_TOKEN="${COPILOT_GITHUB_TOKEN:-${GH_TOKEN:-}}"
 
-                APPTAINER_ARGS=(
-                  run
-                  --containall
-                  --home "${STATE_DIR}:/home/bluefin"
-                  --pwd /workspace
-                  --bind "${PWD}:/workspace"
-                )
+        APPTAINER_ARGS=(
+          run
+          --containall
+          --home "${STATE_DIR}:/home/bluefin"
+          --pwd /workspace
+          --bind "${PWD}:/workspace"
+        )
 
-                # Terminal passthrough environment
-                [[ -n "${TERM:-}" ]] && APPTAINER_ARGS+=(--env "TERM=${TERM}")
-                [[ -n "${COLORTERM:-}" ]] && APPTAINER_ARGS+=(--env "COLORTERM=${COLORTERM}")
+        # Terminal passthrough environment
+        [[ -n "${TERM:-}" ]] && APPTAINER_ARGS+=(--env "TERM=${TERM}")
+        [[ -n "${COLORTERM:-}" ]] && APPTAINER_ARGS+=(--env "COLORTERM=${COLORTERM}")
 
-                # GitHub token credentials
-                [[ -n "${GH_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GH_TOKEN=${GH_TOKEN}")
-                [[ -n "${GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_TOKEN=${GITHUB_TOKEN}")
-                [[ -n "${COPILOT_GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}")
+        # GitHub token credentials
+        [[ -n "${GH_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GH_TOKEN=${GH_TOKEN}")
+        [[ -n "${GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_TOKEN=${GITHUB_TOKEN}")
+        [[ -n "${COPILOT_GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}")
 
-                # Bind host configs into container
-                for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
-                           "${HOME}/.config/hive:/home/bluefin/.config/hive:ro" \
-                           "${HOME}/.config/gh:/home/bluefin/.config/gh:ro" \
-                           "${HOME}/.omp:/home/bluefin/.omp:rw"; do
-                  src="${cfg%%:*}"
-                  if [[ -e "$src" ]]; then
-                    APPTAINER_ARGS+=(--bind "$cfg")
-                  fi
-                done
+        # Bind host configs into container
+        for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
+                   "${HOME}/.config/hive:/home/bluefin/.config/hive:ro" \
+                   "${HOME}/.config/gh:/home/bluefin/.config/gh:ro" \
+                   "${HOME}/.omp:/home/bluefin/.omp:rw"; do
+          src="${cfg%%:*}"
+          if [[ -e "$src" ]]; then
+            APPTAINER_ARGS+=(--bind "$cfg")
+          fi
+        done
 
-                # Hardware virtualization support
-                if [[ -e /dev/kvm && -r /dev/kvm && -w /dev/kvm ]]; then
-                  APPTAINER_ARGS+=(--bind /dev/kvm)
-                fi
+        # Hardware virtualization support
+        if [[ -e /dev/kvm && -r /dev/kvm && -w /dev/kvm ]]; then
+          APPTAINER_ARGS+=(--bind /dev/kvm)
+        fi
 
-                # Tiered gVisor (runsc) sandbox support
-                if command -v runsc >/dev/null 2>&1 || [[ -x /usr/bin/runsc ]]; then
-                  APPTAINER_ARGS+=(--env "BLUEFIN_SANDBOX=gvisor")
-                fi
+        # Tiered gVisor (runsc) sandbox support
+        if command -v runsc >/dev/null 2>&1 || [[ -x /usr/bin/runsc ]]; then
+          APPTAINER_ARGS+=(--env "BLUEFIN_SANDBOX=gvisor")
+        fi
 
-                # Positional arguments mapping
-                app_args=()
-                if [[ "${1:-}" =~ ^#?[0-9]+$ ]]; then
-                  app_args+=(--pr "${1#\\#}")
-                  shift
-                elif [[ "${1:-}" =~ ^(https://github\\.com/)?[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ || "${1:-}" =~ ^org:[A-Za-z0-9._-]+$ ]]; then
-                  app_args+=(--repo "$1")
-                  shift
-                  if [[ "${1:-}" =~ ^#?[0-9]+$ ]]; then
-                    app_args+=(--pr "${1#\\#}")
-                    shift
-                  fi
-                fi
-                if [[ "${1:-}" == "issues" || "${1:-}" == "--issues" ]]; then
-                  app_args+=(--issues)
-                  shift
-                elif [[ "${1:-}" == "all" || "${1:-}" == "--all" ]]; then
-                  app_args+=(--all)
-                  shift
-                elif [[ "${1:-}" == "autoslay" || "${1:-}" == "--autoslay" || "${1:-}" == "slay" ]]; then
-                  app_args+=(--autoslay)
-                  shift
-                fi
+        # Positional arguments mapping
+        app_args=()
+        if [[ "${1:-}" =~ ^#?[0-9]+$ ]]; then
+          app_args+=(--pr "${1#\\#}")
+          shift
+        elif [[ "${1:-}" =~ ^(https://github\\.com/)?[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ || "${1:-}" =~ ^org:[A-Za-z0-9._-]+$ ]]; then
+          app_args+=(--repo "$1")
+          shift
+          if [[ "${1:-}" =~ ^#?[0-9]+$ ]]; then
+            app_args+=(--pr "${1#\\#}")
+            shift
+          fi
+        fi
+        if [[ "${1:-}" == "issues" || "${1:-}" == "--issues" ]]; then
+          app_args+=(--issues)
+          shift
+        elif [[ "${1:-}" == "all" || "${1:-}" == "--all" ]]; then
+          app_args+=(--all)
+          shift
+        elif [[ "${1:-}" == "autoslay" || "${1:-}" == "--autoslay" || "${1:-}" == "slay" ]]; then
+          app_args+=(--autoslay)
+          shift
+        fi
 
-                exec apptainer "${APPTAINER_ARGS[@]}" "docker://${IMAGE}" ${app_args[@]+"${app_args[@]}"} "$@"
+        exec apptainer "${APPTAINER_ARGS[@]}" "docker://${IMAGE}" ${app_args[@]+"${app_args[@]}"} "$@"
       SHELL
     else
       # macOS native wrapper
@@ -134,9 +134,9 @@ class BluefinReview < Formula
         exec omp --profile review --extension "#{opt_prefix}/image/extension/bluefin-review" "$@"
       SHELL
     end
-    chmod 0755, bin/"bluefin-review"
 
     prefix.install "image"
+    FileUtils.chmod 0755, bin/"bluefin-review"
   end
 
   test do
