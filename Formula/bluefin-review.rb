@@ -136,7 +136,7 @@ class BluefinReview < Formula
     end
 
     prefix.install "image"
-    FileUtils.chmod 0755, bin/"bluefin-review"
+    chmod 0755, bin/"bluefin-review"
   end
 
   test do
