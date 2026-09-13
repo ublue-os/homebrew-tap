@@ -90,7 +90,7 @@ cask "asusctl-linux" do
       selinux=Disabled
       if command -v getenforce >/dev/null; then selinux=$(getenforce); fi
       if [ "$selinux" != Disabled ] && command -v semanage >/dev/null; then
-        semanage fcontext -d /opt/ublue-asusctl/bin(/.*)? || true
+        semanage fcontext -d "/opt/ublue-asusctl/bin(/.*)?" || true
       fi
       rm -f /etc/systemd/system/asusd.service /etc/systemd/system/asus-shutdown.service \
         /etc/udev/rules.d/99-asusd.rules /etc/dbus-1/system.d/asusd.conf /etc/asusd/asusd.env
@@ -113,7 +113,7 @@ cask "asusctl-linux" do
       /etc/udev/rules.d/99-asusd.rules
       /etc/dbus-1/system.d/asusd.conf
 
-    On Bluefin and Bazzite, /opt resolves into writable /var storage, so the
+    On Aurora, Bluefin and Bazzite, /opt resolves into writable /var storage, so the
     daemon payload does not depend on a writable /usr tree.
 
     To activate the system services:
