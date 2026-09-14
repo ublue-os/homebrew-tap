@@ -13,7 +13,7 @@ class BluefinReview < Formula
   def install
     prefix.install "image", "scripts"
 
-    wrapper = buildpath/"bluefin-review"
+    wrapper = (bin/"bluefin-review")
     if OS.linux?
       wrapper.write <<~'SHELL'
         #!/usr/bin/env bash
@@ -144,8 +144,7 @@ if os.path.exists(db_path):
       SHELL
     end
 
-    wrapper.chmod 0755
-    bin.install wrapper
+    File.chmod(0555, wrapper)
   end
 
   test do
