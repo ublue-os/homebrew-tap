@@ -12,7 +12,7 @@ class BluefinReview < Formula
 
   def install
     if OS.linux?
-      (bin/"bluefin-review").write <<~SHELL
+      (bin/"bluefin-review").write <<~'SHELL'
         #!/usr/bin/env bash
         set -euo pipefail
 
@@ -26,6 +26,14 @@ class BluefinReview < Formula
           apptainer pull --force "$sif" "$IMAGE"
           chmod 0755 "$sif"
         fi
+
+        APPTAINER_ARGS=(
+          run
+          --containall
+          --home "${STATE_DIR}:/home/bluefin"
+          --pwd /workspace
+          --bind "${PWD}:/workspace"
+        )
 
         # Forward host configs into container automatically
         for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
@@ -56,23 +64,23 @@ class BluefinReview < Formula
         # Fallback to host omp auth credentials
         if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v python3 >/dev/null 2>&1; then
           resolved_omp="$(python3 -c '
-        import sqlite3, os, json
-        db_path = os.path.expanduser("~/.omp/agent/agent.db")
-        if os.path.exists(db_path):
-            try:
-                conn = sqlite3.connect(db_path)
-                cur = conn.cursor()
-                for prov in ("github-copilot", "github"):
-                    row = cur.execute("SELECT data FROM auth_credentials WHERE provider = ?", (prov,)).fetchone()
-                    if row:
-                        d = json.loads(row[0])
-                        tok = d.get("access") or d.get("token") or d.get("access_token")
-                        if tok:
-                            print(tok)
-                            break
-            except Exception:
-                pass
-        ' 2>/dev/null || true)"
+import sqlite3, os, json
+db_path = os.path.expanduser("~/.omp/agent/agent.db")
+if os.path.exists(db_path):
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        for prov in ("github-copilot", "github"):
+            row = cur.execute("SELECT data FROM auth_credentials WHERE provider = ?", (prov,)).fetchone()
+            if row:
+                d = json.loads(row[0])
+                tok = d.get("access") or d.get("token") or d.get("access_token")
+                if tok:
+                    print(tok)
+                    break
+    except Exception:
+        pass
+' 2>/dev/null || true)"
           if [[ -n "$resolved_omp" ]]; then
             export GH_TOKEN="$resolved_omp"
             export GITHUB_TOKEN="$resolved_omp"
@@ -86,14 +94,6 @@ class BluefinReview < Formula
         export COPILOT_GITHUB_TOKEN="${COPILOT_GITHUB_TOKEN:-${GH_TOKEN:-}}"
         export GITHUB_COPILOT_TOKEN="${GITHUB_COPILOT_TOKEN:-${COPILOT_GITHUB_TOKEN}}"
         export COPILOT_INTEGRATION_ID="${COPILOT_INTEGRATION_ID:-copilot-developer-cli}"
-
-        APPTAINER_ARGS=(
-          run
-          --containall
-          --home "${STATE_DIR}:/home/bluefin"
-          --pwd /workspace
-          --bind "${PWD}:/workspace"
-        )
 
         # Terminal passthrough environment
         [[ -n "${TERM:-}" ]] && APPTAINER_ARGS+=(--env "TERM=${TERM}")
@@ -120,18 +120,24 @@ class BluefinReview < Formula
         fi
 
         # Parse review arguments using the canonical helper
-        source "#{opt_prefix}/scripts/parse-review-args.sh"
-        parse_review_args "$@"
-        APPLIANCE_ARGS=("${PARSED_REVIEW_ARGS[@]}")
+        opt_prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+        if [[ -f "${opt_prefix}/scripts/parse-review-args.sh" ]]; then
+          source "${opt_prefix}/scripts/parse-review-args.sh"
+          parse_review_args "$@"
+          APPLIANCE_ARGS=("${PARSED_REVIEW_ARGS[@]}")
+        else
+          APPLIANCE_ARGS=("$@")
+        fi
 
         exec apptainer "${APPTAINER_ARGS[@]}" "$sif" ${APPLIANCE_ARGS[@]+"${APPLIANCE_ARGS[@]}"}
       SHELL
     else
       # macOS native wrapper
-      (bin/"bluefin-review").write <<~SHELL
+      (bin/"bluefin-review").write <<~'SHELL'
         #!/usr/bin/env bash
         set -euo pipefail
-        exec omp --profile review --extension "#{opt_prefix}/image/extension/bluefin-review" "$@"
+        opt_prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+        exec omp --profile review --extension "${opt_prefix}/image/extension/bluefin-review" "$@"
       SHELL
     end
 
