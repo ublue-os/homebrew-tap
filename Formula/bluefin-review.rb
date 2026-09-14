@@ -18,8 +18,14 @@ class BluefinReview < Formula
 
         STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/bluefin-review"
         mkdir -p "$STATE_DIR"
+        sif="${BLUEFIN_REVIEW_SIF:-$STATE_DIR/bluefin-review.sif}"
 
-        IMAGE="${BLUEFIN_REVIEW_IMAGE:-ghcr.io/projectbluefin/review:stable}"
+        if [[ ! -x "$sif" ]]; then
+          IMAGE="${BLUEFIN_REVIEW_IMAGE:-docker://ghcr.io/projectbluefin/review:stable}"
+          echo "bluefin-review: pulling review image (${IMAGE}) to ${sif} ..." >&2
+          apptainer pull --force "$sif" "$IMAGE"
+          chmod 0755 "$sif"
+        fi
 
         # Resolve GitHub tokens if not explicitly set
         if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v gh >/dev/null 2>&1; then
@@ -54,8 +60,6 @@ class BluefinReview < Formula
             export GH_TOKEN="$resolved_omp"
             export GITHUB_TOKEN="$resolved_omp"
             export COPILOT_GITHUB_TOKEN="$resolved_omp"
-        export GITHUB_COPILOT_TOKEN="${GITHUB_COPILOT_TOKEN:-${COPILOT_GITHUB_TOKEN}}"
-        export COPILOT_INTEGRATION_ID="${COPILOT_INTEGRATION_ID:-copilot-developer-cli}"
             export GITHUB_COPILOT_TOKEN="$resolved_omp"
           fi
         fi
@@ -130,7 +134,7 @@ class BluefinReview < Formula
           shift
         fi
 
-        exec apptainer "${APPTAINER_ARGS[@]}" "docker://${IMAGE}" ${app_args[@]+"${app_args[@]}"} "$@"
+        exec apptainer "${APPTAINER_ARGS[@]}" "$sif" ${app_args[@]+"${app_args[@]}"} "$@"
       SHELL
     else
       # macOS native wrapper
