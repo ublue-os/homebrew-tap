@@ -142,7 +142,8 @@ if os.path.exists(db_path):
     end
 
     prefix.install "image", "scripts"
-    chmod 0755, bin/"bluefin-review"
+    chmod 0555, bin/"bluefin-review"
+    (bin/"bluefin-review").chmod 0555
   end
 
   test do
