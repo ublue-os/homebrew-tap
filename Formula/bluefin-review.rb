@@ -27,6 +27,23 @@ class BluefinReview < Formula
           chmod 0755 "$sif"
         fi
 
+        # Forward host configs into container automatically
+        for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
+                   "${HOME}/.config/hive:/home/bluefin/.config/hive:ro" \
+                   "${HOME}/.config/gh:/home/bluefin/.config/gh:ro" \
+                   "${HOME}/.omp:/home/bluefin/.omp:rw"; do
+          src="${cfg%%:*}"
+          if [[ -e "$src" ]]; then
+            APPTAINER_ARGS+=(--bind "$cfg")
+          fi
+        done
+
+        # Resolve HIVE_HUB from contributor.env if unset
+        if [[ -z "${HIVE_HUB:-}" && -f "${HOME}/.config/hive/contributor.env" ]]; then
+          resolved_hub="$(sed -nE 's/^[[:space:]]*(export[[:space:]]+)?HIVE_HUB=[[:space:]]*["'\'']?([^"'\'']+)["'\'']?/\2/p' "${HOME}/.config/hive/contributor.env" | head -1 || true)"
+          [[ -n "$resolved_hub" ]] && export HIVE_HUB="$resolved_hub"
+        fi
+
         # Resolve GitHub tokens if not explicitly set
         if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]] && command -v gh >/dev/null 2>&1; then
           resolved_gh="$(gh auth token 2>/dev/null || true)"
@@ -82,23 +99,15 @@ class BluefinReview < Formula
         [[ -n "${TERM:-}" ]] && APPTAINER_ARGS+=(--env "TERM=${TERM}")
         [[ -n "${COLORTERM:-}" ]] && APPTAINER_ARGS+=(--env "COLORTERM=${COLORTERM}")
 
+        # Hive hub endpoint
+        [[ -n "${HIVE_HUB:-}" ]] && APPTAINER_ARGS+=(--env "HIVE_HUB=${HIVE_HUB}")
+
         # GitHub token credentials
         [[ -n "${GH_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GH_TOKEN=${GH_TOKEN}")
         [[ -n "${GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_TOKEN=${GITHUB_TOKEN}")
         [[ -n "${COPILOT_GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}")
         [[ -n "${GITHUB_COPILOT_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_COPILOT_TOKEN=${GITHUB_COPILOT_TOKEN}")
         [[ -n "${COPILOT_INTEGRATION_ID:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_INTEGRATION_ID=${COPILOT_INTEGRATION_ID}")
-
-        # Bind host configs into container
-        for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
-                   "${HOME}/.config/hive:/home/bluefin/.config/hive:ro" \
-                   "${HOME}/.config/gh:/home/bluefin/.config/gh:ro" \
-                   "${HOME}/.omp:/home/bluefin/.omp:rw"; do
-          src="${cfg%%:*}"
-          if [[ -e "$src" ]]; then
-            APPTAINER_ARGS+=(--bind "$cfg")
-          fi
-        done
 
         # Hardware virtualization support
         if [[ -e /dev/kvm && -r /dev/kvm && -w /dev/kvm ]]; then
@@ -110,31 +119,12 @@ class BluefinReview < Formula
           APPTAINER_ARGS+=(--env "BLUEFIN_SANDBOX=gvisor")
         fi
 
-        # Positional arguments mapping
-        app_args=()
-        if [[ "${1:-}" =~ ^#?[0-9]+$ ]]; then
-          app_args+=(--pr "${1#\\#}")
-          shift
-        elif [[ "${1:-}" =~ ^(https://github\\.com/)?[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ || "${1:-}" =~ ^org:[A-Za-z0-9._-]+$ ]]; then
-          app_args+=(--repo "$1")
-          shift
-          if [[ "${1:-}" =~ ^#?[0-9]+$ ]]; then
-            app_args+=(--pr "${1#\\#}")
-            shift
-          fi
-        fi
-        if [[ "${1:-}" == "issues" || "${1:-}" == "--issues" ]]; then
-          app_args+=(--issues)
-          shift
-        elif [[ "${1:-}" == "all" || "${1:-}" == "--all" ]]; then
-          app_args+=(--all)
-          shift
-        elif [[ "${1:-}" == "autoslay" || "${1:-}" == "--autoslay" || "${1:-}" == "slay" ]]; then
-          app_args+=(--autoslay)
-          shift
-        fi
+        # Parse review arguments using the canonical helper
+        source "#{opt_prefix}/scripts/parse-review-args.sh"
+        parse_review_args "$@"
+        APPLIANCE_ARGS=("${PARSED_REVIEW_ARGS[@]}")
 
-        exec apptainer "${APPTAINER_ARGS[@]}" "$sif" ${app_args[@]+"${app_args[@]}"} "$@"
+        exec apptainer "${APPTAINER_ARGS[@]}" "$sif" ${APPLIANCE_ARGS[@]+"${APPLIANCE_ARGS[@]}"}
       SHELL
     else
       # macOS native wrapper
@@ -145,7 +135,7 @@ class BluefinReview < Formula
       SHELL
     end
 
-    prefix.install "image"
+    prefix.install "image", "scripts"
     chmod 0755, bin/"bluefin-review"
   end
 
