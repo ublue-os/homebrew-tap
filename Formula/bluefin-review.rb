@@ -144,6 +144,7 @@ if os.path.exists(db_path):
       SHELL
     end
 
+    wrapper.chmod 0755
     bin.install wrapper
   end
 
