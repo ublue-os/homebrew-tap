@@ -131,6 +131,7 @@ if os.path.exists(db_path):
 
         exec apptainer "${APPTAINER_ARGS[@]}" "$sif" ${APPLIANCE_ARGS[@]+"${APPLIANCE_ARGS[@]}"}
       SHELL
+      FileUtils.chmod 0755, bin/"bluefin-review"
     else
       # macOS native wrapper
       (bin/"bluefin-review").write <<~'SHELL'
@@ -139,11 +140,10 @@ if os.path.exists(db_path):
         opt_prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
         exec omp --profile review --extension "${opt_prefix}/image/extension/bluefin-review" "$@"
       SHELL
+      FileUtils.chmod 0755, bin/"bluefin-review"
     end
 
     prefix.install "image", "scripts"
-    chmod 0555, bin/"bluefin-review"
-    (bin/"bluefin-review").chmod 0555
   end
 
   test do
