@@ -54,6 +54,8 @@ class BluefinReview < Formula
             export GH_TOKEN="$resolved_omp"
             export GITHUB_TOKEN="$resolved_omp"
             export COPILOT_GITHUB_TOKEN="$resolved_omp"
+        export GITHUB_COPILOT_TOKEN="${GITHUB_COPILOT_TOKEN:-${COPILOT_GITHUB_TOKEN}}"
+        export COPILOT_INTEGRATION_ID="${COPILOT_INTEGRATION_ID:-copilot-developer-cli}"
             export GITHUB_COPILOT_TOKEN="$resolved_omp"
           fi
         fi
@@ -61,6 +63,8 @@ class BluefinReview < Formula
         export GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
         export GITHUB_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
         export COPILOT_GITHUB_TOKEN="${COPILOT_GITHUB_TOKEN:-${GH_TOKEN:-}}"
+        export GITHUB_COPILOT_TOKEN="${GITHUB_COPILOT_TOKEN:-${COPILOT_GITHUB_TOKEN}}"
+        export COPILOT_INTEGRATION_ID="${COPILOT_INTEGRATION_ID:-copilot-developer-cli}"
 
         APPTAINER_ARGS=(
           run
@@ -78,6 +82,8 @@ class BluefinReview < Formula
         [[ -n "${GH_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GH_TOKEN=${GH_TOKEN}")
         [[ -n "${GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_TOKEN=${GITHUB_TOKEN}")
         [[ -n "${COPILOT_GITHUB_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}")
+        [[ -n "${GITHUB_COPILOT_TOKEN:-}" ]] && APPTAINER_ARGS+=(--env "GITHUB_COPILOT_TOKEN=${GITHUB_COPILOT_TOKEN}")
+        [[ -n "${COPILOT_INTEGRATION_ID:-}" ]] && APPTAINER_ARGS+=(--env "COPILOT_INTEGRATION_ID=${COPILOT_INTEGRATION_ID}")
 
         # Bind host configs into container
         for cfg in "${HOME}/.gitconfig:/home/bluefin/.gitconfig:ro" \
