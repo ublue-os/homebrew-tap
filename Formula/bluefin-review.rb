@@ -11,6 +11,8 @@ class BluefinReview < Formula
   end
 
   def install
+    prefix.install "image", "scripts"
+
     if OS.linux?
       (bin/"bluefin-review").write <<~'SHELL'
         #!/usr/bin/env bash
@@ -131,7 +133,6 @@ if os.path.exists(db_path):
 
         exec apptainer "${APPTAINER_ARGS[@]}" "$sif" ${APPLIANCE_ARGS[@]+"${APPLIANCE_ARGS[@]}"}
       SHELL
-      (bin/"bluefin-review").chmod 0755
     else
       # macOS native wrapper
       (bin/"bluefin-review").write <<~'SHELL'
@@ -140,10 +141,9 @@ if os.path.exists(db_path):
         opt_prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
         exec omp --profile review --extension "${opt_prefix}/image/extension/bluefin-review" "$@"
       SHELL
-      (bin/"bluefin-review").chmod 0755
     end
 
-    prefix.install "image", "scripts"
+    chmod 0755, bin/"bluefin-review"
   end
 
   test do
