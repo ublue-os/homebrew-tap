@@ -13,8 +13,9 @@ class BluefinReview < Formula
   def install
     prefix.install "image", "scripts"
 
+    wrapper = buildpath/"bluefin-review"
     if OS.linux?
-      (bin/"bluefin-review").write <<~'SHELL'
+      wrapper.write <<~'SHELL'
         #!/usr/bin/env bash
         set -euo pipefail
 
@@ -135,7 +136,7 @@ if os.path.exists(db_path):
       SHELL
     else
       # macOS native wrapper
-      (bin/"bluefin-review").write <<~'SHELL'
+      wrapper.write <<~'SHELL'
         #!/usr/bin/env bash
         set -euo pipefail
         opt_prefix="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -143,7 +144,7 @@ if os.path.exists(db_path):
       SHELL
     end
 
-    chmod 0755, bin/"bluefin-review"
+    bin.install wrapper
   end
 
   test do
