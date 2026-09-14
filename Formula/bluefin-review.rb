@@ -1,9 +1,9 @@
 class BluefinReview < Formula
   desc "Distroless review appliance for Project Bluefin"
   homepage "https://github.com/projectbluefin/review"
-  url "https://github.com/projectbluefin/review/archive/315bc5364633d4482b493aefb9d24f177a29d6ff.tar.gz"
-  version "26.08.3"
-  sha256 "b071afdf7f00a32a2e313ffd40ad1e1aa349d219aeefee5e4644f461077f1ee3"
+  url "https://github.com/projectbluefin/review/archive/refs/tags/v26.08.05.tar.gz"
+  version "26.08.05"
+  sha256 "3e7f5f4c10a116497011c49536b356c7ff1a51e84d234e2a7551b6fb41ab2f4d"
   license "Apache-2.0"
 
   on_linux do
