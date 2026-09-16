@@ -35,16 +35,21 @@ cask "antigravity-linux" do
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
   preflight_steps do
-    move "Antigravity-*", "Antigravity", source_glob: true
+    unless_path_exists "Antigravity" do
+      move "Antigravity-*", "Antigravity", source_glob: true
+    end
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
-    remove "Antigravity/resources/app-update.yml"
 
+    # Keep file preparation inside run: sandbox path setup must not create the
+    # destination directory before the payload move runs.
     # ASAR uses little-endian 32-bit pickle lengths on both supported Linux CPUs.
-    if_path_exists "Antigravity/resources/app.asar" do
-      run "/bin/bash", chdir: "{{staged_path}}", env: { "JQ" => "{{HOMEBREW_PREFIX}}/bin/jq" },
-                       args: ["-euo", "pipefail", "-c", <<~'SH']
-                         asar=Antigravity/resources/app.asar
+    run "/bin/bash", chdir: "{{staged_path}}", env: { "JQ" => "{{HOMEBREW_PREFIX}}/bin/jq" },
+                     args: ["-euo", "pipefail", "-c", <<~'SH']
+                       rm -f Antigravity/resources/app-update.yml
+
+                       asar=Antigravity/resources/app.asar
+                       if [ -f "$asar" ]; then
                          header_size=$(od -An -tu4 -j4 -N4 "$asar" | tr -d '[:space:]')
                          json_size=$(od -An -tu4 -j12 -N4 "$asar" | tr -d '[:space:]')
                          dd if="$asar" of=asar-header.json bs=64K iflag=skip_bytes,count_bytes skip=16 count="$json_size" status=none
@@ -55,9 +60,9 @@ cask "antigravity-linux" do
                            dd if="$asar" of=antigravity.png bs=64K iflag=skip_bytes,count_bytes \
                              skip="$((8 + header_size + offset))" count="$size" status=none
                          fi
-                       SH
-      remove "asar-header.json"
-    end
+                         rm -f asar-header.json
+                       fi
+                     SH
 
     write_file "antigravity.desktop", <<~EOS
       [Desktop Entry]
