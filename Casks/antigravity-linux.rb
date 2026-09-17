@@ -2,11 +2,11 @@ cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
   os linux: "linux"
 
-  version "2.13.0,6362815968182272"
-  sha256 arm:          "cc44675fff3d35ec6892283332d871902c4d60f70b2a8dafcee34abe012dc405",
-         intel:        "a47a2434d920008792f3ce43ef502d486c326d2098082590831800b5b093f643",
-         arm64_linux:  "cc44675fff3d35ec6892283332d871902c4d60f70b2a8dafcee34abe012dc405",
-         x86_64_linux: "a47a2434d920008792f3ce43ef502d486c326d2098082590831800b5b093f643"
+  version "2.14.0,5449404535144448"
+  sha256 arm:          "43ecdd11f4b81c5d7a881133866eb807512a9a721b863375feb719830db8c822",
+         intel:        "cac312c6811395c74286d4756913034c3b36d6968d8b7d60173065e1073f763e",
+         arm64_linux:  "43ecdd11f4b81c5d7a881133866eb807512a9a721b863375feb719830db8c822",
+         x86_64_linux: "cac312c6811395c74286d4756913034c3b36d6968d8b7d60173065e1073f763e"
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz"
   name "Google Antigravity"
@@ -35,16 +35,21 @@ cask "antigravity-linux" do
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
   preflight_steps do
-    move "Antigravity-*", "Antigravity", source_glob: true
+    unless_path_exists "Antigravity" do
+      move "Antigravity-*", "Antigravity", source_glob: true
+    end
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
-    remove "Antigravity/resources/app-update.yml"
 
+    # Keep file preparation inside run: sandbox path setup must not create the
+    # destination directory before the payload move runs.
     # ASAR uses little-endian 32-bit pickle lengths on both supported Linux CPUs.
-    if_path_exists "Antigravity/resources/app.asar" do
-      run "/bin/bash", chdir: "{{staged_path}}", env: { "JQ" => "{{HOMEBREW_PREFIX}}/bin/jq" },
-                       args: ["-euo", "pipefail", "-c", <<~'SH']
-                         asar=Antigravity/resources/app.asar
+    run "/bin/bash", chdir: "{{staged_path}}", env: { "JQ" => "{{HOMEBREW_PREFIX}}/bin/jq" },
+                     args: ["-euo", "pipefail", "-c", <<~'SH']
+                       rm -f Antigravity/resources/app-update.yml
+
+                       asar=Antigravity/resources/app.asar
+                       if [ -f "$asar" ]; then
                          header_size=$(od -An -tu4 -j4 -N4 "$asar" | tr -d '[:space:]')
                          json_size=$(od -An -tu4 -j12 -N4 "$asar" | tr -d '[:space:]')
                          dd if="$asar" of=asar-header.json bs=64K iflag=skip_bytes,count_bytes skip=16 count="$json_size" status=none
@@ -55,9 +60,9 @@ cask "antigravity-linux" do
                            dd if="$asar" of=antigravity.png bs=64K iflag=skip_bytes,count_bytes \
                              skip="$((8 + header_size + offset))" count="$size" status=none
                          fi
-                       SH
-      remove "asar-header.json"
-    end
+                         rm -f asar-header.json
+                       fi
+                     SH
 
     write_file "antigravity.desktop", <<~EOS
       [Desktop Entry]

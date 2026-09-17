@@ -32,23 +32,24 @@ cask "rog-control-center-linux" do
 
   preflight_steps do
     move "asusctl-*-ubuntu-22.04-*", "asusctl", source_glob: true
-  end
-
-  postflight_steps do
-    symlink ".", ".user-home", source_base: :home, overwrite: true
     mkdir_p ".local/share/applications", base: :home
-    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
-    mkdir_p ".local/share/icons/hicolor/scalable/status", base: :home
+    mkdir_p ".local/share/icons", base: :home
     mkdir_p ".local/share/asusd", base: :home
     mkdir_p ".local/share/rog-gui", base: :home
     mkdir_p ".config/systemd/user", base: :home
     mkdir_p ".config/asusd", base: :home
+  end
+
+  postflight_steps do
+    symlink ".", ".user-home", source_base: :home, overwrite: true
     copy "asusctl/usr/share/asusd/.", ".local/share/asusd", target_base: :home, recursive: true
     copy "asusctl/usr/share/rog-gui/.", ".local/share/rog-gui", target_base: :home, recursive: true
     # Declarative source_glob only accepts one match; these icon sets contain several.
     run "/bin/sh", chdir: "{{staged_path}}",
-                   writable_paths: [".local/share/icons/hicolor"], writable_base: :home,
+                   writable_paths: [".local/share/icons"], writable_base: :home,
                    args: ["-eu", "-c", <<~SH]
+                     mkdir -p .user-home/.local/share/icons/hicolor/512x512/apps
+                     mkdir -p .user-home/.local/share/icons/hicolor/scalable/status
                      for icon in asusctl/usr/share/icons/hicolor/512x512/apps/*.png; do
                        [ -f "$icon" ] || continue
                        cp "$icon" .user-home/.local/share/icons/hicolor/512x512/apps/

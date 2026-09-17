@@ -112,12 +112,6 @@ CASKS = [
         release_prefix="framework",
         artifact_name="framework-wallpapers",
     ),
-    CaskConfig(
-        name="aurora-wallpapers",
-        release_prefix="aurora",
-        artifact_name="aurora-wallpapers",
-        variants=[],  # Single variant, no suffix
-    ),
 ]
 
 CASK_BY_NAME = {cask.name: cask for cask in CASKS}
