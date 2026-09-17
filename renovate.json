@@ -2,5 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>ublue-os/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "Homebrew/actions",
+        "/^Homebrew\\/actions/"
+      ],
+      "matchUpdateTypes": ["digest"],
+      "enabled": false
+    }
   ]
 }
