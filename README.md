@@ -14,6 +14,7 @@ IDEs like Jetbrains and VSCode. They don't run well out of flatpaks so we put th
 
 ```shell
 brew tap ublue-os/tap
+brew trust ublue-os/tap
 
 # Formulas
 brew install heic-to-dynamic-gnome-wallpaper
