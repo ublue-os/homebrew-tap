@@ -138,8 +138,16 @@ cask "1password-gui-linux" do
                          mkdir -p "$directory"
                          cp -f 1PasswordWrapper.sh "$directory/1PasswordWrapper.sh"
                          chmod 755 "$directory/1PasswordWrapper.sh"
-                         manifest="$directory/com.1password.1password.json"
-                         source=native-messaging-chrome.json
+                          manifest="$directory/com.1password.1password.json"
+                          # Skip immutable manifests (e.g. locked with `chattr +i` by
+                          # 1password-flatpak-browser-integration) to avoid hard failure
+                          # (mv EPERM) and allow coexistence. To let this cask manage it:
+                          #   sudo chattr -i "$manifest"
+                          if [ -f "$manifest" ] && command -v lsattr >/dev/null 2>&1 && lsattr "$manifest" 2>/dev/null | grep -q '^....i'; then
+                            echo "Skipping immutable manifest $manifest (chattr +i). Run: sudo chattr -i \"$manifest\" to allow updates." >&2
+                            continue
+                          fi
+                          source=native-messaging-chrome.json
                          [[ "$relative" != .mozilla/* ]] || source=native-messaging-firefox.json
                          [[ ! -f "$manifest" ]] || source="$manifest"
                          temporary=$(mktemp "$directory/.1password-manifest.XXXXXX")
@@ -173,10 +181,16 @@ cask "1password-gui-linux" do
                        BROWSER_HOME=$(readlink "$BROWSER_HOME")
                        for relative in .mozilla/native-messaging-hosts \
                          .config/{google-chrome,google-chrome-beta,google-chrome-unstable,chromium,microsoft-edge-dev,BraveSoftware/Brave-Browser,vivaldi,vivaldi-snapshot}/NativeMessagingHosts; do
-                         directory="$BROWSER_HOME/$relative"
-                         manifest="$directory/com.1password.1password.json"
-                         if [ -f "$manifest" ]; then chmod 644 "$manifest"; fi
-                         rm -f "$directory/1PasswordWrapper.sh"
+                          directory="$BROWSER_HOME/$relative"
+                          manifest="$directory/com.1password.1password.json"
+                          if [ -f "$manifest" ]; then
+                            if command -v lsattr >/dev/null 2>&1 && lsattr "$manifest" 2>/dev/null | grep -q '^....i'; then
+                              echo "Skipping immutable manifest $manifest (chattr +i) on uninstall." >&2
+                            else
+                              chmod 644 "$manifest"
+                            fi
+                          fi
+                          rm -f "$directory/1PasswordWrapper.sh"
                        done
                      SH
   end
