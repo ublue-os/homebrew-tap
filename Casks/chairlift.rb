@@ -39,8 +39,6 @@ cask "chairlift" do
          target_base: :home
     copy "data/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg",
          ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg", target_base: :home
-    copy "data/icons/hicolor/scalable/apps/io.projectbluefin.chairlift-flower.svg",
-         ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift-flower.svg", target_base: :home
     copy "data/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg",
          ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg", target_base: :home
   end
@@ -48,7 +46,6 @@ cask "chairlift" do
   uninstall_postflight_steps do
     remove [".local/share/applications/io.projectbluefin.chairlift.desktop",
             ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg",
-            ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift-flower.svg",
             ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg"], base: :home
   end
 
