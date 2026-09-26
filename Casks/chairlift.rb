@@ -1,11 +1,11 @@
 cask "chairlift" do
   arch arm: "arm64", intel: "amd64"
 
-  version "26.09.0-alpha.1"
-  sha256 arm:          "1dc52a123664e044dddd090e96d14e7e84073a925e5b93b914c01bd51b6fb9b4",
-         intel:        "85084ca5ecc5a5b7b80f44422d52ff070cbe5e53d1d54404b29e7604e16ca39a",
-         arm64_linux:  "1dc52a123664e044dddd090e96d14e7e84073a925e5b93b914c01bd51b6fb9b4",
-         x86_64_linux: "85084ca5ecc5a5b7b80f44422d52ff070cbe5e53d1d54404b29e7604e16ca39a"
+  version "26.09.0-alpha.2"
+  sha256 arm:          "cb64663a0e2ae87b049bacd431de9d9c1925833006559c8310f8bd53ec938a86",
+         intel:        "18f630bb7de0e921ba12ae8c0650adf5e550b0cde203938d73d534382f196d08",
+         arm64_linux:  "cb64663a0e2ae87b049bacd431de9d9c1925833006559c8310f8bd53ec938a86",
+         x86_64_linux: "18f630bb7de0e921ba12ae8c0650adf5e550b0cde203938d73d534382f196d08"
 
   url "https://github.com/projectbluefin/chairlift/releases/download/v#{version}/chairlift_#{version}_linux_#{arch}.tar.gz"
   name "ChairLift"
@@ -14,7 +14,13 @@ cask "chairlift" do
 
   livecheck do
     url :url
-    strategy :github_latest
+    strategy :github_releases do |releases|
+      releases.filter_map do |release|
+        next if release["draft"]
+
+        release["tag_name"]&.delete_prefix("v")
+      end
+    end
   end
 
   depends_on :linux
