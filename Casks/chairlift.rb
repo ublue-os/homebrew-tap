@@ -47,12 +47,47 @@ cask "chairlift" do
          ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg", target_base: :home
     copy "data/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg",
          ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg", target_base: :home
+    # GSettings schemas for the Livery, Updates and First-Run settings. Without
+    # a compiled cache in a directory GSettings searches, the Livery page reports
+    # its settings unavailable, update preferences never persist, and setup
+    # choices are never recorded. The user data dir is searched by GLib and needs
+    # no root; HOMEBREW_PREFIX/share is not on XDG_DATA_DIRS for desktop launches.
+    mkdir_p ".local/share/glib-2.0/schemas", base: :home
+    copy "data/io.projectbluefin.chairlift.livery.gschema.xml",
+         ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.livery.gschema.xml", target_base: :home
+    copy "data/io.projectbluefin.chairlift.updates.gschema.xml",
+         ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml", target_base: :home
+    copy "data/io.projectbluefin.chairlift.firstrun.gschema.xml",
+         ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml", target_base: :home
+    symlink ".", ".user-home", source_base: :home, overwrite: true
+    run "/usr/bin/glib-compile-schemas", chdir:          "{{staged_path}}",
+                                         writable_paths: [".local/share/glib-2.0/schemas"],
+                                         writable_base:  :home,
+                                         args:           [".user-home/.local/share/glib-2.0/schemas"]
   end
 
   uninstall_postflight_steps do
     remove [".local/share/applications/io.projectbluefin.chairlift.desktop",
             ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg",
-            ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg"], base: :home
+            ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg",
+            ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.livery.gschema.xml",
+            ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml",
+            ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml"], base: :home
+    # Recompile what other applications left in the directory, or drop the
+    # cache if ChairLift's schemas were the only ones.
+    # Homebrew runs steps with its own HOME, so the user's home is reached
+    # through the .user-home link the install step left in the staged path.
+    symlink ".", ".user-home", source_base: :home, overwrite: true
+    run "/bin/sh", chdir: "{{staged_path}}", writable_paths: [".local/share/glib-2.0/schemas"],
+                   writable_base: :home, args: ["-eu", "-c", <<~SH]
+                     dir=".user-home/.local/share/glib-2.0/schemas"
+                     [ -d "$dir" ] || exit 0
+                     if ls "$dir"/*.gschema.xml >/dev/null 2>&1; then
+                       /usr/bin/glib-compile-schemas "$dir"
+                     else
+                       rm -f "$dir/gschemas.compiled"
+                     fi
+                   SH
   end
 
   # Never link privileged helpers or install PolicyKit policies from a user-writable cask.
