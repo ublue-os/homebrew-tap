@@ -14,7 +14,13 @@ cask "chairlift" do
 
   livecheck do
     url :url
-    strategy :github_latest
+    strategy :github_releases do |releases|
+      releases.filter_map do |release|
+        next if release["draft"]
+
+        release["tag_name"]&.delete_prefix("v")
+      end
+    end
   end
 
   depends_on :linux
