@@ -2,11 +2,11 @@ cask "antigravity-cli-linux" do
   arch arm: "arm", intel: "x64"
   os linux: "linux"
 
-  version "1.2.10,4751581200121856"
-  sha256 arm:          "b85fd6d22f763dd331bf86fde5fd33fc79ecf6ac1cb254b9c2b6519537f5694f",
-         intel:        "77cb69251292aa35b0b662f91f704f06dd787b72f7902a62db8c6d692989203e",
-         arm64_linux:  "b85fd6d22f763dd331bf86fde5fd33fc79ecf6ac1cb254b9c2b6519537f5694f",
-         x86_64_linux: "77cb69251292aa35b0b662f91f704f06dd787b72f7902a62db8c6d692989203e"
+  version "1.2.11,6016716732497920"
+  sha256 arm:          "01513bc61f9592353045ba801ebb407fbccb8984fcbfde591bc6b681b24e92bc",
+         intel:        "c91c62c5e6fa954f5a7e1d7b9ad417d749db4aa60a4ba0b3d604dec1b645d190",
+         arm64_linux:  "01513bc61f9592353045ba801ebb407fbccb8984fcbfde591bc6b681b24e92bc",
+         x86_64_linux: "c91c62c5e6fa954f5a7e1d7b9ad417d749db4aa60a4ba0b3d604dec1b645d190"
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-cli/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/cli_linux_#{(arch == "arm") ? "arm64" : "x64"}.tar.gz"
   name "Google Antigravity CLI"
