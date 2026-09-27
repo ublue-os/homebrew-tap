@@ -1,11 +1,11 @@
 cask "chairlift" do
   arch arm: "arm64", intel: "amd64"
 
-  version "26.09.0-alpha.2"
-  sha256 arm:          "cb64663a0e2ae87b049bacd431de9d9c1925833006559c8310f8bd53ec938a86",
-         intel:        "18f630bb7de0e921ba12ae8c0650adf5e550b0cde203938d73d534382f196d08",
-         arm64_linux:  "cb64663a0e2ae87b049bacd431de9d9c1925833006559c8310f8bd53ec938a86",
-         x86_64_linux: "18f630bb7de0e921ba12ae8c0650adf5e550b0cde203938d73d534382f196d08"
+  version "26.09.0-alpha.4"
+  sha256 arm:          "554bddb1f91b09ad4a91789d50beda6b1c17245bd3bca9af78b05f203865b53d",
+         intel:        "e6a56064d6df42e86d2f34da9a25e461e1466cd6778fb525cdffca15a59b4f81",
+         arm64_linux:  "554bddb1f91b09ad4a91789d50beda6b1c17245bd3bca9af78b05f203865b53d",
+         x86_64_linux: "e6a56064d6df42e86d2f34da9a25e461e1466cd6778fb525cdffca15a59b4f81"
 
   url "https://github.com/projectbluefin/chairlift/releases/download/v#{version}/chairlift_#{version}_linux_#{arch}.tar.gz"
   name "ChairLift"
@@ -47,23 +47,57 @@ cask "chairlift" do
          ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg", target_base: :home
     copy "data/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg",
          ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg", target_base: :home
+    # GSettings schemas for the Livery, Updates and First-Run settings. Without
+    # a compiled cache in a directory GSettings searches, the Livery page reports
+    # its settings unavailable, update preferences never persist, and setup
+    # choices are never recorded. The user data dir is searched by GLib and needs
+    # no root; HOMEBREW_PREFIX/share is not on XDG_DATA_DIRS for desktop launches.
+    mkdir_p ".local/share/glib-2.0/schemas", base: :home
+    copy "data/io.projectbluefin.chairlift.livery.gschema.xml",
+         ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.livery.gschema.xml", target_base: :home
+    copy "data/io.projectbluefin.chairlift.updates.gschema.xml",
+         ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml", target_base: :home
+    copy "data/io.projectbluefin.chairlift.firstrun.gschema.xml",
+         ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml", target_base: :home
+    symlink ".", ".user-home", source_base: :home, overwrite: true
+    run "/usr/bin/glib-compile-schemas", chdir:          "{{staged_path}}",
+                                         writable_paths: [".local/share/glib-2.0/schemas"],
+                                         writable_base:  :home,
+                                         args:           [".user-home/.local/share/glib-2.0/schemas"]
   end
 
   uninstall_postflight_steps do
     remove [".local/share/applications/io.projectbluefin.chairlift.desktop",
             ".local/share/icons/hicolor/scalable/apps/io.projectbluefin.chairlift.svg",
-            ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg"], base: :home
+            ".local/share/icons/hicolor/symbolic/apps/io.projectbluefin.chairlift-symbolic.svg",
+            ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.livery.gschema.xml",
+            ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.updates.gschema.xml",
+            ".local/share/glib-2.0/schemas/io.projectbluefin.chairlift.firstrun.gschema.xml"], base: :home
+    # Recompile what other applications left in the directory, or drop the
+    # cache if ChairLift's schemas were the only ones.
+    # Homebrew runs steps with its own HOME, so the user's home is reached
+    # through the .user-home link the install step left in the staged path.
+    symlink ".", ".user-home", source_base: :home, overwrite: true
+    run "/bin/sh", chdir: "{{staged_path}}", writable_paths: [".local/share/glib-2.0/schemas"],
+                   writable_base: :home, args: ["-eu", "-c", <<~SH]
+                     dir=".user-home/.local/share/glib-2.0/schemas"
+                     [ -d "$dir" ] || exit 0
+                     if ls "$dir"/*.gschema.xml >/dev/null 2>&1; then
+                       /usr/bin/glib-compile-schemas "$dir"
+                     else
+                       rm -f "$dir/gschemas.compiled"
+                     fi
+                   SH
   end
 
   # Never link privileged helpers or install PolicyKit policies from a user-writable cask.
   caveats <<~EOS
     ChairLift requires GTK 4 and libadwaita 1 shared libraries from your OS.
 
-    Privileged features require the matching projectbluefin-chairlift-system-integration
-    package from https://github.com/projectbluefin/chairlift/releases installed by your
-    OS administrator or included in your OS image. This cask installs only the GUI
-    and desktop assets, not the root-owned helpers or PolicyKit policies.
-    Bootc staging additionally requires /usr/libexec/bootc-update-stage from your OS.
+    Privileged features use /usr/bin/chairlift-helper and its PolicyKit policy,
+    which your OS image must provide. This cask installs only the GUI, desktop
+    assets and settings schemas, never root-owned helpers or policies. Bootc
+    staging also requires /usr/libexec/bootc-update-stage from your OS.
 
     Distribution configuration belongs in /etc/chairlift/config.yml; this cask
     does not overwrite it. Upstream's bundled defaults target Snow Linux.
