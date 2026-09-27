@@ -1,11 +1,11 @@
 cask "chairlift" do
   arch arm: "arm64", intel: "amd64"
 
-  version "26.09.0-alpha.2"
-  sha256 arm:          "cb64663a0e2ae87b049bacd431de9d9c1925833006559c8310f8bd53ec938a86",
-         intel:        "18f630bb7de0e921ba12ae8c0650adf5e550b0cde203938d73d534382f196d08",
-         arm64_linux:  "cb64663a0e2ae87b049bacd431de9d9c1925833006559c8310f8bd53ec938a86",
-         x86_64_linux: "18f630bb7de0e921ba12ae8c0650adf5e550b0cde203938d73d534382f196d08"
+  version "26.09.0-alpha.4"
+  sha256 arm:          "554bddb1f91b09ad4a91789d50beda6b1c17245bd3bca9af78b05f203865b53d",
+         intel:        "e6a56064d6df42e86d2f34da9a25e461e1466cd6778fb525cdffca15a59b4f81",
+         arm64_linux:  "554bddb1f91b09ad4a91789d50beda6b1c17245bd3bca9af78b05f203865b53d",
+         x86_64_linux: "e6a56064d6df42e86d2f34da9a25e461e1466cd6778fb525cdffca15a59b4f81"
 
   url "https://github.com/projectbluefin/chairlift/releases/download/v#{version}/chairlift_#{version}_linux_#{arch}.tar.gz"
   name "ChairLift"
@@ -94,11 +94,10 @@ cask "chairlift" do
   caveats <<~EOS
     ChairLift requires GTK 4 and libadwaita 1 shared libraries from your OS.
 
-    Privileged features require the matching projectbluefin-chairlift-system-integration
-    package from https://github.com/projectbluefin/chairlift/releases installed by your
-    OS administrator or included in your OS image. This cask installs only the GUI
-    and desktop assets, not the root-owned helpers or PolicyKit policies.
-    Bootc staging additionally requires /usr/libexec/bootc-update-stage from your OS.
+    Privileged features use /usr/bin/chairlift-helper and its PolicyKit policy,
+    which your OS image must provide. This cask installs only the GUI, desktop
+    assets and settings schemas, never root-owned helpers or policies. Bootc
+    staging also requires /usr/libexec/bootc-update-stage from your OS.
 
     Distribution configuration belongs in /etc/chairlift/config.yml; this cask
     does not overwrite it. Upstream's bundled defaults target Snow Linux.
