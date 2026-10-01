@@ -7,11 +7,11 @@ cask "1password-gui-linux" do
     end
   os linux: "linux"
 
-  version "8.12.36"
-  sha256 arm:          "4b58851b3bf52a7bbc79243fc6b9cba9591cabe8b7eb2d0e271593bad2192af9",
-         intel:        "393c93c8025fee5dda76a4d0f1e478e98526cc946e58a22efe26f540ea2b5729",
-         arm64_linux:  "4b58851b3bf52a7bbc79243fc6b9cba9591cabe8b7eb2d0e271593bad2192af9",
-         x86_64_linux: "393c93c8025fee5dda76a4d0f1e478e98526cc946e58a22efe26f540ea2b5729"
+  version "8.12.38"
+  sha256 arm:          "cb8b3667a0f51705e40a4e1e4ab83d440c57324cfab3f3bfacb713e40e63129d",
+         intel:        "8b9767276ad6795a8f1b79306aa8282f7d79617c7ca08beda7846ff79a1bb4f2",
+         arm64_linux:  "cb8b3667a0f51705e40a4e1e4ab83d440c57324cfab3f3bfacb713e40e63129d",
+         x86_64_linux: "8b9767276ad6795a8f1b79306aa8282f7d79617c7ca08beda7846ff79a1bb4f2"
 
   url "https://downloads.1password.com/linux/tar/stable/#{arch}/1password-#{version}.#{arch_suffix}.tar.gz"
   name "1Password"
