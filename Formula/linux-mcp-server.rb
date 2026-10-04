@@ -409,62 +409,332 @@ class LinuxMcpServer < Formula
     venv.pip_install_and_link buildpath
 
     # Install the goose configuration setup script
-    (bin/"goose-mcp-setup").write <<~BASH
-      #!/bin/bash
-      set -e
+    (bin/"goose-mcp-setup").write <<~PYTHON
+      #!#{libexec}/bin/python
+      """
+      goose-mcp-setup - Configure Goose to use linux-mcp-server with safe defaults.
 
-      CONFIG_DIR="${HOME}/.config/goose"
-      CONFIG_FILE="${CONFIG_DIR}/config.yaml"
-      MCP_SERVER="#{HOMEBREW_PREFIX}/bin/linux-mcp-server"
-      USERNAME="$(whoami)"
+      Supports non-interactive additive configuration of the extensions.linux-tools entry:
+        - Adds or repairs ONLY extensions.linux-tools
+        - Merges into existing valid Goose configuration (~/.config/goose/config.yaml)
+        - Idempotent: leaves already-correct configuration untouched
+        - Atomic write with recoverable backup (<config>.bak) before modifying existing files
+        - Enforces explicit read-only policy: --toolset FIXED, --no-search-for-ssh-key, --verify-host-keys
+        - Rejects malformed configuration without data loss
+        - Preserves provider, model, credentials, comments, and other extensions
+      """
 
-      if [ -f "$CONFIG_FILE" ]; then
-        echo "Config already exists at $CONFIG_FILE"
-        echo ""
-        echo "To add linux-mcp-server manually, add this to your extensions section:"
-        echo ""
-        echo "  linux-tools:"
-        echo "    enabled: true"
-        echo "    type: stdio"
-        echo "    name: linux-tools"
-        echo "    description: Linux system administration and diagnostics"
-        echo "    cmd: ${MCP_SERVER}"
-        echo "    envs:"
-        echo "      LINUX_MCP_USER: ${USERNAME}"
-        echo "      LINUX_MCP_LOG_LEVEL: INFO"
-        echo "    timeout: 30"
-        echo "    bundled: null"
-        echo "    available_tools: []"
-        echo "    args: []"
-        exit 0
-      fi
+      import argparse
+      import os
+      import shutil
+      import sys
 
-      mkdir -p "$CONFIG_DIR"
+      try:
+          from ruamel.yaml import YAML
+          from ruamel.yaml.constructor import DuplicateKeyError
+          HAVE_RUAMEL = True
+      except ImportError:
+          HAVE_RUAMEL = False
+          import yaml
 
-      {
-        echo "GEMINI_CLI_COMMAND: gemini"
-        echo "GOOSE_PROVIDER: gemini-cli"
-        echo "GOOSE_MODEL: gemini-3-flash-preview"
-        echo "extensions:"
-        echo "  linux-tools:"
-        echo "    enabled: true"
-        echo "    type: stdio"
-        echo "    name: linux-tools"
-        echo "    description: Linux system administration and diagnostics"
-        echo "    cmd: ${MCP_SERVER}"
-        echo "    envs:"
-        echo "      LINUX_MCP_USER: ${USERNAME}"
-        echo "      LINUX_MCP_LOG_LEVEL: INFO"
-        echo "      LINUX_MCP_SSH_KEY_PATH: ~/.ssh/id_ed25519"
-        echo "    timeout: 30"
-        echo "    bundled: null"
-        echo "    available_tools: []"
-        echo "    args: []"
-      } > "$CONFIG_FILE"
+          class UniqueKeyLoader(yaml.SafeLoader):
+              def construct_mapping(self, node, deep=False):
+                  mapping = set()
+                  for key_node, _ in node.value:
+                      key = self.construct_object(key_node, deep=deep)
+                      if key in mapping:
+                          raise ValueError(f"duplicate key: {key}")
+                      mapping.add(key)
+                  return super().construct_mapping(node, deep=deep)
 
-      echo "Created goose config at $CONFIG_FILE"
-      echo "You can now use goose with linux-mcp-server!"
-    BASH
+      TARGET_ARGS = ["--toolset", "FIXED", "--no-search-for-ssh-key", "--verify-host-keys"]
+
+
+      class MalformedConfigError(ValueError):
+          """Raised when existing configuration cannot be safely parsed or merged."""
+          pass
+
+
+      def resolve_config_path(override=None):
+          if override:
+              return os.path.abspath(os.path.expanduser(override))
+          xdg_config = os.environ.get("XDG_CONFIG_HOME")
+          if xdg_config:
+              return os.path.join(os.path.abspath(os.path.expanduser(xdg_config)), "goose", "config.yaml")
+          return os.path.expanduser("~/.config/goose/config.yaml")
+
+
+      def resolve_server_cmd(override=None):
+          if override:
+              return override
+          candidate = "#{HOMEBREW_PREFIX}/bin/linux-mcp-server"
+          if os.path.exists(candidate):
+              return candidate
+          which_cmd = shutil.which("linux-mcp-server")
+          if which_cmd:
+              return which_cmd
+          return candidate
+
+
+      def is_valid_linux_tools_extension(ext, server_cmd=None):
+          if not isinstance(ext, dict):
+              return False
+          if ext.get("type") != "stdio":
+              return False
+
+          cmd = ext.get("cmd")
+          if not cmd or os.path.basename(str(cmd)) != "linux-mcp-server":
+              return False
+
+          if ext.get("enabled") is False:
+              return False
+
+          envs = ext.get("envs")
+          if isinstance(envs, dict) and envs.get("LINUX_MCP_SSH_KEY_PATH"):
+              return False
+
+          args = ext.get("args")
+          if not isinstance(args, list):
+              return False
+
+          fixed = False
+          no_search = False
+          i = 0
+          while i < len(args):
+              arg = str(args[i])
+              if arg == "--toolset":
+                  if fixed or i + 1 >= len(args) or str(args[i + 1]) != "FIXED":
+                      return False
+                  fixed = True
+                  i += 2
+                  continue
+              elif arg == "--no-search-for-ssh-key":
+                  no_search = True
+              elif arg in ("--search-for-ssh-key", "--no-verify-host-keys", "--ssh-key-path"):
+                  return False
+              elif arg.startswith(("--toolset=", "--ssh-key-path=")):
+                  return False
+              i += 1
+
+          return fixed and no_search
+
+
+      def build_or_repair_linux_tools(existing=None, server_cmd="linux-mcp-server"):
+          if not isinstance(existing, dict):
+              existing = {}
+
+          envs = existing.get("envs")
+          if isinstance(envs, dict):
+              safe_envs = {k: v for k, v in envs.items() if k != "LINUX_MCP_SSH_KEY_PATH"}
+          else:
+              safe_envs = {}
+
+          cmd = existing.get("cmd")
+          if not cmd or os.path.basename(str(cmd)) != "linux-mcp-server":
+              cmd = server_cmd
+
+          result = dict(existing)
+          result["name"] = existing.get("name", "linux-tools")
+          result["type"] = "stdio"
+          result["enabled"] = True
+          result["bundled"] = existing.get("bundled", False)
+          result["description"] = existing.get("description", "Linux system administration and diagnostics")
+          result["cmd"] = cmd
+          result["args"] = list(TARGET_ARGS)
+          result["envs"] = safe_envs
+          result["timeout"] = existing.get("timeout", 300)
+          return result
+
+
+      def parse_config(content):
+          if HAVE_RUAMEL:
+              ryaml = YAML()
+              ryaml.preserve_quotes = True
+              try:
+                  docs = list(ryaml.load_all(content))
+              except DuplicateKeyError as e:
+                  raise MalformedConfigError(f"Duplicate key in configuration: {e}")
+              except Exception as e:
+                  raise MalformedConfigError(f"Invalid YAML: {e}")
+              if not docs or docs[0] is None:
+                  raise MalformedConfigError("The configuration is empty or not a YAML mapping")
+              if len(docs) > 1:
+                  raise MalformedConfigError("Multiple YAML documents are not supported")
+              root = docs[0]
+              if not isinstance(root, dict):
+                  raise MalformedConfigError("The configuration must be a YAML mapping")
+              return root, "ruamel"
+          else:
+              try:
+                  docs = list(yaml.load_all(content, Loader=UniqueKeyLoader))
+              except Exception as e:
+                  raise MalformedConfigError(f"Invalid YAML: {e}")
+              if not docs or docs[0] is None:
+                  raise MalformedConfigError("The configuration is empty or not a YAML mapping")
+              if len(docs) > 1:
+                  raise MalformedConfigError("Multiple YAML documents are not supported")
+              root = docs[0]
+              if not isinstance(root, dict):
+                  raise MalformedConfigError("The configuration must be a YAML mapping")
+              return root, "pyyaml"
+
+
+      def dump_config(root, engine, original_content=""):
+          if engine == "ruamel":
+              import io
+              ryaml = YAML()
+              ryaml.preserve_quotes = True
+              buf = io.StringIO()
+              ryaml.dump(root, buf)
+              return buf.getvalue()
+          else:
+              leading = []
+              for line in original_content.splitlines(True):
+                  if line.strip().startswith("#") or not line.strip():
+                      leading.append(line)
+                  else:
+                      break
+              header = "".join(leading)
+              dumped = yaml.safe_dump(root, sort_keys=False)
+              return header + dumped
+
+
+      def atomic_write(path, data_str, create_backup=False):
+          dirname = os.path.dirname(path)
+          if dirname:
+              os.makedirs(dirname, mode=0o700, exist_ok=True)
+
+          backup_path = None
+          if create_backup and os.path.exists(path):
+              backup_path = path + ".bak"
+              shutil.copy2(path, backup_path)
+
+          tmp_path = os.path.join(dirname or ".", f".{os.path.basename(path)}.tmp.{os.getpid()}_{os.urandom(4).hex()}")
+          try:
+              flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+              fd = os.open(tmp_path, flags, 0o600)
+              with os.fdopen(fd, "w", encoding="utf-8") as f:
+                  f.write(data_str)
+                  f.flush()
+                  os.fsync(f.fileno())
+              os.replace(tmp_path, path)
+          except Exception:
+              if os.path.exists(tmp_path):
+                  try:
+                      os.remove(tmp_path)
+                  except OSError:
+                      pass
+              raise
+
+          return backup_path
+
+
+      def build_fresh_config(server_cmd):
+          root = {
+              "GEMINI_CLI_COMMAND": "gemini",
+              "GOOSE_PROVIDER": "gemini-cli",
+              "GOOSE_MODEL": "gemini-3-flash-preview",
+              "extensions": {
+                  "linux-tools": build_or_repair_linux_tools(server_cmd=server_cmd),
+              },
+          }
+          if HAVE_RUAMEL:
+              return dump_config(root, "ruamel")
+          else:
+              return dump_config(root, "pyyaml")
+
+
+      def ensure_linux_tools(config_path, server_cmd, no_backup=False):
+          if not os.path.exists(config_path):
+              content = build_fresh_config(server_cmd)
+              atomic_write(config_path, content, create_backup=False)
+              return "created", f"Created goose config at {config_path}", None
+
+          with open(config_path, "r", encoding="utf-8") as f:
+              raw_content = f.read()
+
+          root, engine = parse_config(raw_content)
+
+          extensions = root.get("extensions")
+          if extensions is None:
+              extensions = {}
+              root["extensions"] = extensions
+          elif not isinstance(extensions, dict):
+              raise MalformedConfigError("'extensions' must be a mapping; repair it in Goose")
+
+          existing_ext = extensions.get("linux-tools")
+          if is_valid_linux_tools_extension(existing_ext, server_cmd):
+              return "already_correct", f"linux-tools is already configured correctly in {config_path}", None
+
+          extensions["linux-tools"] = build_or_repair_linux_tools(existing_ext, server_cmd)
+          new_content = dump_config(root, engine, raw_content)
+
+          backup_path = atomic_write(config_path, new_content, create_backup=not no_backup)
+          msg = f"Configured linux-tools in {config_path}"
+          if backup_path:
+              msg += f" (backup saved to {backup_path})"
+          return "repaired", msg, backup_path
+
+
+      def main(argv=None):
+          parser = argparse.ArgumentParser(
+              prog="goose-mcp-setup",
+              description="Configure Goose to use linux-mcp-server with safe, read-only defaults.",
+              formatter_class=argparse.RawDescriptionHelpFormatter,
+          )
+          parser.add_argument(
+              "-n", "--non-interactive",
+              action="store_true",
+              help="Run non-interactively without prompting; exit 0 on success, non-zero on error.",
+          )
+          parser.add_argument(
+              "--ensure-linux-tools",
+              action="store_true",
+              help="Add or repair ONLY the extensions.linux-tools entry in Goose configuration.",
+          )
+          parser.add_argument(
+              "-c", "--config",
+              dest="config_path",
+              default=None,
+              help="Path to Goose config.yaml (default: $XDG_CONFIG_HOME/goose/config.yaml or ~/.config/goose/config.yaml)",
+          )
+          parser.add_argument(
+              "--server-cmd", "--cmd",
+              dest="server_cmd",
+              default=None,
+              help="Path to linux-mcp-server executable (default: resolved from Homebrew prefix or PATH)",
+          )
+          parser.add_argument(
+              "--no-backup",
+              action="store_true",
+              help="Do not create a .bak backup file before modifying an existing configuration.",
+          )
+
+          args = parser.parse_args(argv)
+
+          config_path = resolve_config_path(args.config_path)
+          server_cmd = resolve_server_cmd(args.server_cmd)
+
+          try:
+              _status, message, _backup_path = ensure_linux_tools(
+                  config_path=config_path,
+                  server_cmd=server_cmd,
+                  no_backup=args.no_backup,
+              )
+              print(message)
+              return 0
+          except MalformedConfigError as e:
+              sys.stderr.write(f"Error: {e}\\n")
+              return 2
+          except Exception as e:
+              sys.stderr.write(f"Error: {e}\\n")
+              return 1
+
+
+      if __name__ == "__main__":
+          sys.exit(main())
+    PYTHON
+    (bin/"goose-mcp-setup").chmod 0755
   end
 
   def caveats
@@ -472,18 +742,11 @@ class LinuxMcpServer < Formula
       To configure goose to use linux-mcp-server, run:
         goose-mcp-setup
 
-      This creates ~/.config/goose/config.yaml with these defaults:
-        LINUX_MCP_USER: your current username
-        LINUX_MCP_SSH_KEY_PATH: ~/.ssh/id_ed25519
+      This adds or repairs the linux-tools extension in ~/.config/goose/config.yaml
+      using the fixed diagnostic toolset without remote SSH defaults.
 
-      To customize, edit ~/.config/goose/config.yaml and modify the envs section.
-
-      Additional options you can add:
-        LINUX_MCP_HOST             - Remote Linux host (required on macOS)
-        LINUX_MCP_KEY_PASSPHRASE   - Passphrase for encrypted SSH key
-        LINUX_MCP_COMMAND_TIMEOUT  - SSH timeout in seconds (default: 30)
-        LINUX_MCP_VERIFY_HOST_KEYS - Set to "true" for host key verification
-        LINUX_MCP_KNOWN_HOSTS_PATH - Custom path to known_hosts file
+      For non-interactive or scripted configuration, run:
+        goose-mcp-setup --non-interactive
 
       For more configuration options, see:
         https://rhel-lightspeed.github.io/linux-mcp-server/clients/
@@ -494,8 +757,83 @@ class LinuxMcpServer < Formula
   end
 
   test do
-    assert_path_exists bin/"linux-mcp-server"
-    assert_path_exists bin/"goose-mcp-setup"
-    assert_equal version.to_s, shell_output("#{bin}/linux-mcp-server --version").strip
+    server = bin/"linux-mcp-server"
+    setup = bin/"goose-mcp-setup"
+
+    assert_path_exists server
+    assert_path_exists setup
+    assert_equal version.to_s, shell_output("#{server} --version").strip
+
+    # Verify goose-mcp-setup --help
+    help_output = shell_output("#{setup} --help")
+    assert_match "non-interactive", help_output
+    assert_match "ensure-linux-tools", help_output
+
+    # Test fresh configuration
+    test_fresh = testpath/"goose-fresh.yaml"
+    shell_output("#{setup} --non-interactive --config #{test_fresh} --server-cmd #{server}")
+    assert_path_exists test_fresh
+    assert_match "linux-tools:", test_fresh.read
+    assert_match "--toolset", test_fresh.read
+    assert_match "FIXED", test_fresh.read
+    refute_match "LINUX_MCP_SSH_KEY_PATH", test_fresh.read
+    refute_match "--search-for-ssh-key", test_fresh.read
+
+    # Test existing configuration merge and backup
+    test_existing = testpath/"goose-existing.yaml"
+    test_existing.write <<~YAML
+      GOOSE_PROVIDER: anthropic
+      GOOSE_MODEL: claude-sonnet-4
+      CUSTOM_SETTING: keep-me
+      extensions:
+        other:
+          type: builtin
+          enabled: true
+    YAML
+    shell_output("#{setup} --non-interactive --config #{test_existing} --server-cmd #{server}")
+    assert_path_exists testpath/"goose-existing.yaml.bak"
+    existing_content = test_existing.read
+    assert_match "GOOSE_PROVIDER: anthropic", existing_content
+    assert_match "CUSTOM_SETTING: keep-me", existing_content
+    assert_match "other:", existing_content
+    assert_match "linux-tools:", existing_content
+    assert_match "FIXED", existing_content
+
+    # Test already-correct configuration is idempotent (no modification, no new backup)
+    rm testpath/"goose-existing.yaml.bak"
+    shell_output("#{setup} --non-interactive --config #{test_existing} --server-cmd #{server}")
+    refute_path_exists testpath/"goose-existing.yaml.bak"
+
+    # Test disabled extension repair
+    test_disabled = testpath/"goose-disabled.yaml"
+    test_disabled.write <<~YAML
+      extensions:
+        linux-tools:
+          type: stdio
+          cmd: #{server}
+          enabled: false
+          args: []
+    YAML
+    shell_output("#{setup} --non-interactive --config #{test_disabled} --server-cmd #{server}")
+    disabled_content = test_disabled.read
+    assert_match "enabled: true", disabled_content
+    assert_match "FIXED", disabled_content
+
+    # Test malformed configuration refusal (exit code 2, file unchanged)
+    test_malformed = testpath/"goose-malformed.yaml"
+    test_malformed.write("extensions: [broken\n")
+    shell_output("#{setup} --non-interactive --config #{test_malformed} --server-cmd #{server}", 2)
+    assert_equal "extensions: [broken\n", test_malformed.read
+    refute_path_exists testpath/"goose-malformed.yaml.bak"
+
+    # Test failure before replace (unwritable directory)
+    test_ro_dir = testpath/"readonly_dir"
+    test_ro_dir.mkpath
+    test_ro_config = test_ro_dir/"config.yaml"
+    test_ro_config.write("GOOSE_PROVIDER: anthropic\n")
+    test_ro_dir.chmod(0500)
+    shell_output("#{setup} --non-interactive --config #{test_ro_config} --server-cmd #{server}", 1)
+    test_ro_dir.chmod(0700)
+    assert_equal "GOOSE_PROVIDER: anthropic\n", test_ro_config.read
   end
 end
