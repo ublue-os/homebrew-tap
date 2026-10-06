@@ -65,7 +65,8 @@ cask "rog-control-center-linux" do
                    SH
     # Prepare files in the readable stage, then only write to the user's home.
     run "/bin/sed", args:        ["s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center|",
-                                  "{{staged_path}}/asusctl/usr/share/applications/org.opengamingcollective.rog-control-center.desktop"],
+                                  "{{staged_path}}/asusctl/usr/share/applications/" \
+                                  "org.opengamingcollective.rog-control-center.desktop"],
                     stdout_path: "org.opengamingcollective.rog-control-center.desktop"
     copy "org.opengamingcollective.rog-control-center.desktop",
          ".local/share/applications/org.opengamingcollective.rog-control-center.desktop", target_base: :home
@@ -93,7 +94,8 @@ cask "rog-control-center-linux" do
     symlink ".", ".user-home", source_base: :home, overwrite: true
     run "systemctl", args: ["--user", "disable", "--now", "asusd-user.service"], must_succeed: false,
                      writable_paths: [".config/systemd/user"], writable_base: :home
-    remove [".config/systemd/user/asusd-user.service", ".local/share/applications/org.opengamingcollective.rog-control-center.desktop",
+    remove [".config/systemd/user/asusd-user.service",
+            ".local/share/applications/org.opengamingcollective.rog-control-center.desktop",
             ".local/share/applications/rog-control-center.desktop",
             ".local/share/metainfo/org.opengamingcollective.rog-control-center.metainfo.xml",
             ".local/share/locale/*/LC_MESSAGES/rog-control-center.mo",
