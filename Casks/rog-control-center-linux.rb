@@ -67,7 +67,8 @@ cask "rog-control-center-linux" do
     run "/bin/sed", args:        ["s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center|",
                                   "{{staged_path}}/asusctl/usr/share/applications/org.opengamingcollective.rog-control-center.desktop"],
                     stdout_path: "org.opengamingcollective.rog-control-center.desktop"
-    copy "org.opengamingcollective.rog-control-center.desktop", ".local/share/applications/org.opengamingcollective.rog-control-center.desktop", target_base: :home
+    copy "org.opengamingcollective.rog-control-center.desktop",
+         ".local/share/applications/org.opengamingcollective.rog-control-center.desktop", target_base: :home
     # Upstream renamed the launcher; drop the legacy name so upgrades do not leave a duplicate.
     run "/bin/rm", args: ["-f", "{{staged_path}}/.user-home/.local/share/applications/rog-control-center.desktop"],
                       must_succeed: false, writable_paths: [".local/share/applications"], writable_base: :home
