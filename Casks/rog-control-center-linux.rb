@@ -2,11 +2,11 @@ cask "rog-control-center-linux" do
   arch arm: "arm64", intel: "amd64"
   os linux: "linux"
 
-  version "6.3.8,3"
-  sha256 arm:          "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
-         intel:        "f05fbc48e5971649685d9269a4e7d6c835e3163e8946c4a3cebc49a5cc647cc5",
-         arm64_linux:  "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
-         x86_64_linux: "f05fbc48e5971649685d9269a4e7d6c835e3163e8946c4a3cebc49a5cc647cc5"
+  version "6.5.0,4"
+  sha256 arm:          "04b2a6e7a1858d9af33423f67cca335b3b46a89b9a6077c16a3f4f244c0a02d7",
+         intel:        "91aa192f9b1861dce9ea3077bd7bf839acf97c5349d26435e699e49785fd21e6",
+         arm64_linux:  "04b2a6e7a1858d9af33423f67cca335b3b46a89b9a6077c16a3f4f244c0a02d7",
+         x86_64_linux: "91aa192f9b1861dce9ea3077bd7bf839acf97c5349d26435e699e49785fd21e6"
 
   release_tag = "asusctl-#{version.csv.first}-#{version.csv.second}"
   release_root = "asusctl-#{version.csv.first}-ubuntu-22.04-#{arch}"
@@ -14,7 +14,7 @@ cask "rog-control-center-linux" do
   url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz"
   name "ROG Control Center"
   desc "ASUS ROG Control Center GUI and user daemon with XDG-first installation"
-  homepage "https://gitlab.com/asus-linux/asusctl"
+  homepage "https://github.com/OpenGamingCollective/asusctl"
 
   livecheck do
     url "https://api.github.com/repos/daegalus/linux-app-builds/releases/latest"
@@ -36,6 +36,8 @@ cask "rog-control-center-linux" do
     mkdir_p ".local/share/icons", base: :home
     mkdir_p ".local/share/asusd", base: :home
     mkdir_p ".local/share/rog-gui", base: :home
+    mkdir_p ".local/share/locale", base: :home
+    mkdir_p ".local/share/metainfo", base: :home
     mkdir_p ".config/systemd/user", base: :home
     mkdir_p ".config/asusd", base: :home
   end
@@ -44,6 +46,8 @@ cask "rog-control-center-linux" do
     symlink ".", ".user-home", source_base: :home, overwrite: true
     copy "asusctl/usr/share/asusd/.", ".local/share/asusd", target_base: :home, recursive: true
     copy "asusctl/usr/share/rog-gui/.", ".local/share/rog-gui", target_base: :home, recursive: true
+    copy "asusctl/usr/share/locale/.", ".local/share/locale", target_base: :home, recursive: true
+    copy "asusctl/usr/share/metainfo/.", ".local/share/metainfo", target_base: :home, recursive: true
     # Declarative source_glob only accepts one match; these icon sets contain several.
     run "/bin/sh", chdir: "{{staged_path}}",
                    writable_paths: [".local/share/icons"], writable_base: :home,
@@ -61,12 +65,15 @@ cask "rog-control-center-linux" do
                    SH
     # Prepare files in the readable stage, then only write to the user's home.
     run "/bin/sed", args:        ["s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center|",
-                                  "{{staged_path}}/asusctl/usr/share/applications/rog-control-center.desktop"],
-                    stdout_path: "rog-control-center.desktop"
-    copy "rog-control-center.desktop", ".local/share/applications/rog-control-center.desktop", target_base: :home
+                                  "{{staged_path}}/asusctl/usr/share/applications/org.opengamingcollective.rog-control-center.desktop"],
+                    stdout_path: "org.opengamingcollective.rog-control-center.desktop"
+    copy "org.opengamingcollective.rog-control-center.desktop", ".local/share/applications/org.opengamingcollective.rog-control-center.desktop", target_base: :home
+    # Upstream renamed the launcher; drop the legacy name so upgrades do not leave a duplicate.
+    run "/bin/rm", args: ["-f", "{{staged_path}}/.user-home/.local/share/applications/rog-control-center.desktop"],
+                      must_succeed: false, writable_paths: [".local/share/applications"], writable_base: :home
     run "/bin/sed", args:        ["-e", "/^Environment=ASUSD_USER_EXEC=/d",
                                   "-e",
-                                  "s|ExecStart=${ASUSD_USER_EXEC}|ExecStart={{HOMEBREW_PREFIX}}/bin/asusd-user|",
+                                  "s|^ExecStart=.*|ExecStart={{HOMEBREW_PREFIX}}/bin/asusd-user|",
                                   "{{staged_path}}/asusctl/usr/lib/systemd/user/asusd-user.service"],
                     stdout_path: "asusd-user.service"
     copy "asusd-user.service", ".config/systemd/user/asusd-user.service", target_base: :home
@@ -85,7 +92,10 @@ cask "rog-control-center-linux" do
     symlink ".", ".user-home", source_base: :home, overwrite: true
     run "systemctl", args: ["--user", "disable", "--now", "asusd-user.service"], must_succeed: false,
                      writable_paths: [".config/systemd/user"], writable_base: :home
-    remove [".config/systemd/user/asusd-user.service", ".local/share/applications/rog-control-center.desktop",
+    remove [".config/systemd/user/asusd-user.service", ".local/share/applications/org.opengamingcollective.rog-control-center.desktop",
+            ".local/share/applications/rog-control-center.desktop",
+            ".local/share/metainfo/org.opengamingcollective.rog-control-center.metainfo.xml",
+            ".local/share/locale/*/LC_MESSAGES/rog-control-center.mo",
             ".config/asusd/asusd-user.env"], base: :home
     remove [".local/share/icons/hicolor/512x512/apps/asus_notif_{blue,green,orange,red,white,yellow}.png",
             ".local/share/icons/hicolor/512x512/apps/rog-control-center.png",
@@ -104,10 +114,12 @@ cask "rog-control-center-linux" do
 
   caveats <<~EOS
     User-facing files were installed to:
-      ~/.local/share/applications/rog-control-center.desktop
+      ~/.local/share/applications/org.opengamingcollective.rog-control-center.desktop
       ~/.local/share/icons/hicolor
       ~/.local/share/asusd
       ~/.local/share/rog-gui
+      ~/.local/share/locale
+      ~/.local/share/metainfo
       ~/.config/systemd/user/asusd-user.service
       ~/.config/asusd/asusd-user.env
 

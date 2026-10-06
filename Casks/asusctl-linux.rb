@@ -2,11 +2,11 @@ cask "asusctl-linux" do
   arch arm: "arm64", intel: "amd64"
   os linux: "linux"
 
-  version "6.3.8,3"
-  sha256 arm:          "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
-         intel:        "f05fbc48e5971649685d9269a4e7d6c835e3163e8946c4a3cebc49a5cc647cc5",
-         arm64_linux:  "66b7e0c8c358ad2281c806240a410be1c0e61c3c182b05408490f92de779bb9d",
-         x86_64_linux: "f05fbc48e5971649685d9269a4e7d6c835e3163e8946c4a3cebc49a5cc647cc5"
+  version "6.5.0,4"
+  sha256 arm:          "04b2a6e7a1858d9af33423f67cca335b3b46a89b9a6077c16a3f4f244c0a02d7",
+         intel:        "91aa192f9b1861dce9ea3077bd7bf839acf97c5349d26435e699e49785fd21e6",
+         arm64_linux:  "04b2a6e7a1858d9af33423f67cca335b3b46a89b9a6077c16a3f4f244c0a02d7",
+         x86_64_linux: "91aa192f9b1861dce9ea3077bd7bf839acf97c5349d26435e699e49785fd21e6"
 
   release_tag = "asusctl-#{version.csv.first}-#{version.csv.second}"
   release_root = "asusctl-#{version.csv.first}-ubuntu-22.04-#{arch}"
@@ -14,7 +14,7 @@ cask "asusctl-linux" do
   url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz"
   name "asusctl"
   desc "ASUS laptop control CLI and immutable-friendly system daemon payload"
-  homepage "https://gitlab.com/asus-linux/asusctl"
+  homepage "https://github.com/OpenGamingCollective/asusctl"
 
   livecheck do
     url "https://api.github.com/repos/daegalus/linux-app-builds/releases/latest"
@@ -38,12 +38,12 @@ cask "asusctl-linux" do
   postflight_steps do
     # Generate files in the existing stage without predeclaring them as directories.
     run "/bin/sed", args:        ["-e", "/^Environment=ASUSD_EXEC=/d",
-                                  "-e", "s|ExecStart=${ASUSD_EXEC}|ExecStart=/opt/ublue-asusctl/bin/asusd|",
+                                  "-e", "s|^ExecStart=.*|ExecStart=/opt/ublue-asusctl/bin/asusd|",
                                   "{{staged_path}}/asusctl/usr/lib/systemd/system/asusd.service"],
                     stdout_path: "asusd.service"
     run "/bin/sed", args:        ["-e", "/^Environment=ASUS_SHUTDOWN_EXEC=/d",
                                   "-e",
-                                  "s|ExecStart=${ASUS_SHUTDOWN_EXEC}|ExecStart=/opt/ublue-asusctl/bin/asus-shutdown|",
+                                  "s|^ExecStart=.*|ExecStart=/opt/ublue-asusctl/bin/asus-shutdown|",
                                   "{{staged_path}}/asusctl/usr/lib/systemd/system/asus-shutdown.service"],
                     stdout_path: "asus-shutdown.service"
     write_file "asusd.env", <<~EOS
@@ -75,7 +75,15 @@ cask "asusctl-linux" do
           restorecon -RFv "$root" /etc/systemd/system /etc/udev/rules.d /etc/dbus-1/system.d /etc/asusd
         fi
       fi
+      if command -v pkill >/dev/null; then
+        # Reap a pre-upgrade asus-shutdown: it defers SIGTERM by design and ships
+        # SendSIGKILL=no, so `disable --now` from an older Cask leaves it behind and
+        # systemd then refuses to start the new unit while it exists.
+        pkill -KILL -x asus-shutdown || true
+        pkill -KILL -x asusd || true
+      fi
       if command -v systemctl >/dev/null; then systemctl daemon-reload || true; fi
+      if command -v systemctl >/dev/null; then systemctl reset-failed asus-shutdown.service asusd.service || true; fi
       if command -v udevadm >/dev/null; then udevadm control --reload || true; fi
     SH
   end
@@ -84,8 +92,14 @@ cask "asusctl-linux" do
     run "/bin/sh", args: ["-eu", "-c", <<~'SH'], sudo: true
       PATH=/usr/sbin:/usr/bin:/bin
       if command -v systemctl >/dev/null; then
-        systemctl disable --now asus-shutdown.service || true
-        systemctl disable --now asusd.service || true
+        systemctl disable asus-shutdown.service asusd.service || true
+        systemctl stop asusd.service || true
+      fi
+      if command -v pkill >/dev/null; then
+        # asus-shutdown defers SIGTERM by design and ships SendSIGKILL=no, so only
+        # SIGKILL reaps it; otherwise it outlives uninstalls and blocks future starts.
+        pkill -KILL -x asus-shutdown || true
+        pkill -KILL -x asusd || true
       fi
       selinux=Disabled
       if command -v getenforce >/dev/null; then selinux=$(getenforce); fi
