@@ -13,7 +13,7 @@ cask "rog-control-center-linux" do
 
   url "https://github.com/daegalus/linux-app-builds/releases/download/#{release_tag}/#{release_root}.tar.gz"
   name "ROG Control Center"
-  desc "ASUS ROG Control Center GUI and user daemon with XDG-first installation"
+  desc "ASUS ROG Control Center GUI with XDG-first installation"
   homepage "https://github.com/OpenGamingCollective/asusctl"
 
   livecheck do
@@ -28,7 +28,6 @@ cask "rog-control-center-linux" do
   end
 
   binary "asusctl/usr/bin/rog-control-center"
-  binary "asusctl/usr/bin/asusd-user"
 
   preflight_steps do
     move "asusctl-*-ubuntu-22.04-*", "asusctl", source_glob: true
@@ -38,8 +37,10 @@ cask "rog-control-center-linux" do
     mkdir_p ".local/share/rog-gui", base: :home
     mkdir_p ".local/share/locale", base: :home
     mkdir_p ".local/share/metainfo", base: :home
+    # Kept writable for migration cleanup of the deprecated asusd-user files.
     mkdir_p ".config/systemd/user", base: :home
     mkdir_p ".config/asusd", base: :home
+    mkdir_p ".config/autostart", base: :home
   end
 
   postflight_steps do
@@ -73,21 +74,27 @@ cask "rog-control-center-linux" do
     # Upstream renamed the launcher; drop the legacy name so upgrades do not leave a duplicate.
     run "/bin/rm", args: ["-f", "{{staged_path}}/.user-home/.local/share/applications/rog-control-center.desktop"],
                       must_succeed: false, writable_paths: [".local/share/applications"], writable_base: :home
-    run "/bin/sed", args:        ["-e", "/^Environment=ASUSD_USER_EXEC=/d",
-                                  "-e",
-                                  "s|^ExecStart=.*|ExecStart={{HOMEBREW_PREFIX}}/bin/asusd-user|",
-                                  "{{staged_path}}/asusctl/usr/lib/systemd/user/asusd-user.service"],
-                    stdout_path: "asusd-user.service"
-    copy "asusd-user.service", ".config/systemd/user/asusd-user.service", target_base: :home
-    run "/bin/sh", chdir: "{{staged_path}}", writable_paths: [".config/asusd"], writable_base: :home,
-                   args: ["-eu", "-c", <<~SH]
-                     user_home=$(readlink .user-home)
-                     printf '%s\\n' "ASUSD_DATA_DIR=$user_home/.local/share/asusd" \
-                       "ROG_GUI_DATA_DIR=$user_home/.local/share/rog-gui" \
-                       "ROG_GUI_LAYOUTS_DIR=$user_home/.local/share/rog-gui/layouts" \
-                       "ASUSCTL_AURA_SUPPORT_PATH=$user_home/.local/share/asusd/aura_support.ron" \
-                       "ASUSCTL_DATA_DIRS=$user_home/.local/share" > .user-home/.config/asusd/asusd-user.env
-                   SH
+    # Upstream deprecated asusd-user (OpenGamingCollective/asusctl#406): it aborts with
+    # "Cannot start a runtime from within a runtime" and will be removed. Do not install
+    # it; disable and remove leftovers from previous cask versions.
+    run "systemctl", args: ["--user", "disable", "--now", "asusd-user.service"], must_succeed: false,
+                     writable_paths: [".config/systemd/user"], writable_base: :home
+    run "/bin/rm", args: ["-f", "{{staged_path}}/.user-home/.config/systemd/user/asusd-user.service",
+                          "{{staged_path}}/.user-home/.config/asusd/asusd-user.env"],
+                      must_succeed: false, writable_paths: [".config/systemd/user", ".config/asusd"],
+                      writable_base: :home
+    run "/bin/rmdir", args: ["{{staged_path}}/.user-home/.config/asusd"], must_succeed: false, print_stderr: false,
+                      writable_paths: [".config/asusd"], writable_base: :home
+    # Upstream writes autostart with a bare `Exec=rog-control-center ...`, which fails on
+    # KDE when the Linuxbrew bin dir is not in the session PATH
+    # (OpenGamingCollective/asusctl#407). Drop the legacy duplicate and repair the
+    # remaining entry to use the absolute brew executable, preserving its flags.
+    run "/bin/rm", args: ["-f", "{{staged_path}}/.user-home/.config/autostart/rog-control-center.desktop"],
+                      must_succeed: false, writable_paths: [".config/autostart"], writable_base: :home
+    run "/bin/sed", args: ["-i", "s|^Exec=rog-control-center|Exec={{HOMEBREW_PREFIX}}/bin/rog-control-center|",
+                           "{{staged_path}}/.user-home/.config/autostart/" \
+                           "org.opengamingcollective.rog-control-center.desktop"],
+                      must_succeed: false, writable_paths: [".config/autostart"], writable_base: :home
   end
 
   uninstall_postflight_steps do
@@ -99,7 +106,8 @@ cask "rog-control-center-linux" do
             ".local/share/applications/rog-control-center.desktop",
             ".local/share/metainfo/org.opengamingcollective.rog-control-center.metainfo.xml",
             ".local/share/locale/*/LC_MESSAGES/rog-control-center.mo",
-            ".config/asusd/asusd-user.env"], base: :home
+            ".config/asusd/asusd-user.env",
+            ".config/autostart/rog-control-center.desktop"], base: :home
     remove [".local/share/icons/hicolor/512x512/apps/asus_notif_{blue,green,orange,red,white,yellow}.png",
             ".local/share/icons/hicolor/512x512/apps/rog-control-center.png",
             ".local/share/icons/hicolor/scalable/status/gpu-{compute,hybrid,integrated,nvidia,vfio}.svg",
@@ -123,15 +131,27 @@ cask "rog-control-center-linux" do
       ~/.local/share/rog-gui
       ~/.local/share/locale
       ~/.local/share/metainfo
-      ~/.config/systemd/user/asusd-user.service
-      ~/.config/asusd/asusd-user.env
 
     This cask expects the root daemon from:
       brew install --cask asusctl-linux
 
-    After the system daemon is installed and running, enable the user daemon:
-      systemctl --user daemon-reload
-      systemctl --user enable --now asusd-user.service
+    asusd-user is deprecated upstream and crashes on startup
+    (https://github.com/OpenGamingCollective/asusctl/issues/406). This cask no
+    longer installs ~/.config/systemd/user/asusd-user.service or
+    ~/.config/asusd/asusd-user.env and disables/removes leftovers from previous
+    versions. Do not enable asusd-user.service. If you previously enabled it:
+      systemctl --user disable --now asusd-user.service
+
+    Autostart uses an absolute brew path because KDE sessions may not include
+    the Linuxbrew bin dir in PATH
+    (https://github.com/OpenGamingCollective/asusctl/issues/407). This cask
+    repairs ~/.config/autostart/org.opengamingcollective.rog-control-center.desktop
+    on install and removes the legacy ~/.config/autostart/rog-control-center.desktop
+    duplicate. If you toggle autostart in the GUI, upstream rewrites the entry
+    with a bare `Exec=rog-control-center ...`, so re-run `brew reinstall --cask
+    rog-control-center-linux` or fix it manually, e.g.:
+      sed -i 's|^Exec=rog-control-center|Exec=#{HOMEBREW_PREFIX}/bin/rog-control-center|' \
+        ~/.config/autostart/org.opengamingcollective.rog-control-center.desktop
 
     Shared desktop caches cannot be read inside the cask sandbox. If the launcher
     or icons need refreshing after installation or removal, run:
