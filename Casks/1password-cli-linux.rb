@@ -2,11 +2,11 @@ cask "1password-cli-linux" do
   arch arm: "arm64", intel: "amd64"
   os linux: "linux"
 
-  version "2.40.0"
-  sha256 arm:          "0e8ac99ee93d661aa725dc24a5ef8bf344741d224064a5dfb469dc689faec86a",
-         intel:        "74277219e8da60958c00f9aee9d2023225e98fdda8bfd2156a5d9e85e0edaab3",
-         arm64_linux:  "0e8ac99ee93d661aa725dc24a5ef8bf344741d224064a5dfb469dc689faec86a",
-         x86_64_linux: "74277219e8da60958c00f9aee9d2023225e98fdda8bfd2156a5d9e85e0edaab3"
+  version "2.41.0"
+  sha256 arm:          "bc4ac99201909f96f67e7a89601dbf5388f991aca53120db6fc3f1666dff706b",
+         intel:        "498bbaa154f0d90749325a14e04488fcd84930a426ae92ebf421d2a7d793a80a",
+         arm64_linux:  "bc4ac99201909f96f67e7a89601dbf5388f991aca53120db6fc3f1666dff706b",
+         x86_64_linux: "498bbaa154f0d90749325a14e04488fcd84930a426ae92ebf421d2a7d793a80a"
 
   url "https://cache.agilebits.com/dist/1P/op2/pkg/v#{version}/op_linux_#{arch}_v#{version}.zip"
   name "1Password CLI"
