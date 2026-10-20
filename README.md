@@ -28,10 +28,8 @@ brew install --cask 1password-gui-linux
 brew install --cask framework-tool
 brew install --cask antigravity-linux
 brew install --cask antigravity-ide-linux
-brew install --cask antigravity-cli-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
-brew install --cask zed-linux
 brew install --cask ublue-os/tap/chairlift
 
 brew install --cask bluefin-wallpapers
@@ -47,7 +45,6 @@ brew install --cask framework-wallpapers
 
 - heic-to-dynamic-gnome-wallpaper - Convert HEIC dynamic wallpapers to GNOME dynamic wallpapers
 - asusctl - cli for controlling Asus ROG laptops
-- Antigravity CLI - Terminal interface for Antigravity agents
 
 ### GUI
 
@@ -60,7 +57,6 @@ brew install --cask framework-wallpapers
 - VSCodium - Open-source build of VS Code
 - Framework System Tool - Hardware management for Framework laptops
 - rog control center - GUI frontend for asusctl (for Asus ROG etc laptops)
-- Zed - High-performance, multiplayer code editor
 - ChairLift - System management and package updates for bootc-based Linux systems
 
 #### ChairLift
