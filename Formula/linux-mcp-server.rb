@@ -13,9 +13,9 @@ class LinuxMcpServer < Formula
   end
 
   bottle do
-    root_url "https://github.com/ublue-os/homebrew-tap/releases/download/linux-mcp-server-1.7.0"
-    sha256 cellar: :any, arm64_tahoe:  "68cdfbfd5e76598be28d464446e028e5a7c1dde5cf48611bc1477b919066860d"
-    sha256 cellar: :any, x86_64_linux: "506006301d17c9b85a39b822d315c0b847cffddde79d54ebb2bf7dedc0762053"
+    root_url "https://github.com/ublue-os/homebrew-tap/releases/download/linux-mcp-server-1.8.0"
+    sha256 cellar: :any, arm64_tahoe:  "73c778ce047064beb18410ab7b588247d826c453824d5275ec9a88235c5a29fa"
+    sha256 cellar: :any, x86_64_linux: "5f0e7a8388d4c2a682ef8d88b35c488b0565648fe3703ad3c85d276f6a915d82"
   end
 
   depends_on "cmake" => :build
