@@ -2,11 +2,11 @@ cask "antigravity-linux" do
   arch arm: "arm", intel: "x64"
   os linux: "linux"
 
-  version "2.28.1,6709500728705024"
-  sha256 arm:          "f1e2274a3501fd90eeec0bd74f6bc27a3ee98dfb5dd1095ba8ec4ba59bceed7f",
-         intel:        "15b15578e432ea432e7fc90ac62e140a844eeb295653af72aa5fd5a36494def7",
-         arm64_linux:  "f1e2274a3501fd90eeec0bd74f6bc27a3ee98dfb5dd1095ba8ec4ba59bceed7f",
-         x86_64_linux: "15b15578e432ea432e7fc90ac62e140a844eeb295653af72aa5fd5a36494def7"
+  version "2.28.2,5937220255875072"
+  sha256 arm:          "e7a08d799a25622f58efbbe9ffe03f3981c50049e3efcd284775002e3ad406f5",
+         intel:        "bd92938b088863baff568b08236f76f0d237e8a39581077a07937f4dc6e138c3",
+         arm64_linux:  "e7a08d799a25622f58efbbe9ffe03f3981c50049e3efcd284775002e3ad406f5",
+         x86_64_linux: "bd92938b088863baff568b08236f76f0d237e8a39581077a07937f4dc6e138c3"
 
   url "https://storage.googleapis.com/antigravity-public/antigravity-hub/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz"
   name "Google Antigravity"
