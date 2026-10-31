@@ -61,6 +61,11 @@ cask "1password-gui-linux" do
       if ! grep -qxF flatpak-session-helper 1password/resources/custom_allowed_browsers; then
         printf '\nflatpak-session-helper\n' >> 1password/resources/custom_allowed_browsers
       fi
+      # Firefox's flatpak uses the xdg-desktop-portal NativeMessagingProxy instead of
+      # flatpak-spawn --host, so the connecting process is xdg-native-messaging-proxy.
+      if ! grep -qxF xdg-native-messaging-proxy 1password/resources/custom_allowed_browsers; then
+        printf '\nxdg-native-messaging-proxy\n' >> 1password/resources/custom_allowed_browsers
+      fi
       owners=$(awk -F: '$3 >= 1000 && $3 <= 9999 && $1 != "nobody" && count++ < 10 {printf "unix-user:%s ", $1}' /etc/passwd)
       sed "s/\${POLICY_OWNERS}/$owners/g" 1password/com.1password.1Password.policy.tpl > 1password/com.1password.1Password.policy
     SH
@@ -73,6 +78,9 @@ cask "1password-gui-linux" do
       if [ -f /etc/1password/custom_allowed_browsers ]; then
         if ! grep -q '^flatpak-session-helper' /etc/1password/custom_allowed_browsers; then
           printf '\nflatpak-session-helper\n' >> /etc/1password/custom_allowed_browsers
+        fi
+        if ! grep -q '^xdg-native-messaging-proxy' /etc/1password/custom_allowed_browsers; then
+          printf '\nxdg-native-messaging-proxy\n' >> /etc/1password/custom_allowed_browsers
         fi
       else
         install -Dm0644 "$1/resources/custom_allowed_browsers" /etc/1password/custom_allowed_browsers
