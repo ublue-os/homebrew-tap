@@ -36,8 +36,8 @@ cask "hermes-desktop-linux" do
       # is re-linked into HOMEBREW_PREFIX/bin on every install.
       cat > hermes-desktop.sh <<'SH'
       #!/bin/bash
-      # Hermes Light (homebrew cask wrapper) — remote-only desktop client for
-      # Hermes Agent. Preset the backend with HERMES_DESKTOP_REMOTE_URL, or
+      # Hermes Agent (remote client; homebrew cask wrapper). Preset the
+      # backend with HERMES_DESKTOP_REMOTE_URL, or
       # configure it in-app on first launch (Settings -> Gateways).
       exec "$(dirname "$(readlink -f "$0")")/squashfs-root/AppRun" "$@"
       SH
@@ -49,11 +49,16 @@ cask "hermes-desktop-linux" do
       if [ -n "$desktop" ]; then
         sed -i "s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/hermes-desktop|" "$desktop"
         sed -i "s|^Icon=.*|Icon=hermes-light|" "$desktop"
+        # Present the menu entry as "Hermes Agent" (the upstream build's
+        # internal display name stays "Hermes Light"); Exec/Icon/StartupWMClass
+        # are kept so GNOME still maps the running window to this entry.
+        sed -i "/^Name\\[/d" "$desktop"
+        sed -i "s|^Name=.*|Name=Hermes Agent|" "$desktop"
         cp "$desktop" hermes-light.desktop
       else
         printf '%s\n' \
-          "[Desktop Entry]" "Type=Application" "Name=Hermes Light" \
-          "Comment=Remote-only desktop client for Hermes Agent" \
+          "[Desktop Entry]" "Type=Application" "Name=Hermes Agent" \
+          "Comment=Remote desktop client for Hermes Agent" \
           "Exec={{HOMEBREW_PREFIX}}/bin/hermes-desktop" "Icon=hermes-light" \
           "Terminal=false" "Categories=Development;Network;" > hermes-light.desktop
       fi
