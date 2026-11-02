@@ -7,7 +7,7 @@ cask "hermes-desktop-linux" do
   sha256 "598f62c95e6954eebfff3bd9ddc6ea02d394c657a90de5b36a4c7aaf69cbcbd9"
 
   url "https://github.com/tunix/homebrew-tap/releases/download/hermes-desktop-v#{version}/HermesLight-#{version}-linux-x86_64.AppImage"
-  name "Hermes Light"
+  name "Hermes Desktop"
   desc "Remote-only desktop client for Hermes Agent"
   homepage "https://hermes-agent.nousresearch.com/desktop"
 
@@ -36,7 +36,7 @@ cask "hermes-desktop-linux" do
       # is re-linked into HOMEBREW_PREFIX/bin on every install.
       cat > hermes-desktop.sh <<'SH'
       #!/bin/bash
-      # Hermes Agent (remote client; homebrew cask wrapper). Preset the
+      # Hermes Desktop (remote client; homebrew cask wrapper). Preset the
       # backend with HERMES_DESKTOP_REMOTE_URL, or
       # configure it in-app on first launch (Settings -> Gateways).
       exec "$(dirname "$(readlink -f "$0")")/squashfs-root/AppRun" "$@"
@@ -49,15 +49,15 @@ cask "hermes-desktop-linux" do
       if [ -n "$desktop" ]; then
         sed -i "s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/hermes-desktop|" "$desktop"
         sed -i "s|^Icon=.*|Icon=hermes-light|" "$desktop"
-        # Present the menu entry as "Hermes Agent" (the upstream build's
+        # Present the menu entry as "Hermes Desktop" (the upstream build's
         # internal display name stays "Hermes Light"); Exec/Icon/StartupWMClass
         # are kept so GNOME still maps the running window to this entry.
         sed -i "/^Name\\[/d" "$desktop"
-        sed -i "s|^Name=.*|Name=Hermes Agent|" "$desktop"
+        sed -i "s|^Name=.*|Name=Hermes Desktop|" "$desktop"
         cp "$desktop" hermes-light.desktop
       else
         printf '%s\n' \
-          "[Desktop Entry]" "Type=Application" "Name=Hermes Agent" \
+          "[Desktop Entry]" "Type=Application" "Name=Hermes Desktop" \
           "Comment=Remote desktop client for Hermes Agent" \
           "Exec={{HOMEBREW_PREFIX}}/bin/hermes-desktop" "Icon=hermes-light" \
           "Terminal=false" "Categories=Development;Network;" > hermes-light.desktop
