@@ -10,7 +10,7 @@ on:
 
 jobs:
   get-version:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -57,7 +57,7 @@ jobs:
 
   bottle-linux:
     needs: get-version
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -107,7 +107,7 @@ jobs:
 
   upload:
     needs: [get-version, bottle-macos, bottle-linux]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     steps:
