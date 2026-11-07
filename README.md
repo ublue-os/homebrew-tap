@@ -31,6 +31,7 @@ brew install --cask antigravity-ide-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
 brew install --cask ublue-os/tap/chairlift
+brew install --cask hermes-desktop-linux
 
 brew install --cask bluefin-wallpapers
 brew install --cask bluefin-wallpapers-extra
@@ -58,6 +59,21 @@ brew install --cask framework-wallpapers
 - Framework System Tool - Hardware management for Framework laptops
 - rog control center - GUI frontend for asusctl (for Asus ROG etc laptops)
 - ChairLift - System management and package updates for bootc-based Linux systems
+- Hermes Desktop (remote client) - Remote-only desktop client for Hermes Agent (agent runs elsewhere, e.g. a server or Raspberry Pi)
+
+#### Hermes Desktop (remote client)
+
+`hermes-desktop-linux` packages the upstream **light** variant of
+[Hermes Desktop](https://hermes-agent.nousresearch.com/desktop): the Electron
+client without the bundled agent runtime (Python, Node, Chromium stay off your
+machine). It connects to a Hermes backend running on another host. The menu
+entry is presented as **Hermes Desktop** (the upstream build's internal display
+name is "Hermes Light").
+
+- Preset the backend: `HERMES_DESKTOP_REMOTE_URL=http://host:9119 hermes-desktop`, or configure it in-app on first launch (Settings -> Gateways).
+- Auth is set up on the backend (`hermes dashboard register` + Nous Portal OAuth for anything beyond a trusted LAN/VPN; username/password for LAN/VPN only).
+- The light variant is stamped `updateMechanism: external` upstream, so brew owns updates and the app ships no in-app updater.
+- Artifact is built from upstream stable tags with `python -m scripts.bundles.desktop --tag=vX.Y.Z --variant=light`; see the cask header for the recipe.
 
 #### ChairLift
 
