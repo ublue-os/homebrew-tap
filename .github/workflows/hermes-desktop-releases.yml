@@ -59,17 +59,19 @@ jobs:
           have="$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
             | jq -r '.[].tag_name' | grep '^hermes-desktop-v' || true)"
 
-          # Oldest missing tag first, so a catch-up run leaves the tap
-          # consistent; capped at 5 builds per run, the next run continues.
+          # The newest tag without an artifact: the cask's livecheck and the
+          # FlatPark resolver both consume the latest build only, so older
+          # missing tags are not worth building. One per run; if a build
+          # fails, the next run retries the same tag.
           tags="$(gh api "repos/$UPSTREAM/releases?per_page=30" \
             | jq -r --arg have "$have" '
                 [.[]
                  | select(.draft == false and .prerelease == false)
                  | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))
-                 | select((($have | split("\n")) | index("hermes-desktop-" + .tag_name)) == null)
-                 | .tag_name]
-                | reverse
-                | .[0:5]
+                 | .tag_name as $t
+                 | select((($have | split("\n")) | index("hermes-desktop-" + $t)) == null)
+                 | $t]
+                | .[0:1]
                 | join("\n")')"
 
           printf 'tags=%s\n' "$tags" >> "$GITHUB_OUTPUT"
