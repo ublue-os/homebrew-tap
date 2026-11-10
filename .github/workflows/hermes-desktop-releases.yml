@@ -132,17 +132,19 @@ jobs:
             sha256sum "$appimage" > SHA256SUMS
             cat SHA256SUMS
 
+            {
+              printf 'Hermes Desktop %s (upstream light variant — remote-only client, no bundled agent runtime), built from [%s at `%s`](https://github.com/%s/releases/tag/%s) by the hermes-desktop-releases workflow.\n\n' "$version" "$UPSTREAM" "$tag" "$UPSTREAM" "$tag"
+              printf -- '- `%s` — the desktop AppImage\n' "$(basename "$appimage")"
+              printf -- '- `SHA256SUMS` — its sha256, as pinned by the hermes-desktop-linux cask and the FlatPark package\n\n'
+              printf "Built from a clean checkout of the tag with upstream's \`python -m scripts.bundles.desktop --tag=%s --variant=light\`; the recipe lives in the cask header.\n" "$tag"
+            } > release-notes.md
+
             gh release create "$rel_tag" -R "$GITHUB_REPOSITORY" \
               --title "$rel_tag" \
               --verify-tag \
-              --notes "Hermes Desktop $version (upstream light variant — remote-only client, no bundled agent runtime), built from [$UPSTREAM at \`$tag\`](https://github.com/$UPSTREAM/releases/tag/$tag) by the hermes-desktop-releases workflow.
-
-- \`$(basename "$appimage")\` — the desktop AppImage
-- \`SHA256SUMS\` — its sha256, as pinned by the hermes-desktop-linux cask and the FlatPark package
-
-Built from a clean checkout of the tag with upstream's \`python -m scripts.bundles.desktop --tag=$tag --variant=light\`; the recipe lives in the cask header."
+              --notes-file release-notes.md
             gh release upload "$rel_tag" -R "$GITHUB_REPOSITORY" "$appimage" SHA256SUMS --clobber
             echo "::endgroup::"
 
-            rm -rf hermes-src SHA256SUMS
+            rm -rf hermes-src SHA256SUMS release-notes.md
           done < <(printf '%s\n' "${{ steps.pick.outputs.tags }}")
