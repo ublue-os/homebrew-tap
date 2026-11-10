@@ -155,8 +155,9 @@ jobs:
 
               python3 -m scripts.bundles.desktop --prepared "$prepared" --variant=light
 
-              appimage="$(find "$prepared" -name 'HermesLight-*-linux-x86_64.AppImage' -print -quit)"
+              appimage="$(find . -name 'HermesLight-*-linux-x86_64.AppImage' -print -quit)"
               [ -n "$appimage" ] || { echo "no HermesLight AppImage in the build output" >&2; exit 1; }
+              echo "appimage: $appimage"
               printf '%s\n' "$appimage" > "$GITHUB_WORKSPACE/appimage-path"
             )
             appimage="$(cat "$GITHUB_WORKSPACE/appimage-path")"
