@@ -104,30 +104,37 @@ jobs:
 
             # Upstream's own bundling pipeline provisions its Node toolchain
             # itself; the runner only needs python3 and git. Two phases, so the
-            # icon-tool workaround below can land between them.
-            prepared="$(python3 -m scripts.bundles.desktop \
-                          --tag="$tag" --variant=light --prepare-only \
-                          | tail -n1)"
-            echo "prepared: $prepared"
+            # icon-tool workaround below can land between them. Both phases run
+            # from the repo root — that is where `python -m scripts.…` resolves.
+            (
+              cd hermes-src
+              prepared="$(python3 -m scripts.bundles.desktop \
+                            --tag="$tag" --variant=light --prepare-only \
+                            | tail -n1)"
+              echo "prepared: $prepared"
 
-            # electron-builder's icon step loads build/prepared-packaging-tools/
-            # icons/icon-tool.js, which is CommonJS, as ESM (its nearest
-            # package.json has "type": "module" — hit at v0.22.5, tracked
-            # upstream). Dropping a package.json that pins commonjs beside the
-            # staged tool fixes the load; harmless once upstream resolves it,
-            # and skipped entirely if the tool is not staged there at all.
-            icon_tool="$(find "$prepared" \
-                          -path '*prepared-packaging-tools/icons/icon-tool.js' \
-                          -print -quit || true)"
-            if [ -n "$icon_tool" ] && [ ! -e "$(dirname "$icon_tool")/package.json" ]; then
-              printf '{"type":"commonjs"}\n' > "$(dirname "$icon_tool")/package.json"
-              echo "icon-tool commonjs shim written next to $icon_tool"
-            fi
+              # electron-builder's icon step loads build/prepared-packaging-tools/
+              # icons/icon-tool.js, which is CommonJS, as ESM (its nearest
+              # package.json has "type": "module" — hit at v0.22.5, tracked
+              # upstream). Dropping a package.json that pins commonjs beside the
+              # staged tool fixes the load; harmless once upstream resolves it,
+              # and skipped entirely if the tool is not staged there at all.
+              icon_tool="$(find "$prepared" \
+                            -path '*prepared-packaging-tools/icons/icon-tool.js' \
+                            -print -quit || true)"
+              if [ -n "$icon_tool" ] && [ ! -e "$(dirname "$icon_tool")/package.json" ]; then
+                printf '{"type":"commonjs"}\n' > "$(dirname "$icon_tool")/package.json"
+                echo "icon-tool commonjs shim written next to $icon_tool"
+              fi
 
-            python3 -m scripts.bundles.desktop --prepared "$prepared" --variant=light
+              python3 -m scripts.bundles.desktop --prepared "$prepared" --variant=light
 
-            appimage="$(find "$prepared" -name 'HermesLight-*-linux-x86_64.AppImage' -print -quit)"
-            [ -n "$appimage" ] || { echo "no HermesLight AppImage in the build output" >&2; exit 1; }
+              appimage="$(find "$prepared" -name 'HermesLight-*-linux-x86_64.AppImage' -print -quit)"
+              [ -n "$appimage" ] || { echo "no HermesLight AppImage in the build output" >&2; exit 1; }
+              printf '%s\n' "$appimage" > "$GITHUB_WORKSPACE/appimage-path"
+            )
+            appimage="$(cat "$GITHUB_WORKSPACE/appimage-path")"
+            rm -f "$GITHUB_WORKSPACE/appimage-path"
             echo "::endgroup::"
 
             echo "::group::publish $rel_tag"
