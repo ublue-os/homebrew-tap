@@ -73,7 +73,7 @@ name is "Hermes Light").
 - Preset the backend: `HERMES_DESKTOP_REMOTE_URL=http://host:9119 hermes-desktop`, or configure it in-app on first launch (Settings -> Gateways).
 - Auth is set up on the backend (`hermes dashboard register` + Nous Portal OAuth for anything beyond a trusted LAN/VPN; username/password for LAN/VPN only).
 - The light variant is stamped `updateMechanism: external` upstream, so brew owns updates and the app ships no in-app updater.
-- Artifact is built from upstream stable tags with `python -m scripts.bundles.desktop --tag=vX.Y.Z --variant=light`; see the cask header for the recipe.
+- Artifacts are built and published automatically: the `hermes-desktop-releases` workflow builds the upstream light variant from each new stable tag (`python -m scripts.bundles.desktop --tag=vX.Y.Z --variant=light`; recipe in the cask header) and publishes `hermes-desktop-v<version>` releases here.
 
 #### ChairLift
 

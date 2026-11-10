@@ -1,0 +1,148 @@
+name: Hermes Desktop releases
+
+# Builds the upstream light desktop variant (presented as "Hermes Desktop",
+# internal product name "Hermes Light") from each new stable Hermes Agent tag
+# and publishes it as a hermes-desktop-v<version> release on this tap. Two
+# consumers pin these releases:
+#   - the hermes-desktop-linux cask, kept current by the Homebrew Bump workflow
+#   - the FlatPark package com.nousresearch.hermes-light, whose update resolver
+#     reads the newest hermes-desktop-v* release from here
+#
+# Upstream publishes no Linux desktop packages yet (NousResearch/hermes-agent
+# issue #98171), so this workflow is the artifact source until that changes;
+# if upstream starts publishing, point both consumers there and retire this.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Build one specific upstream tag (vX.Y.Z) instead of catching up"
+        required: false
+        type: string
+  schedule:
+    # Runs before Homebrew Bump (03:00/15:00 UTC), so the artifact for a new
+    # upstream tag is already published when the cask's livecheck looks for it.
+    - cron: "0 1,13 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hermes-desktop-releases
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Pick upstream tags that have no published artifact yet
+        id: pick
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM: NousResearch/hermes-agent
+          UPSTREAM_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+
+          # Stable release tags only: canary tags (vX+canary…) and commit
+          # builds never produce a cask artifact.
+          stable_filter='test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")'
+
+          if [ -n "$UPSTREAM_TAG" ]; then
+            echo "$UPSTREAM_TAG" | grep -Eq "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+              || { echo "tag must look like vX.Y.Z, got: $UPSTREAM_TAG" >&2; exit 1; }
+            printf 'tags=%s\n' "$UPSTREAM_TAG" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          have="$(gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
+            | jq -r '.[].tag_name' | grep '^hermes-desktop-v' || true)"
+
+          # Oldest missing tag first, so a catch-up run leaves the tap
+          # consistent; capped at 5 builds per run, the next run continues.
+          tags="$(gh api "repos/$UPSTREAM/releases?per_page=30" \
+            | jq -r --arg have "$have" '
+                [.[]
+                 | select(.draft == false and .prerelease == false)
+                 | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))
+                 | select((($have | split("\n")) | index("hermes-desktop-" + .tag_name)) == null)
+                 | .tag_name]
+                | reverse
+                | .[0:5]
+                | join("\n")')"
+
+          printf 'tags=%s\n' "$tags" >> "$GITHUB_OUTPUT"
+          echo "tags to build: ${tags:-none}"
+
+      - name: Build and publish each missing tag
+        if: steps.pick.outputs.tags != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM: NousResearch/hermes-agent
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            version="${tag#v}"
+            rel_tag="hermes-desktop-$tag"
+
+            if gh release view "$rel_tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "$rel_tag already exists, skipping"
+              continue
+            fi
+
+            echo "::group::build $tag"
+            rm -rf hermes-src
+            # A clean checkout at the exact tag: the upstream build refuses a
+            # dirty tree and stamps the checkout commit into the artifact.
+            git clone --quiet --filter=blob:none "https://github.com/$UPSTREAM" hermes-src
+            git -C hermes-src checkout --quiet --detach "$tag"
+
+            # Upstream's own bundling pipeline provisions its Node toolchain
+            # itself; the runner only needs python3 and git. Two phases, so the
+            # icon-tool workaround below can land between them.
+            prepared="$(python3 -m scripts.bundles.desktop \
+                          --tag="$tag" --variant=light --prepare-only \
+                          | tail -n1)"
+            echo "prepared: $prepared"
+
+            # electron-builder's icon step loads build/prepared-packaging-tools/
+            # icons/icon-tool.js, which is CommonJS, as ESM (its nearest
+            # package.json has "type": "module" — hit at v0.22.5, tracked
+            # upstream). Dropping a package.json that pins commonjs beside the
+            # staged tool fixes the load; harmless once upstream resolves it,
+            # and skipped entirely if the tool is not staged there at all.
+            icon_tool="$(find "$prepared" \
+                          -path '*prepared-packaging-tools/icons/icon-tool.js' \
+                          -print -quit || true)"
+            if [ -n "$icon_tool" ] && [ ! -e "$(dirname "$icon_tool")/package.json" ]; then
+              printf '{"type":"commonjs"}\n' > "$(dirname "$icon_tool")/package.json"
+              echo "icon-tool commonjs shim written next to $icon_tool"
+            fi
+
+            python3 -m scripts.bundles.desktop --prepared "$prepared" --variant=light
+
+            appimage="$(find "$prepared" -name 'HermesLight-*-linux-x86_64.AppImage' -print -quit)"
+            [ -n "$appimage" ] || { echo "no HermesLight AppImage in the build output" >&2; exit 1; }
+            echo "::endgroup::"
+
+            echo "::group::publish $rel_tag"
+            sha256sum "$appimage" > SHA256SUMS
+            cat SHA256SUMS
+
+            gh release create "$rel_tag" -R "$GITHUB_REPOSITORY" \
+              --title "$rel_tag" \
+              --verify-tag \
+              --notes "Hermes Desktop $version (upstream light variant — remote-only client, no bundled agent runtime), built from [$UPSTREAM at \`$tag\`](https://github.com/$UPSTREAM/releases/tag/$tag) by the hermes-desktop-releases workflow.
+
+- \`$(basename "$appimage")\` — the desktop AppImage
+- \`SHA256SUMS\` — its sha256, as pinned by the hermes-desktop-linux cask and the FlatPark package
+
+Built from a clean checkout of the tag with upstream's \`python -m scripts.bundles.desktop --tag=$tag --variant=light\`; the recipe lives in the cask header."
+            gh release upload "$rel_tag" -R "$GITHUB_REPOSITORY" "$appimage" SHA256SUMS --clobber
+            echo "::endgroup::"
+
+            rm -rf hermes-src SHA256SUMS
+          done < <(printf '%s\n' "${{ steps.pick.outputs.tags }}")
