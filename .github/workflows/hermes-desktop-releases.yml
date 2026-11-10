@@ -108,6 +108,22 @@ jobs:
             # from the repo root — that is where `python -m scripts.…` resolves.
             (
               cd hermes-src
+              # Upstream's stable builds carry an anti-tampering claim: the
+              # build must name an annotated rc.<N>-<tag> attempt ref whose
+              # version matches the build and whose tag object carries an
+              # immutable tagger timestamp (scripts/bundles/desktop_prepare.py).
+              # The attempt that points at the release commit is the one
+              # upstream's pipeline admitted; its timestamp becomes the
+              # release epoch stamped into the artifact.
+              rel_commit="$(git rev-parse "refs/tags/$tag^{commit}")"
+              claim_tag="$(git for-each-ref --format='%(refname:short) %(*objectname)' "refs/tags/rc.*-$tag" \
+                             | awk -v c="$rel_commit" '$2 == c {print $1; exit}')"
+              [ -n "$claim_tag" ] || claim_tag="$(git for-each-ref --format='%(refname:short)' "refs/tags/rc.*-$tag" | tail -n1)"
+              [ -n "$claim_tag" ] || { echo "no rc.*-$tag attempt tag found" >&2; exit 1; }
+              export RELEASE_CLAIM_TAG="$claim_tag"
+              export RELEASE_CLAIM_OBJECT="$(git rev-parse "refs/tags/$claim_tag")"
+              echo "claim: $claim_tag -> $RELEASE_CLAIM_OBJECT"
+
               prepared="$(python3 -m scripts.bundles.desktop \
                             --tag="$tag" --variant=light --prepare-only \
                             | tail -n1)"
