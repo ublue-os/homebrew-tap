@@ -157,6 +157,7 @@ jobs:
 
               appimage="$(find . -name 'HermesLight-*-linux-x86_64.AppImage' -print -quit)"
               [ -n "$appimage" ] || { echo "no HermesLight AppImage in the build output" >&2; exit 1; }
+              appimage="$(readlink -f "$appimage")"
               echo "appimage: $appimage"
               printf '%s\n' "$appimage" > "$GITHUB_WORKSPACE/appimage-path"
             )
