@@ -166,7 +166,7 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::publish $rel_tag"
-            sha256sum "$appimage" > SHA256SUMS
+            ( cd "$(dirname "$appimage")" && sha256sum "$(basename "$appimage")" ) > SHA256SUMS
             cat SHA256SUMS
 
             {
@@ -178,7 +178,6 @@ jobs:
 
             gh release create "$rel_tag" -R "$GITHUB_REPOSITORY" \
               --title "$rel_tag" \
-              --verify-tag \
               --notes-file release-notes.md
             gh release upload "$rel_tag" -R "$GITHUB_REPOSITORY" "$appimage" SHA256SUMS --clobber
             echo "::endgroup::"
