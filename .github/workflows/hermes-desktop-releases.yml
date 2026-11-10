@@ -131,20 +131,27 @@ jobs:
 
               # electron-builder's icon step runs icon-tool.js, which is
               # CommonJS, as ESM: the nearest package.json says "type":
-              # "module" (hit at v0.22.5, tracked upstream). The tool is staged
-              # from the prepare cache into apps/desktop/build/prepared-
-              # packaging-tools/ at build time by run-electron-builder.mjs, so
-              # pinning commonjs next to the CACHED copy fixes every staged
-              # copy — the staging copies the directory tree verbatim.
-              # Harmless once upstream resolves it, and skipped when the tool
-              # is not present at all.
+              # "module" (hit at v0.22.5, tracked upstream). Patch the copy in
+              # the prepare cache — the source the packager stages from.
               while IFS= read -r tool; do
                 dir="$(dirname "$tool")"
                 [ -e "$dir/package.json" ] || {
                   printf '{"type":"commonjs"}\n' > "$dir/package.json"
                   echo "icon-tool commonjs shim: $dir"
                 }
-              done < <(find . -name icon-tool.js -print 2>/dev/null)
+              done < <(find .cache -name icon-tool.js -print 2>/dev/null)
+
+              # The packager's prepared.json checksums its staged inputs, so a
+              # patched source makes the staged copies stale ("Missing or
+              # changed packaging input … run preparation again" — upstream's
+              # own message). Drop the staged tree and prepare again: the
+              # second pass re-stages from the patched cache and records
+              # checksums that match it.
+              rm -rf .build/desktop-job
+              prepared="$(python3 -m scripts.bundles.desktop \
+                            --tag="$tag" --variant=light --prepare-only \
+                            | tail -n1)"
+              echo "prepared (re-staged): $prepared"
 
               python3 -m scripts.bundles.desktop --prepared "$prepared" --variant=light
 
