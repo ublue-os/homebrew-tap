@@ -2,11 +2,11 @@ cask "antigravity-ide-linux" do
   arch arm: "arm", intel: "x64"
   os linux: "linux"
 
-  version "2.6.0,5526304964083712"
-  sha256 arm:          "4953ccb52bf909582a1711a3dd26d640efb45fe555a17ebeff8bc7e2eaa052de",
-         intel:        "b060a7c7679103b2b619752f8ee7a3088dd241a7d207d4311974b56ea6f94356",
-         arm64_linux:  "4953ccb52bf909582a1711a3dd26d640efb45fe555a17ebeff8bc7e2eaa052de",
-         x86_64_linux: "b060a7c7679103b2b619752f8ee7a3088dd241a7d207d4311974b56ea6f94356"
+  version "2.7.0,4507555968450560"
+  sha256 arm:          "70c1938815408c3d3a2acfff303e3f627a8b16b7b85dd3d572bca7571c3a5ebb",
+         intel:        "9360a86521c3e5498846254b743b1f3203768ebadf65a178bc549395936f7a5d",
+         arm64_linux:  "70c1938815408c3d3a2acfff303e3f627a8b16b7b85dd3d572bca7571c3a5ebb",
+         x86_64_linux: "9360a86521c3e5498846254b743b1f3203768ebadf65a178bc549395936f7a5d"
 
   url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity%20IDE.tar.gz"
   name "Google Antigravity IDE"
