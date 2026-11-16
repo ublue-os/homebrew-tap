@@ -25,6 +25,7 @@ cask "goose-linux" do
   end
 
   depends_on formula: "rpm2cpio"
+  depends_on formula: "cpio"
 
   binary "usr/lib/Goose/Goose", target: "goose-desktop"
   artifact "Goose.desktop",
