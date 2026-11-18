@@ -1,11 +1,11 @@
 cask "chairlift" do
   arch arm: "arm64", intel: "amd64"
 
-  version "26.11.7"
-  sha256 arm:          "5047ebd9967667769f9a408d3a4d0413b79ed429a648b2f1826f1e42fa47efe3",
-         intel:        "3f1dd91a61dc932b93eb0063a8aeed632369911a9ce5435e37b635c097c5f58d",
-         arm64_linux:  "5047ebd9967667769f9a408d3a4d0413b79ed429a648b2f1826f1e42fa47efe3",
-         x86_64_linux: "3f1dd91a61dc932b93eb0063a8aeed632369911a9ce5435e37b635c097c5f58d"
+  version "26.11.8"
+  sha256 arm:          "1126673ac0d84f03e9a8a18ceca7516f07aa0dc5c58a6bb9a74b55d35caf3ce0",
+         intel:        "f1da330c42459059cdc04fe9368e940502495d81659ef43a3baa6ff620278bf0",
+         arm64_linux:  "1126673ac0d84f03e9a8a18ceca7516f07aa0dc5c58a6bb9a74b55d35caf3ce0",
+         x86_64_linux: "f1da330c42459059cdc04fe9368e940502495d81659ef43a3baa6ff620278bf0"
 
   url "https://github.com/projectbluefin/chairlift/releases/download/v#{version}/chairlift_#{version}_linux_#{arch}.tar.gz"
   name "ChairLift"
@@ -16,13 +16,16 @@ cask "chairlift" do
     url :url
     strategy :github_releases do |releases|
       releases.filter_map do |release|
-        next if release["draft"]
+        next if release["draft"] || release["prerelease"]
 
         release["tag_name"]&.delete_prefix("v")
       end
     end
   end
 
+  # Printer applications are enabled only after `cosign verify` checks their
+  # publisher signature (chairlift#612); no OS image ships cosign at runtime.
+  depends_on formula: "cosign"
   depends_on :linux
 
   binary "chairlift"
