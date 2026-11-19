@@ -30,7 +30,6 @@ brew install --cask antigravity-linux
 brew install --cask antigravity-ide-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
-brew install --cask ublue-os/tap/chairlift
 
 brew install --cask bluefin-wallpapers
 brew install --cask bluefin-wallpapers-extra
@@ -57,30 +56,17 @@ brew install --cask framework-wallpapers
 - VSCodium - Open-source build of VS Code
 - Framework System Tool - Hardware management for Framework laptops
 - rog control center - GUI frontend for asusctl (for Asus ROG etc laptops)
-- ChairLift - System management and package updates for bootc-based Linux systems
 
 #### ChairLift
 
-This cask uses [Project Bluefin's ChairLift](https://github.com/projectbluefin/chairlift).
-It supports x86_64 and ARM64 Linux and requires GTK 4 and libadwaita 1 from the
-host OS. The cask installs the GUI and user-local desktop assets only.
-Privileged features need the matching `projectbluefin-chairlift-system-integration`
-package from [upstream releases](https://github.com/projectbluefin/chairlift/releases)
-provided by the OS image or installed by an administrator. Bootc staging also
-needs the OS-provided `/usr/libexec/bootc-update-stage` helper.
-
-The bundled configuration targets Snow Linux. Distributions can override it in
-`/etc/chairlift/config.yml`, which this cask leaves untouched.
-
-Existing `ublue-os/tap/chairlift` installations can switch to the Project Bluefin
-release with `brew upgrade --cask ublue-os/tap/chairlift`. The cask name is unchanged.
-
-If migrating from the Frostyard tap, uninstall its cask first to avoid conflicting
-binaries and desktop files, then install the fully qualified cask from this tap:
+ChairLift moved to [Project Bluefin's tap](https://github.com/projectbluefin/homebrew-tap),
+which its maintainers keep current. To switch an existing install:
 
 ```shell
-brew uninstall --cask frostyard/tap/chairlift
-brew install --cask ublue-os/tap/chairlift
+brew tap projectbluefin/tap
+brew trust projectbluefin/tap
+brew uninstall --cask ublue-os/tap/chairlift
+brew install --cask projectbluefin/tap/chairlift
 ```
 
 ### Wallpapers
