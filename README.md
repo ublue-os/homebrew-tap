@@ -31,6 +31,8 @@ brew install --cask antigravity-ide-linux
 brew install --cask asusctl-linux
 brew install --cask rog-control-center-linux
 brew install --cask ublue-os/tap/chairlift
+brew install --cask chatgpt
+brew install --cask claude
 
 brew install --cask bluefin-wallpapers
 brew install --cask bluefin-wallpapers-extra
