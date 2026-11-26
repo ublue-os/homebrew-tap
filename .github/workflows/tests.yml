@@ -25,8 +25,8 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
-          key: ubuntu-24.04-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ubuntu-24.04-rubygems-
+          key: ubuntu-26.04-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ubuntu-26.04-rubygems-
       
       - name: Install Bubblewrap
         run: sudo apt-get update && sudo apt-get install -y bubblewrap
@@ -41,7 +41,7 @@ jobs:
     if: github.event_name == 'pull_request'
     strategy:
       matrix:
-        os: [ ubuntu-24.04, macos-15 ]
+        os: [ ubuntu-26.04, macos-15 ]
     runs-on: ${{ matrix.os }}
     permissions:
       actions: read
