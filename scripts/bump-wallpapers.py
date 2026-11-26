@@ -155,24 +155,48 @@ def get_asset_sha256(release: Release, asset_name: str) -> str:
     raise AssetNotFoundError(f"Asset not found: {asset_name}")
 
 
-def update_sha256_after_url(content: str, url_pattern: str, new_sha256: str) -> str:
-    """Update the sha256 line that follows a specific URL pattern."""
+SHA256_LINE_RE = re.compile(r'^\s*sha256\s+"[^"]+"')
+URL_LINE_RE = re.compile(r'^\s*url\s+"')
+BLOCK_BOUNDARY_RE = re.compile(r"^\s*(end\b|else\b|elsif\b|if\b|on_\w+\s+do\b)")
+
+
+def find_sha256_for_url(lines: list[str], url_index: int) -> int | None:
+    """Find the sha256 line paired with the url at url_index.
+
+    The pair must sit in the same block (between the same if/elsif/else/
+    on_* ... end boundaries) and may come before or after the url.
+    """
+    for step in (1, -1):
+        i = url_index + step
+        while 0 <= i < len(lines):
+            line = lines[i]
+            if BLOCK_BOUNDARY_RE.match(line) or URL_LINE_RE.match(line):
+                break
+            if SHA256_LINE_RE.match(line):
+                return i
+            i += step
+    return None
+
+
+def update_sha256_for_url(content: str, url_pattern: str, new_sha256: str) -> str:
+    """Update the sha256 paired with the url containing url_pattern."""
     lines = content.split("\n")
-    result = []
-    found_url = False
+    url_indices = [
+        i for i, line in enumerate(lines)
+        if URL_LINE_RE.match(line) and url_pattern in line
+    ]
+    if not url_indices:
+        raise AssetNotFoundError(f"No url line for {url_pattern} in cask")
 
-    for line in lines:
-        if url_pattern in line:
-            found_url = True
-            result.append(line)
-        elif found_url and "sha256" in line:
-            new_line = re.sub(r'sha256\s+"[^"]+"', f'sha256 "{new_sha256}"', line)
-            result.append(new_line)
-            found_url = False
-        else:
-            result.append(line)
+    for url_index in url_indices:
+        sha_index = find_sha256_for_url(lines, url_index)
+        if sha_index is None:
+            raise BumpError(f"No sha256 paired with url for {url_pattern}")
+        lines[sha_index] = re.sub(
+            r'sha256\s+"[^"]+"', f'sha256 "{new_sha256}"', lines[sha_index]
+        )
 
-    return "\n".join(result)
+    return "\n".join(lines)
 
 
 def update_version(content: str, new_version: str) -> str:
@@ -215,7 +239,7 @@ def bump_cask(config: CaskConfig, version: str | None = None) -> None:
             try:
                 sha256 = get_asset_sha256(release, asset_name)
                 logger.info("  %s: %s", variant.value, sha256)
-                content = update_sha256_after_url(content, asset_name, sha256)
+                content = update_sha256_for_url(content, asset_name, sha256)
             except AssetNotFoundError:
                 logger.warning("  %s: not found, skipping", variant.value)
     else:
