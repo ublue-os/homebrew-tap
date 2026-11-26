@@ -4,7 +4,7 @@ cask "bluefin-wallpapers" do
   version "2026-11-19"
 
   on_macos do
-    sha256 "afafb174f8d16b374ed1bf467b0c688f2e27fd49c44c5e4aba743c36b2b5fa1a"
+    sha256 "678a4916e0e913f5594657b8ed437289985b8ad79c6c137dbe33bf3c4b77fc48"
 
     url "https://github.com/ublue-os/artwork/releases/download/bluefin-v#{version}/bluefin-wallpapers-macos.tar.zstd"
   end
